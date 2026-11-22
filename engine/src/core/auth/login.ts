@@ -142,7 +142,10 @@ async function issue(
 		ipAddress: ip,
 		metadata: { method },
 	});
-	return { token, user };
+	return {
+		token,
+		user: { id: user.id, email: user.email, name: user.name },
+	};
 }
 
 /** Sends a one-time code when the phone belongs to a user. The code is not returned. */
@@ -197,10 +200,26 @@ export async function createOtp(
 	return { sent: true };
 }
 
-async function loginWithOtp(
+export type MatchedOtp = {
+	challengeId: string;
+	phone: string;
+	user: {
+		id: number;
+		email: string;
+		name: string | null;
+		activatedAt: Date | null;
+	};
+};
+
+/**
+ * Checks a one-time code and leaves it unconsumed. Activation and sign-in
+ * decide what happens next, so a sign-in attempt cannot burn the code a
+ * learner still needs in order to activate.
+ */
+export async function readMatchingOtp(
 	database: LoginDb,
-	input: OtpLogin & { ip: string },
-): Promise<{ token: string; user: SignedInUser }> {
+	input: { phone: string; code: string },
+): Promise<MatchedOtp> {
 	const phone = normalizeRwandanPhone(input.phone);
 	if (!phone) {
 		throw errors.badRequest("Enter a Rwandan phone number.", {
@@ -238,19 +257,44 @@ async function loginWithOtp(
 		noteFailure(key, "wrong_code");
 	}
 
-	await database
-		.update(otpChallenges)
-		.set({ consumedAt: new Date(now()) })
-		.where(eq(otpChallenges.id, challenge.id));
-	clearFailures(key);
-
 	const [user] = await database
-		.select({ id: users.id, email: users.email, name: users.name })
+		.select({
+			id: users.id,
+			email: users.email,
+			name: users.name,
+			activatedAt: users.activatedAt,
+		})
 		.from(users)
 		.where(and(eq(users.phone, phone), isNull(users.deletedAt)))
 		.limit(1);
 	if (!user) noteFailure(key, "wrong_code");
-	return issue(database, user, input.ip, "otp");
+	return { challengeId: challenge.id, phone, user };
+}
+
+export async function consumeOtpChallenge(
+	database: LoginDb,
+	challengeId: string,
+): Promise<void> {
+	await database
+		.update(otpChallenges)
+		.set({ consumedAt: new Date(now()) })
+		.where(eq(otpChallenges.id, challengeId));
+}
+
+async function loginWithOtp(
+	database: LoginDb,
+	input: OtpLogin & { ip: string },
+): Promise<{ token: string; user: SignedInUser }> {
+	const matched = await readMatchingOtp(database, input);
+	if (!matched.user.activatedAt) {
+		throw errors.badRequest(
+			"This account is not active yet. Enter the code to finish registration.",
+			{ reason: "not_active" },
+		);
+	}
+	await consumeOtpChallenge(database, matched.challengeId);
+	clearFailures(guardKey("otp", matched.phone));
+	return issue(database, matched.user, input.ip, "otp");
 }
 
 async function loginWithPassword(
@@ -267,6 +311,7 @@ async function loginWithPassword(
 			email: users.email,
 			name: users.name,
 			passwordHash: users.passwordHash,
+			activatedAt: users.activatedAt,
 		})
 		.from(users)
 		.where(and(eq(users.email, email), isNull(users.deletedAt)))
@@ -275,6 +320,12 @@ async function loginWithPassword(
 	const valid = await verifyPassword(input.password, passwordHash);
 	if (!user?.passwordHash || !valid) noteFailure(key, "wrong_password");
 
+	if (!user.activatedAt) {
+		throw errors.badRequest(
+			"This account is not active yet. Enter the code to finish registration.",
+			{ reason: "not_active" },
+		);
+	}
 	clearFailures(key);
 	return issue(
 		database,

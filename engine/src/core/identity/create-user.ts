@@ -9,6 +9,8 @@ export type NewIdentity = {
 	name?: string | null;
 	picture?: string | null;
 	createdByUserId?: number;
+	/** Omit to mark the account active. Registration passes null until the OTP. */
+	activatedAt?: Date | null;
 };
 
 export type CreatedIdentity = {
@@ -29,6 +31,8 @@ export async function insertUserWithPassport(
 			name: input.name,
 			picture: input.picture,
 			createdByUserId: input.createdByUserId,
+			activatedAt:
+				input.activatedAt === undefined ? new Date() : input.activatedAt,
 		})
 		.returning({ id: users.id });
 	if (!user) throw new Error("Failed to create user");

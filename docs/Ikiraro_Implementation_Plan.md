@@ -39,7 +39,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
 - [ ] Phase 1 — Identity and place (`phase/1-identity-and-place`)
   - [x] `phase/1.1-identity-schema`
   - [x] `phase/1.2-phone-and-password-auth`
-  - [ ] `phase/1.3-registration-consent-profile`
+  - [x] `phase/1.3-registration-consent-profile`
   - [ ] `phase/1.4-recovery-and-privacy-requests`
   - [ ] `phase/1.5-shared-device-session`
   - [ ] `phase/1.6-staff-provisioning`
@@ -459,7 +459,7 @@ main
 
 - **Branch:** `phase/1.2-phone-and-password-auth`
 - **Needs:** 1.1
-- **Delivers:** `SmsSender` plus a dev adapter that logs the code. `createOtp`, `createSession` (password or OTP), `deleteSession`, `getSession`. Rate limit and lockout. Remove Google raw routes from the product app once these endpoints exist. Staff and learners share this login. Email plus password is allowed for staff accounts that have no phone yet.
+- **Delivers:** `SmsSender` plus a dev adapter that logs the code. `createOtp`, `createSession` (password or OTP), `deleteSession`, `getSession`. Rate limit and lockout. Google sign-in stays available beside phone and password. Email verification is deferred. Staff and learners share this login. Email plus password is allowed for staff accounts that have no phone yet. Demo accounts are listed in `docs/demo-accounts.md`.
 - **Covers:** `FR-IAM-01` (verify step), `FR-IAM-03`, `FR-INT-01` (port only), `NFR-SEC-02`, `NFR-SEC-04`.
 - **UI:** auth recipe. Centered column, large phone and OTP type, one sticker.
 - **Done when:** a wrong code locks out, the hash is not in the response, and the session cookie still works with the existing web client.

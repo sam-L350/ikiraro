@@ -38,6 +38,18 @@ describe("decideAccess", () => {
 		expect(decision).toEqual({ ok: true });
 	});
 
+	test("a center-scoped trainer can read their own profile", () => {
+		const decision = decideAccess({
+			actorId: "7",
+			permission: "profile.read.self",
+			assignments: [
+				{ role: "trainer", scopeType: "center", scopeId: "center-a" },
+			],
+			resource: { ownerId: "7" },
+		});
+		expect(decision).toEqual({ ok: true });
+	});
+
 	test("a learner can read only their own profile", () => {
 		const own = decideAccess({
 			actorId: "4",

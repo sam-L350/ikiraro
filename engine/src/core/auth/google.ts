@@ -277,8 +277,9 @@ export const googleAuthRoutes = defineRawRoutes([
 					return redirectWithError("profile_fetch_failed", context);
 
 				const profile = (await profileResponse.json()) as GoogleProfile;
-				if (!profile.email || profile.email_verified === false) {
-					return redirectWithError("email_not_verified", context);
+				// Email verification is deferred. A Google account with an email can sign in.
+				if (!profile.email) {
+					return redirectWithError("email_missing", context);
 				}
 
 				const userId = await upsertGoogleUser(profile);

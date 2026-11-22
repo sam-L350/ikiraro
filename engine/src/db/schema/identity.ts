@@ -29,6 +29,8 @@ export const users = pgTable("users", {
 		(): AnyPgColumn => users.id,
 	),
 	mustChangePassword: boolean("must_change_password").notNull().default(false),
+	/** Null until the learner confirms with a one-time code. */
+	activatedAt: timestamp("activated_at", { withTimezone: true }),
 	deletedAt: timestamp("deleted_at", { withTimezone: true }),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at")

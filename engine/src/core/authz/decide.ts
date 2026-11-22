@@ -62,6 +62,16 @@ export function decideAccess(input: {
 	if (holders.length === 0) {
 		return { ok: false, reason: "You do not have this permission" };
 	}
+	// A center-scoped trainer still has a profile of their own. Self permissions
+	// follow the resource owner, not the job scope.
+	if (
+		input.permission === "profile.read.self" ||
+		input.permission === "profile.write.self"
+	) {
+		return input.resource.ownerId === input.actorId
+			? { ok: true }
+			: { ok: false, reason: "This action is outside your scope" };
+	}
 	const allowed = holders.some((assignment) =>
 		scopeMatches(assignment, input.actorId, input.resource),
 	);

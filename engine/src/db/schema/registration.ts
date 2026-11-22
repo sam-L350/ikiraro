@@ -1,4 +1,11 @@
-import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	integer,
+	pgTable,
+	text,
+	timestamp,
+	uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./identity";
 
 /** Hashed one-time code. The plaintext code is never stored. */
@@ -14,13 +21,17 @@ export const otpChallenges = pgTable("otp_challenges", {
 		.defaultNow(),
 });
 
-/** A new row records a decision. Older rows stay as the history. */
+/**
+ * A new row records a decision, including a withdrawal. Older rows stay as
+ * the history and are never updated.
+ */
 export const consents = pgTable("consents", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: integer("user_id")
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
 	purpose: text("purpose").notNull(),
+	granted: boolean("granted").notNull().default(true),
 	version: text("version").notNull(),
 	grantedAt: timestamp("granted_at", { withTimezone: true })
 		.notNull()

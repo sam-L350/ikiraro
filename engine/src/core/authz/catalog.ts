@@ -21,6 +21,7 @@ export function isRoleCode(value: string): value is RoleCode {
 
 export const PERMISSION_CODES = [
 	"profile.read.self",
+	"profile.write.self",
 	"submission.review",
 	"center.manage",
 	"district.manage",
@@ -51,22 +52,41 @@ export const ROLE_NAMES: Record<RoleCode, string> = {
 };
 
 export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
-	learner: ["profile.read.self"],
-	trainer: ["profile.read.self", "submission.review"],
-	center_manager: ["center.manage", "submission.review"],
-	district_coordinator: ["district.manage", "submission.review"],
-	content_author: ["content.write"],
-	content_reviewer: ["content.publish"],
-	hardware_officer: ["hardware.manage"],
-	committee_member: ["grant.decide"],
-	auditor: ["report.read"],
-	platform_admin: ["admin.manage"],
-	mentor: ["mentor.connect"],
-	public_verifier: [],
+	learner: ["profile.read.self", "profile.write.self"],
+	trainer: ["profile.read.self", "profile.write.self", "submission.review"],
+	center_manager: [
+		"profile.read.self",
+		"profile.write.self",
+		"center.manage",
+		"submission.review",
+	],
+	district_coordinator: [
+		"profile.read.self",
+		"profile.write.self",
+		"district.manage",
+		"submission.review",
+	],
+	content_author: ["profile.read.self", "profile.write.self", "content.write"],
+	content_reviewer: [
+		"profile.read.self",
+		"profile.write.self",
+		"content.publish",
+	],
+	hardware_officer: [
+		"profile.read.self",
+		"profile.write.self",
+		"hardware.manage",
+	],
+	committee_member: ["profile.read.self", "profile.write.self", "grant.decide"],
+	auditor: ["profile.read.self", "profile.write.self", "report.read"],
+	platform_admin: ["profile.read.self", "profile.write.self", "admin.manage"],
+	mentor: ["profile.read.self", "profile.write.self", "mentor.connect"],
+	public_verifier: ["profile.read.self", "profile.write.self"],
 };
 
 export const PERMISSION_DESCRIPTIONS: Record<PermissionCode, string> = {
 	"profile.read.self": "Read the signed-in user's own profile",
+	"profile.write.self": "Update the signed-in user's own profile",
 	"submission.review": "Review evidence at the assigned scope",
 	"center.manage": "Manage one learning center",
 	"district.manage": "Manage centers in one district",

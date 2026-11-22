@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useSearchParams } from "react-router";
+import { Link, Navigate, useSearchParams } from "react-router";
 import { LoginForm } from "@/components/auth/login-form";
 import {
 	previewRoleName,
@@ -43,6 +43,12 @@ export default function LoginPage() {
 				{t("signIn")}
 			</h1>
 			<LoginForm redirectTo={redirectTo} />
+			<Link
+				className="mt-6 font-sans text-sm font-semibold text-fg underline-offset-4 hover:underline"
+				to="/register"
+			>
+				{t("createAccount")}
+			</Link>
 			{pendingName ? (
 				<p className="mt-4 font-sans text-sm font-medium text-fg">
 					This sign-in will enter as {pendingName}.

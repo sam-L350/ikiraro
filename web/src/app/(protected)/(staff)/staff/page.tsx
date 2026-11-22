@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 
 export default function StaffHomePage() {
@@ -10,6 +12,11 @@ export default function StaffHomePage() {
 			<p className="mt-6 font-sans text-lg font-medium leading-relaxed text-fg">
 				{t("staffBody")}
 			</p>
+			<div className="mt-8">
+				<Button asChild variant="sticker">
+					<Link to="/register/assisted">{t("registerLearner")}</Link>
+				</Button>
+			</div>
 		</section>
 	);
 }

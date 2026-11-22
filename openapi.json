@@ -15,10 +15,19 @@
 			"name": "auth"
 		},
 		{
+			"name": "consents"
+		},
+		{
 			"name": "dev"
 		},
 		{
 			"name": "examples"
+		},
+		{
+			"name": "profile"
+		},
+		{
+			"name": "registrations"
 		},
 		{
 			"name": "system"
@@ -446,6 +455,155 @@
 					},
 					"400": {
 						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/consents": {
+			"post": {
+				"operationId": "createConsent",
+				"summary": "Records a new consent decision. Withdrawal inserts a row and does not edit",
+				"description": "the earlier one.",
+				"tags": [
+					"consents"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"purpose": {
+										"type": "string",
+										"enum": [
+											"terms",
+											"data_use",
+											"public_passport",
+											"leaderboard",
+											"mentor_contact",
+											"guardian"
+										]
+									},
+									"granted": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"purpose",
+									"granted"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"purpose": {
+													"type": "string",
+													"enum": [
+														"terms",
+														"data_use",
+														"public_passport",
+														"leaderboard",
+														"mentor_contact",
+														"guardian"
+													]
+												},
+												"granted": {
+													"type": "boolean"
+												},
+												"version": {
+													"type": "string"
+												},
+												"grantedAt": {
+													"type": "string",
+													"description": "Date string"
+												}
+											},
+											"required": [
+												"purpose",
+												"granted",
+												"version",
+												"grantedAt"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -924,6 +1082,955 @@
 											"required": [
 												"active",
 												"timestamp"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/profile": {
+			"get": {
+				"operationId": "getProfile",
+				"summary": "The signed-in person's profile, including the latest consent for each purpose.",
+				"tags": [
+					"profile"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												},
+												"phone": {
+													"type": "string",
+													"nullable": true
+												},
+												"email": {
+													"type": "string",
+													"nullable": true
+												},
+												"dateOfBirth": {
+													"type": "string",
+													"nullable": true
+												},
+												"gender": {
+													"type": "string",
+													"nullable": true
+												},
+												"district": {
+													"type": "string",
+													"nullable": true
+												},
+												"sector": {
+													"type": "string",
+													"nullable": true
+												},
+												"village": {
+													"type": "string",
+													"nullable": true
+												},
+												"economicSector": {
+													"type": "string",
+													"nullable": true
+												},
+												"locale": {
+													"type": "string"
+												},
+												"photoKey": {
+													"type": "string",
+													"nullable": true
+												},
+												"guardianContact": {
+													"type": "string",
+													"nullable": true
+												},
+												"minor": {
+													"type": "boolean"
+												},
+												"active": {
+													"type": "boolean"
+												},
+												"consents": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"purpose": {
+																"type": "string",
+																"enum": [
+																	"terms",
+																	"data_use",
+																	"public_passport",
+																	"leaderboard",
+																	"mentor_contact",
+																	"guardian"
+																]
+															},
+															"granted": {
+																"type": "boolean"
+															},
+															"version": {
+																"type": "string"
+															},
+															"grantedAt": {
+																"type": "string",
+																"description": "Date string"
+															}
+														},
+														"required": [
+															"purpose",
+															"granted",
+															"version",
+															"grantedAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"email",
+												"dateOfBirth",
+												"gender",
+												"district",
+												"sector",
+												"village",
+												"economicSector",
+												"locale",
+												"photoKey",
+												"guardianContact",
+												"minor",
+												"active",
+												"consents"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/profile/update": {
+			"put": {
+				"operationId": "updateProfile",
+				"summary": "Replaces the fields the signed-in person sends. Omitted fields stay as they are.",
+				"tags": [
+					"profile"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"dateOfBirth": {
+										"type": "string"
+									},
+									"gender": {
+										"type": "string",
+										"nullable": true
+									},
+									"district": {
+										"type": "string"
+									},
+									"sector": {
+										"type": "string"
+									},
+									"village": {
+										"type": "string"
+									},
+									"economicSector": {
+										"type": "string"
+									},
+									"locale": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"en"
+										]
+									},
+									"photoKey": {
+										"type": "string",
+										"nullable": true
+									},
+									"guardianContact": {
+										"type": "string",
+										"nullable": true
+									}
+								},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												},
+												"phone": {
+													"type": "string",
+													"nullable": true
+												},
+												"email": {
+													"type": "string",
+													"nullable": true
+												},
+												"dateOfBirth": {
+													"type": "string",
+													"nullable": true
+												},
+												"gender": {
+													"type": "string",
+													"nullable": true
+												},
+												"district": {
+													"type": "string",
+													"nullable": true
+												},
+												"sector": {
+													"type": "string",
+													"nullable": true
+												},
+												"village": {
+													"type": "string",
+													"nullable": true
+												},
+												"economicSector": {
+													"type": "string",
+													"nullable": true
+												},
+												"locale": {
+													"type": "string"
+												},
+												"photoKey": {
+													"type": "string",
+													"nullable": true
+												},
+												"guardianContact": {
+													"type": "string",
+													"nullable": true
+												},
+												"minor": {
+													"type": "boolean"
+												},
+												"active": {
+													"type": "boolean"
+												},
+												"consents": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"purpose": {
+																"type": "string",
+																"enum": [
+																	"terms",
+																	"data_use",
+																	"public_passport",
+																	"leaderboard",
+																	"mentor_contact",
+																	"guardian"
+																]
+															},
+															"granted": {
+																"type": "boolean"
+															},
+															"version": {
+																"type": "string"
+															},
+															"grantedAt": {
+																"type": "string",
+																"description": "Date string"
+															}
+														},
+														"required": [
+															"purpose",
+															"granted",
+															"version",
+															"grantedAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"email",
+												"dateOfBirth",
+												"gender",
+												"district",
+												"sector",
+												"village",
+												"economicSector",
+												"locale",
+												"photoKey",
+												"guardianContact",
+												"minor",
+												"active",
+												"consents"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/registrations/activation": {
+			"post": {
+				"operationId": "createRegistrationActivation",
+				"summary": "Activates a registration with the learner's one-time code and opens a session.",
+				"description": "Public: the learner has no session yet. A wrong code leaves the account inactive.",
+				"tags": [
+					"registrations"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"phone": {
+										"type": "string"
+									},
+									"code": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"phone",
+									"code"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"email": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"email",
+												"name"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/registrations/assisted": {
+			"post": {
+				"operationId": "createRegistrationAssisted",
+				"summary": "A trainer registers a learner. The record stores the trainer and stays",
+				"description": "inactive until the learner confirms with a one-time code.",
+				"tags": [
+					"registrations"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"phone": {
+										"type": "string"
+									},
+									"dateOfBirth": {
+										"type": "string"
+									},
+									"district": {
+										"type": "string"
+									},
+									"sector": {
+										"type": "string"
+									},
+									"village": {
+										"type": "string"
+									},
+									"economicSector": {
+										"type": "string"
+									},
+									"locale": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"en"
+										]
+									},
+									"email": {
+										"type": "string"
+									},
+									"gender": {
+										"type": "string"
+									},
+									"guardianContact": {
+										"type": "string"
+									},
+									"consents": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"purpose": {
+													"type": "string",
+													"enum": [
+														"terms",
+														"data_use",
+														"public_passport",
+														"leaderboard",
+														"mentor_contact",
+														"guardian"
+													]
+												},
+												"granted": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"purpose",
+												"granted"
+											],
+											"additionalProperties": false
+										}
+									}
+								},
+								"required": [
+									"name",
+									"phone",
+									"dateOfBirth",
+									"district",
+									"sector",
+									"village",
+									"economicSector",
+									"locale",
+									"consents"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string"
+												},
+												"phone": {
+													"type": "string"
+												},
+												"active": {
+													"const": false,
+													"type": "boolean"
+												},
+												"codeSent": {
+													"type": "boolean"
+												},
+												"assistedBy": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"active",
+												"codeSent",
+												"assistedBy"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/registrations": {
+			"post": {
+				"operationId": "createRegistration",
+				"summary": "Self-registration. The account stays inactive until the learner's code.",
+				"description": "Public: there is no session yet. The code is not in this response.",
+				"tags": [
+					"registrations"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"phone": {
+										"type": "string"
+									},
+									"dateOfBirth": {
+										"type": "string"
+									},
+									"district": {
+										"type": "string"
+									},
+									"sector": {
+										"type": "string"
+									},
+									"village": {
+										"type": "string"
+									},
+									"economicSector": {
+										"type": "string"
+									},
+									"locale": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"en"
+										]
+									},
+									"email": {
+										"type": "string"
+									},
+									"gender": {
+										"type": "string"
+									},
+									"guardianContact": {
+										"type": "string"
+									},
+									"consents": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"purpose": {
+													"type": "string",
+													"enum": [
+														"terms",
+														"data_use",
+														"public_passport",
+														"leaderboard",
+														"mentor_contact",
+														"guardian"
+													]
+												},
+												"granted": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"purpose",
+												"granted"
+											],
+											"additionalProperties": false
+										}
+									}
+								},
+								"required": [
+									"name",
+									"phone",
+									"dateOfBirth",
+									"district",
+									"sector",
+									"village",
+									"economicSector",
+									"locale",
+									"consents"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string"
+												},
+												"phone": {
+													"type": "string"
+												},
+												"active": {
+													"const": false,
+													"type": "boolean"
+												},
+												"codeSent": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"active",
+												"codeSent"
 											],
 											"additionalProperties": false
 										},

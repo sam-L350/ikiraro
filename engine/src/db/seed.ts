@@ -7,6 +7,7 @@ import {
 	ROLE_PERMISSIONS,
 	type RoleCode,
 } from "../core/authz/catalog";
+import { seedDemoAccounts } from "./demo-accounts";
 import { db } from "./index";
 import { permissions, rolePermissions, roles } from "./schema";
 
@@ -54,4 +55,6 @@ export async function seedFoundations(): Promise<void> {
 	if (stored.length !== 1) {
 		throw new Error("Foundation seed did not store the learner role");
 	}
+
+	await seedDemoAccounts();
 }

@@ -1,5 +1,6 @@
 import { endpoints } from "../.generated/endpoints";
 import { createRuntime } from "./core/api/runtime";
+import { googleAuthRoutes } from "./core/auth/google";
 
 /**
  * Assembles the HTTP application:
@@ -12,6 +13,7 @@ export function createApp() {
 	return createRuntime({
 		endpoints,
 		rawRoutes: [
+			...googleAuthRoutes,
 			// Example escape hatch: multipart upload. Replace or remove.
 			{
 				method: "POST",
