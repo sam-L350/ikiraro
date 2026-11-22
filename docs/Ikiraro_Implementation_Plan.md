@@ -38,7 +38,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/0.6-shells-and-i18n`
 - [ ] Phase 1 — Identity and place (`phase/1-identity-and-place`)
   - [x] `phase/1.1-identity-schema`
-  - [ ] `phase/1.2-phone-and-password-auth`
+  - [x] `phase/1.2-phone-and-password-auth`
   - [ ] `phase/1.3-registration-consent-profile`
   - [ ] `phase/1.4-recovery-and-privacy-requests`
   - [ ] `phase/1.5-shared-device-session`

@@ -13,6 +13,7 @@ export function useTestEnv(overrides: Record<string, string | undefined> = {}) {
 		API_URL: "http://localhost:3000",
 		CORS_ORIGINS: `${TEST_WEB_ORIGIN},https://*.example.com`,
 		COOKIE_SAME_SITE: "lax",
+		OTP_PEPPER: "test-pepper-value",
 	};
 	for (const key of Object.keys(base)) delete process.env[key];
 	for (const [key, value] of Object.entries({ ...base, ...overrides })) {

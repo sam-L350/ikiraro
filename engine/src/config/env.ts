@@ -46,6 +46,8 @@ export type Env = {
 	readonly maxBodyBytes: number;
 	/** Lets a signed-in builder assume a role. Always false in production. */
 	readonly devRoleSwitch: boolean;
+	/** Pepper for one-time codes. Required in production. */
+	readonly otpPepper: string;
 };
 
 type Source = Record<string, string | undefined>;
@@ -232,7 +234,13 @@ export function parseEnv(source: Source): Env {
 		validateResponses: read.bool("VALIDATE_RESPONSES", true),
 		maxBodyBytes: read.int("MAX_BODY_BYTES", 1024 * 1024, { min: 1024 }),
 		devRoleSwitch: !isProduction && read.bool("DEV_ROLE_SWITCH", true),
+		otpPepper: read.string("OTP_PEPPER", isProduction ? "" : "dev-only-pepper"),
 	};
+	if (isProduction && env.otpPepper.length < 16) {
+		read.problems.push(
+			"OTP_PEPPER must be at least 16 characters in production",
+		);
+	}
 
 	if (read.problems.length > 0) {
 		throw new EnvError(read.problems);

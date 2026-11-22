@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigate, useSearchParams } from "react-router";
+import { LoginForm } from "@/components/auth/login-form";
 import {
 	previewRoleName,
 	readPreviewRole,
@@ -10,7 +11,6 @@ import {
 	RolePreviewPanel,
 	useRolePreview,
 } from "@/components/dev/role-preview";
-import { GoogleSignInButton } from "@/components/google-button";
 import { Spinner } from "@/components/spinner";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -42,12 +42,7 @@ export default function LoginPage() {
 			>
 				{t("signIn")}
 			</h1>
-			<p className="mt-4 font-sans text-lg font-medium text-fg">
-				{t("loginSentence")}
-			</p>
-			<div className="mt-8">
-				<GoogleSignInButton redirectTo={redirectTo} label={t("signIn")} />
-			</div>
+			<LoginForm redirectTo={redirectTo} />
 			{pendingName ? (
 				<p className="mt-4 font-sans text-sm font-medium text-fg">
 					This sign-in will enter as {pendingName}.

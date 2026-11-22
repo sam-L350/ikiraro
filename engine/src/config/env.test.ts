@@ -56,8 +56,18 @@ describe("parseEnv", () => {
 				NODE_ENV: "production",
 				DATABASE_URL: "postgres://localhost/db",
 				DEV_ROLE_SWITCH: "true",
+				OTP_PEPPER: "production-pepper-ok",
 			}).devRoleSwitch,
 		).toBe(false);
+	});
+
+	test("production requires a pepper for one-time codes", () => {
+		expect(() =>
+			parseEnv({
+				NODE_ENV: "production",
+				DATABASE_URL: "postgres://localhost/db",
+			}),
+		).toThrow(/OTP_PEPPER/);
 	});
 
 	test("strips trailing slashes from URL lists", () => {

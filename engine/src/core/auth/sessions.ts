@@ -1,6 +1,6 @@
 import { eq, lt } from "drizzle-orm";
 import { env } from "../../config/env";
-import { db } from "../../db";
+import { type Database, db } from "../../db";
 import { sessions, type User, users } from "../../db/schema";
 import { parseCookies, serializeCookie } from "../http/cookies";
 
@@ -29,11 +29,14 @@ function randomToken(): string {
 	return `${TOKEN_PREFIX}${hex}`;
 }
 
-export async function createSession(userId: number): Promise<string> {
+export async function createSession(
+	userId: number,
+	database: Pick<Database, "insert"> = db,
+): Promise<string> {
 	const token = randomToken();
 	const expiresAt = new Date(Date.now() + env.sessionTtlMs);
 
-	await db.insert(sessions).values({
+	await database.insert(sessions).values({
 		id: await hashToken(token),
 		userId,
 		expiresAt,
