@@ -10,7 +10,7 @@ This plan is the order of work. The functional spec decides what the system must
 
 ## 1. How to use this plan
 
-Work one subphase branch at a time. A subphase is done when its acceptance checks pass and `make verify` is green. Merge the subphase into its phase branch. Merge the phase branch into `main` only when the phase gate in Section 6 passes.
+Work one subphase branch at a time. A subphase is done when its acceptance checks pass and `make verify` is green. Merge the subphase into its phase branch. Merge the phase branch into `DEV` when the phase gate in Section 6 passes. `main` stays the release line and is not updated at the end of each phase.
 
 Do not start a subphase whose "Needs" line is still open. Do not pull a later requirement forward because it is nearby in the file. The order protects the trust loop: identity, then content, then learning, then evidence, then an atomic award, then the passport.
 
@@ -291,11 +291,12 @@ main
       └── phase/1.2-phone-and-password-auth
 ```
 
-- `main` is the last finished phase.
-- The phase branch is cut from `main` when the phase starts.
+- `DEV` is the integration line. A finished phase is merged here.
+- `main` is the release line. It moves when a release is cut, not at the end of every phase.
+- The phase branch is cut from `DEV` when the phase starts.
 - The subphase branch is cut from the phase branch.
 - Pull request: subphase into the phase branch. One subphase, one review.
-- Pull request: phase branch into `main` only after the phase gate.
+- Pull request: phase branch into `DEV` after the phase gate.
 - Branch names below are exact. Do not invent a parallel naming scheme.
 
 ---
@@ -357,7 +358,7 @@ main
 ### Phase 1 — Identity and place
 
 **Branch:** `phase/1-identity-and-place`  
-**Needs:** phase 0 on `main`  
+**Needs:** phase 0 on `DEV`  
 **Gate:** a trainer can register a learner at a center, the learner can confirm with an OTP, consent is stored, and a second center cannot see that learner.
 
 #### 1.1 Identity schema
@@ -662,7 +663,7 @@ This is the product. Do not open phase 7 while this gate is red.
 ### Phase 7 — Fairness and hardware
 
 **Branch:** `phase/7-fairness-and-hardware`  
-**Needs:** phase 6 on `main`, plus a written allocation policy from a real stakeholder (functional spec, step 5 of Section 14). The software encodes that policy. Do not invent quotas in code that the policy does not state.  
+**Needs:** phase 6 on `DEV`, plus a written allocation policy from a real stakeholder (functional spec, step 5 of Section 14). The software encodes that policy. Do not invent quotas in code that the policy does not state.  
 **Gate:** a round can be opened, applicants ranked with a stored formula, a committee decision recorded, a device handed over with a witness, and an outsider can read why.
 
 #### 7.1 Review SLA
@@ -1169,6 +1170,6 @@ Priority is copied from the functional spec. The branch is where the requirement
 
 ## 10. Suggested first branch
 
-Start with `phase/0-foundations` cut from `main`, then `phase/0.1-design-system`.
+Start with `phase/0-foundations` cut from `DEV`, then `phase/0.1-design-system`.
 
 That branch only changes tokens, fonts, and primitives. It does not change the database or auth. It gives every later screen one set of materials, which is what the UI guidelines require before product pages are built.
