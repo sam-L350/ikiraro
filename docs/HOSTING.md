@@ -71,6 +71,23 @@ make db-migrate       # applies pending migrations using DATABASE_URL
 
 The engine deploy workflow runs `db:migrate` automatically when the `DATABASE_URL` secret is configured.
 
+After a migration that adds roles, run `bun run db:seed` in `engine/` so the twelve roles and the permission catalogue exist.
+
+## 5.1 Backup and restore
+
+The development database is the cloud Postgres URL in `engine/.env.local`. Confirm that host's daily backup is turned on before any real learner data is stored.
+
+To prove a restore:
+
+```bash
+pg_dump "$DATABASE_URL" --format=custom --file=ikiraro.dump
+createdb ikiraro_restore
+pg_restore --dbname=ikiraro_restore --no-owner ikiraro.dump
+psql ikiraro_restore -c "select count(*) from system_audit_logs;"
+```
+
+Record the time of the test. The target is a recovery point of 24 hours and a recovery time of 8 hours. Drop `ikiraro_restore` when the check is done. Do not restore over the live database.
+
 ## 6. GitHub Actions
 
 | Workflow | Trigger | Does |
