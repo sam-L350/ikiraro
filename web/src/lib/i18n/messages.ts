@@ -31,9 +31,7 @@ export const en = {
 		"This page is the learner home. It shows who is signed in, and sign out stays one tap away on a shared computer.",
 	staffTitle: "Staff tools",
 	staffBody:
-		"This page is for trainers and managers. The theme control lives in this account menu. Learners do not see it.",
-	account: "Account",
-	theme: "Theme",
+		"This page is for trainers and managers. Learners do not see this desk.",
 	howItWorks: "How it works",
 	status: "Status",
 } as const;
@@ -73,9 +71,7 @@ export const rw: Record<MessageKey, string> = {
 		"Iyi paji ni iy'umunyeshuri. Erekana uwinjiye, kandi gusohoka ni intambwe imwe kuri mudasobwa rusange.",
 	staffTitle: "Ibikoresho by'abakozi",
 	staffBody:
-		"Iyi paji ni iy'abatoza n'abayobozi. Guhindura urumuri biri muri iri menyu. Abanyeshuri ntibabona iri menyu.",
-	account: "Konti",
-	theme: "Urumuri",
+		"Iyi paji ni iy'abatoza n'abayobozi. Abanyeshuri ntibabona iyi paji.",
 	howItWorks: "Uko bikora",
 	status: "Imimerere",
 };

@@ -25,6 +25,91 @@ Each subphase follows the same engineering loop, because that is how this reposi
 7. Add `index.test.ts` beside the endpoint. Use `useTestEnv()`.
 8. Run `make verify`.
 
+Check a box only after that subphase's "Done when" line is true and the branch is on `DEV`. A phase box is checked only when its gate passes.
+
+### Progress
+
+- [x] Phase 0 — Foundations (`phase/0-foundations`)
+  - [x] `phase/0.1-design-system`
+  - [x] `phase/0.2-data-platform`
+  - [x] `phase/0.3-audit-and-events`
+  - [x] `phase/0.4-authorization`
+  - [x] `phase/0.5-guardrails`
+  - [x] `phase/0.6-shells-and-i18n`
+- [ ] Phase 1 — Identity and place (`phase/1-identity-and-place`)
+  - [ ] `phase/1.1-identity-schema`
+  - [ ] `phase/1.2-phone-and-password-auth`
+  - [ ] `phase/1.3-registration-consent-profile`
+  - [ ] `phase/1.4-recovery-and-privacy-requests`
+  - [ ] `phase/1.5-shared-device-session`
+  - [ ] `phase/1.6-staff-provisioning`
+  - [ ] `phase/1.7-geography-and-centers`
+- [ ] Phase 2 — Content (`phase/2-content`)
+  - [ ] `phase/2.1-content-schema`
+  - [ ] `phase/2.2-authoring`
+  - [ ] `phase/2.3-review-and-publish`
+  - [ ] `phase/2.4-content-versions`
+  - [ ] `phase/2.5-rubrics-badges-media`
+- [ ] Phase 3 — Learning (`phase/3-learning`)
+  - [ ] `phase/3.1-catalog-enrollment`
+  - [ ] `phase/3.2-progress-and-prerequisites`
+  - [ ] `phase/3.3-learner-home-and-task`
+  - [ ] `phase/3.4-audio-and-language`
+- [ ] Phase 4 — Trust loop (`phase/4-trust-loop`)
+  - [ ] `phase/4.1-private-media`
+  - [ ] `phase/4.2-submissions`
+  - [ ] `phase/4.3-upload-queue`
+  - [ ] `phase/4.4-review-queue`
+  - [ ] `phase/4.5-decisions-and-conflicts`
+  - [ ] `phase/4.6-atomic-award`
+  - [ ] `phase/4.7-resubmit-and-revoke`
+- [ ] Phase 5 — Passport and points (`phase/5-passport-and-points`)
+  - [ ] `phase/5.1-points-ledger`
+  - [ ] `phase/5.2-eligibility-engine`
+  - [ ] `phase/5.3-learner-passport`
+  - [ ] `phase/5.4-public-verification`
+  - [ ] `phase/5.5-manual-adjustments`
+- [ ] Phase 6 — Pilot readiness (`phase/6-pilot-readiness`)
+  - [ ] `phase/6.1-notification-outbox`
+  - [ ] `phase/6.2-sms-production`
+  - [ ] `phase/6.3-offline-pwa`
+  - [ ] `phase/6.4-audit-and-privacy-tools`
+  - [ ] `phase/6.5-misconduct-reports`
+  - [ ] `phase/6.6-pilot-operations`
+- [ ] Phase 7 — Fairness and hardware (`phase/7-fairness-and-hardware`)
+  - [ ] `phase/7.1-review-sla`
+  - [ ] `phase/7.2-second-review-and-quality`
+  - [ ] `phase/7.3-appeals-and-feedback-library`
+  - [ ] `phase/7.4-evidence-integrity`
+  - [ ] `phase/7.5-sessions-and-attendance`
+  - [ ] `phase/7.6-center-devices-and-directory`
+  - [ ] `phase/7.7-inventory`
+  - [ ] `phase/7.8-allocation-rounds`
+  - [ ] `phase/7.9-committee-decision`
+  - [ ] `phase/7.10-handover-and-custody`
+  - [ ] `phase/7.11-recovery-and-exceptions`
+  - [ ] `phase/7.12-leaderboard-and-equity`
+- [ ] Phase 8 — Impact and ecosystem (`phase/8-impact-and-ecosystem`)
+  - [ ] `phase/8.1-follow-ups`
+  - [ ] `phase/8.2-outcomes-and-surveys`
+  - [ ] `phase/8.3-dormancy`
+  - [ ] `phase/8.4-mentors`
+  - [ ] `phase/8.5-opportunities-and-referrals`
+  - [ ] `phase/8.6-mentor-messaging`
+  - [ ] `phase/8.7-signed-credentials-and-api`
+  - [ ] `phase/8.8-donor-reports`
+  - [ ] `phase/8.9-offline-content-packs`
+  - [ ] `phase/8.10-maker-checker-and-support`
+  - [ ] `phase/8.11-success-stories`
+- [ ] Phase 9 — Scale (`phase/9-scale`)
+  - [ ] `phase/9.1-pathways-and-placement`
+  - [ ] `phase/9.2-peer-and-group-work`
+  - [ ] `phase/9.3-scheduled-reports-and-warnings`
+  - [ ] `phase/9.4-portable-credentials`
+  - [ ] `phase/9.5-coverage-and-tours`
+  - [ ] `phase/9.6-remaining-could-haves`
+  - [ ] `phase/9.7-account-hardening`
+
 ---
 
 ## 2. Decisions locked for this build
@@ -311,7 +396,7 @@ main
 #### 0.1 Design system
 
 - **Branch:** `phase/0.1-design-system`
-- **Needs:** `main`
+- **Needs:** `DEV`
 - **Delivers:** `web/src/index.css` tokens from the guidelines (`--canvas`, `--ink`, `--yellow`, poster colors, `--danger`). Fonts: Anton, Montserrat Alternates, Inter Tight, loaded the way Geist is loaded now. `Button` variants `sticker`, `ink`, `quiet`, `destructive`. `Badge` status map. Poster, quiet, and ink `Card`. `shadow-sticker`. Remove `bg-grid` and `bg-glow` from any screen this branch touches.
 - **Done when:** the home page is paper and ink, with one sticker, and both themes still read. No raw hex in a component.
 
@@ -350,7 +435,7 @@ main
 
 - **Branch:** `phase/0.6-shells-and-i18n`
 - **Needs:** 0.1
-- **Delivers:** public, auth, learner, and staff layouts. Signed-in slot and sign-out slot. Dictionary loader for `rw` and `en`, with a language switch that does not drop the route. Product header no longer shows OpenAPI or the theme toggle to learners. Theme toggle moves to the staff account menu.
+- **Delivers:** public, auth, learner, and staff layouts. Signed-in slot and sign-out slot. Dictionary loader for `rw` and `en`, with a language switch that does not drop the route. Product header does not show OpenAPI. The product stays on the paper theme.
 - **Done when:** a placeholder learner page and a placeholder staff page both show who would be signed in, and a Kinyarwanda string wraps in the body face.
 
 ---
@@ -859,7 +944,7 @@ USSD, native apps, mobile money, and automatic grading stay out. They need their
 
 ## 6. Phase gates
 
-| Phase | Merge to `main` when |
+| Phase | Merge to `DEV` when |
 | --- | --- |
 | 0 | Permission checks, audit trigger, and design tokens are in, and `make verify` passes. |
 | 1 | Assisted registration, OTP, consent, and center scope work in tests and in the browser. |

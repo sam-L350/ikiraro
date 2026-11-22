@@ -1,4 +1,4 @@
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -9,47 +9,13 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
-import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 export default function DashboardSettingsPage() {
 	const { logout, user } = useAuth();
-	const { theme, setTheme } = useTheme();
 
 	return (
 		<div className="grid gap-6 lg:grid-cols-2">
-			<Card>
-				<CardHeader>
-					<CardTitle>Appearance</CardTitle>
-					<CardDescription>Stored in this browser only.</CardDescription>
-				</CardHeader>
-				<CardContent className="pt-2">
-					<div className="grid grid-cols-2 gap-3">
-						{(
-							[
-								{ value: "light", label: "Light", icon: Sun },
-								{ value: "dark", label: "Dark", icon: Moon },
-							] as const
-						).map(({ value, label, icon: Icon }) => (
-							<button
-								key={value}
-								type="button"
-								onClick={() => setTheme(value)}
-								className={cn(
-									"flex items-center gap-3 rounded-xl border p-4 text-left text-sm font-medium transition-all",
-									theme === value
-										? "border-accent bg-accent-soft text-fg ring-2 ring-accent/30"
-										: "border-line bg-surface text-fg-muted hover:border-line-strong hover:text-fg",
-								)}
-							>
-								<Icon className="size-4" aria-hidden />
-								{label}
-							</button>
-						))}
-					</div>
-				</CardContent>
-			</Card>
-
 			<Card>
 				<CardHeader>
 					<CardTitle>Profile</CardTitle>

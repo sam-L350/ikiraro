@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { LanguageSwitch } from "@/components/shell/language-switch";
 import { Wordmark } from "@/components/shell/wordmark";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -47,7 +46,6 @@ export function PublicShell({ children }: { children: ReactNode }) {
 
 export function ProductShell({
 	children,
-	surface,
 }: {
 	children: ReactNode;
 	surface: "learner" | "staff";
@@ -71,19 +69,6 @@ export function ProductShell({
 					</div>
 					<div className="flex items-center gap-3">
 						<LanguageSwitch />
-						{surface === "staff" ? (
-							<details className="relative">
-								<summary className="flex h-11 cursor-pointer list-none items-center font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{t("account")}
-								</summary>
-								<div className="absolute right-0 z-10 mt-2 flex items-center gap-3 rounded-[20px] bg-surface p-3">
-									<span className="font-meta text-xs uppercase tracking-wide text-fg-muted">
-										{t("theme")}
-									</span>
-									<ThemeToggle />
-								</div>
-							</details>
-						) : null}
 						<Button type="button" variant="quiet" onClick={() => void logout()}>
 							{t("signOut")}
 						</Button>
