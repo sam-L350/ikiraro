@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.wrangler/
+
+# Generated artifacts (rebuilt by `make generate`)
+.generated/
+
+# TypeScript and tool caches
+*.tsbuildinfo
+.cache/
+.tmp/
+
+# Environment files (keep *.example files)
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Logs
+*.log
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
