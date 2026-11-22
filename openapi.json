@@ -15,6 +15,9 @@
 			"name": "auth"
 		},
 		{
+			"name": "dev"
+		},
+		{
 			"name": "examples"
 		},
 		{
@@ -141,6 +144,39 @@
 												"createdAt": {
 													"type": "string",
 													"description": "Date string"
+												},
+												"roles": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"code": {
+																"type": "string",
+																"enum": [
+																	"learner",
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"content_author",
+																	"content_reviewer",
+																	"hardware_officer",
+																	"committee_member",
+																	"auditor",
+																	"platform_admin",
+																	"mentor",
+																	"public_verifier"
+																]
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"code",
+															"name"
+														],
+														"additionalProperties": false
+													}
 												}
 											},
 											"required": [
@@ -148,7 +184,8 @@
 												"email",
 												"name",
 												"picture",
-												"createdAt"
+												"createdAt",
+												"roles"
 											],
 											"additionalProperties": false
 										},
@@ -175,6 +212,382 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/otp": {
+			"post": {
+				"operationId": "createAuthOtp",
+				"summary": "Ask for a one-time code. Public: the person has no session yet.",
+				"description": "The code is handed to the SMS sender and is not part of this response.",
+				"tags": [
+					"auth"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"phone": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"phone"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sent": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"sent"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/session": {
+			"post": {
+				"operationId": "createAuthSession",
+				"summary": "Sign in with a one-time code or with email and password.",
+				"description": "Public: the person has no session yet. The password hash and the code\nhash are never returned. The session is the existing HttpOnly cookie.",
+				"tags": [
+					"auth"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"method": {
+										"type": "string",
+										"enum": [
+											"otp",
+											"password"
+										]
+									},
+									"phone": {
+										"type": "string"
+									},
+									"code": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"method"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"email": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"email",
+												"name"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/dev/role": {
+			"put": {
+				"operationId": "updateDevRole",
+				"summary": "Development only. Replace the signed-in user's roles with one preview role.",
+				"description": "The handler requires a session and does not call authorize(), because the\nbuilder may hold no role yet. It returns 404 when the switch is off,\nincluding every production process.",
+				"tags": [
+					"dev"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"role": {
+										"type": "string",
+										"enum": [
+											"learner",
+											"trainer",
+											"center_manager",
+											"district_coordinator",
+											"content_author",
+											"content_reviewer",
+											"hardware_officer",
+											"committee_member",
+											"auditor",
+											"platform_admin",
+											"mentor",
+											"public_verifier"
+										]
+									}
+								},
+								"required": [
+									"role"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"role": {
+													"type": "string",
+													"enum": [
+														"learner",
+														"trainer",
+														"center_manager",
+														"district_coordinator",
+														"content_author",
+														"content_reviewer",
+														"hardware_officer",
+														"committee_member",
+														"auditor",
+														"platform_admin",
+														"mentor",
+														"public_verifier"
+													]
+												},
+												"name": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"role",
+												"name"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}
