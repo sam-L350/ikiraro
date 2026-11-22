@@ -31,6 +31,7 @@ Rules enforced by the generator (`make generate`):
 Helpers available inside a handler:
 
 - `requireAuth()` — returns the user or throws `401`
+- `authorize({ permission, resource })` — throws `403` when the role and scope do not allow the action. Call it in every handler that is not explicitly public.
 - `getUser()` — returns the user or `null`
 - `getRequestContext()` — request id, URL, logger, response headers
 - `errors.notFound()`, `errors.forbidden()`, ... — structured errors
