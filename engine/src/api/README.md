@@ -35,3 +35,5 @@ Helpers available inside a handler:
 - `getUser()` — returns the user or `null`
 - `getRequestContext()` — request id, URL, logger, response headers
 - `errors.notFound()`, `errors.forbidden()`, ... — structured errors
+
+Mutations that must not run twice read the `Idempotency-Key` header and pass it to `runIdempotent`.
