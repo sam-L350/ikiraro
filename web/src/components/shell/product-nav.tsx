@@ -17,6 +17,8 @@ type NavItem = {
 function useProductNavItems(): NavItem[] {
 	const { user } = useAuth();
 	const isStaff = user?.roles.some((role) => role.code !== "learner") ?? false;
+	const canWriteCourses =
+		user?.roles.some((role) => role.code === "content_author") ?? false;
 	const context = useEngine("/staff/context", undefined, { enabled: isStaff });
 	const mode = context.data?.mode;
 	const canAddStaff = mode === "admin" || mode === "center";
@@ -32,6 +34,9 @@ function useProductNavItems(): NavItem[] {
 	);
 	if (canAddStaff) {
 		items.push({ to: "/staff/new", label: "staffAccounts" });
+	}
+	if (canWriteCourses) {
+		items.push({ to: "/courses", label: "coursesNav" });
 	}
 	return items;
 }

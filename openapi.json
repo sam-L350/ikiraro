@@ -12,19 +12,142 @@
 	],
 	"tags": [
 		{
+			"name": "account"
+		},
+		{
 			"name": "auth"
+		},
+		{
+			"name": "centers"
+		},
+		{
+			"name": "consents"
+		},
+		{
+			"name": "courses"
+		},
+		{
+			"name": "criteria"
+		},
+		{
+			"name": "dev"
 		},
 		{
 			"name": "examples"
 		},
 		{
+			"name": "modules"
+		},
+		{
+			"name": "privacy"
+		},
+		{
+			"name": "profile"
+		},
+		{
+			"name": "registrations"
+		},
+		{
+			"name": "staff"
+		},
+		{
 			"name": "system"
+		},
+		{
+			"name": "tasks"
 		},
 		{
 			"name": "todos"
 		}
 	],
 	"paths": {
+		"/api/v1/account/deactivation": {
+			"post": {
+				"operationId": "createAccountDeactivation",
+				"summary": "The signed-in person switches the account off. The record stays.",
+				"tags": [
+					"account"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"deactivated": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"deactivated"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/auth/logout": {
 			"post": {
 				"operationId": "createAuthLogout",
@@ -141,6 +264,49 @@
 												"createdAt": {
 													"type": "string",
 													"description": "Date string"
+												},
+												"roles": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"code": {
+																"type": "string",
+																"enum": [
+																	"learner",
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"content_author",
+																	"content_reviewer",
+																	"hardware_officer",
+																	"committee_member",
+																	"auditor",
+																	"platform_admin",
+																	"mentor",
+																	"public_verifier"
+																]
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"code",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												},
+												"sharedDevice": {
+													"type": "boolean"
+												},
+												"idleTimeoutMs": {
+													"type": "number",
+													"nullable": true
+												},
+												"mustChangePassword": {
+													"type": "boolean"
 												}
 											},
 											"required": [
@@ -148,7 +314,11 @@
 												"email",
 												"name",
 												"picture",
-												"createdAt"
+												"createdAt",
+												"roles",
+												"sharedDevice",
+												"idleTimeoutMs",
+												"mustChangePassword"
 											],
 											"additionalProperties": false
 										},
@@ -175,6 +345,3381 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/otp": {
+			"post": {
+				"operationId": "createAuthOtp",
+				"summary": "Ask for a one-time code. Public: the person has no session yet.",
+				"description": "The code is handed to the SMS sender and is not part of this response.",
+				"tags": [
+					"auth"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"phone": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"phone"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sent": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"sent"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/password": {
+			"put": {
+				"operationId": "updateAuthPassword",
+				"summary": "Replace the signed-in person's password. This is allowed while a temporary",
+				"description": "password still has to be changed. Other routes are not.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"currentPassword": {
+										"type": "string"
+									},
+									"nextPassword": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"currentPassword",
+									"nextPassword"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"changed": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"changed"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/recovery": {
+			"post": {
+				"operationId": "createAuthRecovery",
+				"summary": "Ask for a recovery code. Public. The send is rate-limited, and the code",
+				"description": "is not part of this response.",
+				"tags": [
+					"auth"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"phone": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"phone"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sent": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"sent"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/recovery/session": {
+			"post": {
+				"operationId": "createAuthRecoverySession",
+				"summary": "Finish recovery with the code and open a session. Public. Wrong codes",
+				"description": "lock the phone. A removed account cannot be recovered.",
+				"tags": [
+					"auth"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"phone": {
+										"type": "string"
+									},
+									"code": {
+										"type": "string"
+									},
+									"sharedDevice": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"phone",
+									"code"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"email": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"email",
+												"name"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/session": {
+			"post": {
+				"operationId": "createAuthSession",
+				"summary": "Sign in with a one-time code or with email and password.",
+				"description": "Public: the person has no session yet. The password hash and the code\nhash are never returned. The session is the existing HttpOnly cookie.",
+				"tags": [
+					"auth"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"method": {
+										"type": "string",
+										"enum": [
+											"otp",
+											"password"
+										]
+									},
+									"phone": {
+										"type": "string"
+									},
+									"code": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									},
+									"sharedDevice": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"method"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"email": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"email",
+												"name"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/sessions/{id}/revoke": {
+			"delete": {
+				"operationId": "deleteAuthSession",
+				"summary": "End one session that belongs to the signed-in person.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"revoked": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"revoked"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/sessions": {
+			"get": {
+				"operationId": "getAuthSessions",
+				"summary": "Open sessions for the signed-in person. The id is the stored hash, so it",
+				"description": "cannot be replayed as a cookie.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sessions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"createdAt": {
+																"type": "string",
+																"description": "Date string"
+															},
+															"sharedDevice": {
+																"type": "boolean"
+															},
+															"current": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"createdAt",
+															"sharedDevice",
+															"current"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"sessions"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/sessions/revoke": {
+			"post": {
+				"operationId": "createAuthSessionsRevoke",
+				"summary": "End every session for this account, including the one on this computer.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"revoked": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"revoked"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/centers/{id}": {
+			"get": {
+				"operationId": "getCenter",
+				"summary": "One center this person works at. A center outside that set stays hidden.",
+				"tags": [
+					"centers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"active": {
+													"type": "boolean"
+												},
+												"sector": {
+													"type": "string"
+												},
+												"district": {
+													"type": "string"
+												},
+												"province": {
+													"type": "string"
+												},
+												"latitude": {
+													"type": "number",
+													"nullable": true
+												},
+												"longitude": {
+													"type": "number",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"active",
+												"sector",
+												"district",
+												"province",
+												"latitude",
+												"longitude"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/centers": {
+			"get": {
+				"operationId": "getCenters",
+				"summary": "Centers this person works at, and the centers they may choose when adding staff.",
+				"tags": [
+					"centers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"assigned": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"active": {
+																"type": "boolean"
+															},
+															"sector": {
+																"type": "string"
+															},
+															"district": {
+																"type": "string"
+															},
+															"province": {
+																"type": "string"
+															},
+															"latitude": {
+																"type": "number",
+																"nullable": true
+															},
+															"longitude": {
+																"type": "number",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"active",
+															"sector",
+															"district",
+															"province",
+															"latitude",
+															"longitude"
+														],
+														"additionalProperties": false
+													}
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"active": {
+																"type": "boolean"
+															},
+															"sector": {
+																"type": "string"
+															},
+															"district": {
+																"type": "string"
+															},
+															"province": {
+																"type": "string"
+															},
+															"latitude": {
+																"type": "number",
+																"nullable": true
+															},
+															"longitude": {
+																"type": "number",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"active",
+															"sector",
+															"district",
+															"province",
+															"latitude",
+															"longitude"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"assigned",
+												"centers"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/consents": {
+			"post": {
+				"operationId": "createConsent",
+				"summary": "Records a new consent decision. Withdrawal inserts a row and does not edit",
+				"description": "the earlier one.",
+				"tags": [
+					"consents"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"purpose": {
+										"type": "string",
+										"enum": [
+											"terms",
+											"data_use",
+											"public_passport",
+											"leaderboard",
+											"mentor_contact",
+											"guardian"
+										]
+									},
+									"granted": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"purpose",
+									"granted"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"purpose": {
+													"type": "string",
+													"enum": [
+														"terms",
+														"data_use",
+														"public_passport",
+														"leaderboard",
+														"mentor_contact",
+														"guardian"
+													]
+												},
+												"granted": {
+													"type": "boolean"
+												},
+												"version": {
+													"type": "string"
+												},
+												"grantedAt": {
+													"type": "string",
+													"description": "Date string"
+												}
+											},
+											"required": [
+												"purpose",
+												"granted",
+												"version",
+												"grantedAt"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses/{id}": {
+			"get": {
+				"operationId": "getCourse",
+				"summary": "One course with its modules, tasks, and rubric, in both languages.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses/{id}/modules": {
+			"post": {
+				"operationId": "createCourseModule",
+				"summary": "Add a module to a draft course.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"summaryEn": {
+										"type": "string"
+									},
+									"summaryRw": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses/{id}/review": {
+			"post": {
+				"operationId": "createCourseReview",
+				"summary": "Send a complete draft to review. Evidence type and a rubric are required.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses/{id}/update": {
+			"put": {
+				"operationId": "updateCourseDraft",
+				"summary": "Replace the course title and summary in both languages.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"summaryEn": {
+										"type": "string"
+									},
+									"summaryRw": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses/create": {
+			"post": {
+				"operationId": "createCourseDraft",
+				"summary": "Start a draft course in English and, when it is written, Kinyarwanda.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"summaryEn": {
+										"type": "string"
+									},
+									"summaryRw": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses": {
+			"get": {
+				"operationId": "getCourses",
+				"summary": "Courses an author can open and edit.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"courses": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"title": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"title",
+															"missingKinyarwanda"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"courses"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/criteria/{id}/update": {
+			"put": {
+				"operationId": "updateCriterionDraft",
+				"summary": "Replace a rubric row's weight and prompts.",
+				"tags": [
+					"criteria"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"weight": {
+										"type": "number"
+									},
+									"promptEn": {
+										"type": "string"
+									},
+									"promptRw": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"weight",
+									"promptEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/dev/role": {
+			"put": {
+				"operationId": "updateDevRole",
+				"summary": "Development only. Replace the signed-in user's roles with one preview role.",
+				"description": "The handler requires a session and does not call authorize(), because the\nbuilder may hold no role yet. It returns 404 when the switch is off,\nincluding every production process.",
+				"tags": [
+					"dev"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"role": {
+										"type": "string",
+										"enum": [
+											"learner",
+											"trainer",
+											"center_manager",
+											"district_coordinator",
+											"content_author",
+											"content_reviewer",
+											"hardware_officer",
+											"committee_member",
+											"auditor",
+											"platform_admin",
+											"mentor",
+											"public_verifier"
+										]
+									}
+								},
+								"required": [
+									"role"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"role": {
+													"type": "string",
+													"enum": [
+														"learner",
+														"trainer",
+														"center_manager",
+														"district_coordinator",
+														"content_author",
+														"content_reviewer",
+														"hardware_officer",
+														"committee_member",
+														"auditor",
+														"platform_admin",
+														"mentor",
+														"public_verifier"
+													]
+												},
+												"name": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"role",
+												"name"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}
@@ -564,6 +4109,2365 @@
 				}
 			}
 		},
+		"/api/v1/modules/{id}/tasks": {
+			"post": {
+				"operationId": "createModuleTask",
+				"summary": "Add a task to a draft module.",
+				"tags": [
+					"modules"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"instructionsEn": {
+										"type": "string"
+									},
+									"instructionsRw": {
+										"type": "string"
+									},
+									"evidenceType": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/modules/{id}/update": {
+			"put": {
+				"operationId": "updateModuleDraft",
+				"summary": "Replace a module's title and summary in both languages.",
+				"tags": [
+					"modules"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"summaryEn": {
+										"type": "string"
+									},
+									"summaryRw": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/privacy/deletion": {
+			"post": {
+				"operationId": "createPrivacyDeletion",
+				"summary": "Queue anonymization. The user row becomes a tombstone and stays, so later",
+				"description": "reviews and ledger rows are not destroyed. This request is an audit event.",
+				"tags": [
+					"privacy"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"const": "queued",
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"status"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/profile": {
+			"get": {
+				"operationId": "getProfile",
+				"summary": "The signed-in person's profile, including the latest consent for each purpose.",
+				"tags": [
+					"profile"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												},
+												"phone": {
+													"type": "string",
+													"nullable": true
+												},
+												"email": {
+													"type": "string",
+													"nullable": true
+												},
+												"dateOfBirth": {
+													"type": "string",
+													"nullable": true
+												},
+												"gender": {
+													"type": "string",
+													"nullable": true
+												},
+												"district": {
+													"type": "string",
+													"nullable": true
+												},
+												"sector": {
+													"type": "string",
+													"nullable": true
+												},
+												"village": {
+													"type": "string",
+													"nullable": true
+												},
+												"economicSector": {
+													"type": "string",
+													"nullable": true
+												},
+												"locale": {
+													"type": "string"
+												},
+												"photoKey": {
+													"type": "string",
+													"nullable": true
+												},
+												"guardianContact": {
+													"type": "string",
+													"nullable": true
+												},
+												"minor": {
+													"type": "boolean"
+												},
+												"active": {
+													"type": "boolean"
+												},
+												"consents": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"purpose": {
+																"type": "string",
+																"enum": [
+																	"terms",
+																	"data_use",
+																	"public_passport",
+																	"leaderboard",
+																	"mentor_contact",
+																	"guardian"
+																]
+															},
+															"granted": {
+																"type": "boolean"
+															},
+															"version": {
+																"type": "string"
+															},
+															"grantedAt": {
+																"type": "string",
+																"description": "Date string"
+															}
+														},
+														"required": [
+															"purpose",
+															"granted",
+															"version",
+															"grantedAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"email",
+												"dateOfBirth",
+												"gender",
+												"district",
+												"sector",
+												"village",
+												"economicSector",
+												"locale",
+												"photoKey",
+												"guardianContact",
+												"minor",
+												"active",
+												"consents"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/profile/update": {
+			"put": {
+				"operationId": "updateProfile",
+				"summary": "Replaces the fields the signed-in person sends. Omitted fields stay as they are.",
+				"tags": [
+					"profile"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"dateOfBirth": {
+										"type": "string"
+									},
+									"gender": {
+										"type": "string",
+										"nullable": true
+									},
+									"district": {
+										"type": "string"
+									},
+									"sector": {
+										"type": "string"
+									},
+									"village": {
+										"type": "string"
+									},
+									"economicSector": {
+										"type": "string"
+									},
+									"locale": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"en"
+										]
+									},
+									"photoKey": {
+										"type": "string",
+										"nullable": true
+									},
+									"guardianContact": {
+										"type": "string",
+										"nullable": true
+									}
+								},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												},
+												"phone": {
+													"type": "string",
+													"nullable": true
+												},
+												"email": {
+													"type": "string",
+													"nullable": true
+												},
+												"dateOfBirth": {
+													"type": "string",
+													"nullable": true
+												},
+												"gender": {
+													"type": "string",
+													"nullable": true
+												},
+												"district": {
+													"type": "string",
+													"nullable": true
+												},
+												"sector": {
+													"type": "string",
+													"nullable": true
+												},
+												"village": {
+													"type": "string",
+													"nullable": true
+												},
+												"economicSector": {
+													"type": "string",
+													"nullable": true
+												},
+												"locale": {
+													"type": "string"
+												},
+												"photoKey": {
+													"type": "string",
+													"nullable": true
+												},
+												"guardianContact": {
+													"type": "string",
+													"nullable": true
+												},
+												"minor": {
+													"type": "boolean"
+												},
+												"active": {
+													"type": "boolean"
+												},
+												"consents": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"purpose": {
+																"type": "string",
+																"enum": [
+																	"terms",
+																	"data_use",
+																	"public_passport",
+																	"leaderboard",
+																	"mentor_contact",
+																	"guardian"
+																]
+															},
+															"granted": {
+																"type": "boolean"
+															},
+															"version": {
+																"type": "string"
+															},
+															"grantedAt": {
+																"type": "string",
+																"description": "Date string"
+															}
+														},
+														"required": [
+															"purpose",
+															"granted",
+															"version",
+															"grantedAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"email",
+												"dateOfBirth",
+												"gender",
+												"district",
+												"sector",
+												"village",
+												"economicSector",
+												"locale",
+												"photoKey",
+												"guardianContact",
+												"minor",
+												"active",
+												"consents"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/registrations/activation": {
+			"post": {
+				"operationId": "createRegistrationActivation",
+				"summary": "Activates a registration with the learner's one-time code and opens a session.",
+				"description": "Public: the learner has no session yet. A wrong code leaves the account inactive.",
+				"tags": [
+					"registrations"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"phone": {
+										"type": "string"
+									},
+									"code": {
+										"type": "string"
+									},
+									"sharedDevice": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"phone",
+									"code"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"email": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"email",
+												"name"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/registrations/assisted": {
+			"post": {
+				"operationId": "createRegistrationAssisted",
+				"summary": "A trainer registers a learner. The record stores the trainer and stays",
+				"description": "inactive until the learner confirms with a one-time code.",
+				"tags": [
+					"registrations"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"phone": {
+										"type": "string"
+									},
+									"dateOfBirth": {
+										"type": "string"
+									},
+									"district": {
+										"type": "string"
+									},
+									"sector": {
+										"type": "string"
+									},
+									"village": {
+										"type": "string"
+									},
+									"economicSector": {
+										"type": "string"
+									},
+									"locale": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"en"
+										]
+									},
+									"email": {
+										"type": "string"
+									},
+									"gender": {
+										"type": "string"
+									},
+									"guardianContact": {
+										"type": "string"
+									},
+									"consents": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"purpose": {
+													"type": "string",
+													"enum": [
+														"terms",
+														"data_use",
+														"public_passport",
+														"leaderboard",
+														"mentor_contact",
+														"guardian"
+													]
+												},
+												"granted": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"purpose",
+												"granted"
+											],
+											"additionalProperties": false
+										}
+									}
+								},
+								"required": [
+									"name",
+									"phone",
+									"dateOfBirth",
+									"district",
+									"sector",
+									"village",
+									"economicSector",
+									"locale",
+									"consents"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string"
+												},
+												"phone": {
+													"type": "string"
+												},
+												"active": {
+													"const": false,
+													"type": "boolean"
+												},
+												"codeSent": {
+													"type": "boolean"
+												},
+												"assistedBy": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"active",
+												"codeSent",
+												"assistedBy"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/registrations": {
+			"post": {
+				"operationId": "createRegistration",
+				"summary": "Self-registration. The account stays inactive until the learner's code.",
+				"description": "Public: there is no session yet. The code is not in this response.",
+				"tags": [
+					"registrations"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"phone": {
+										"type": "string"
+									},
+									"dateOfBirth": {
+										"type": "string"
+									},
+									"district": {
+										"type": "string"
+									},
+									"sector": {
+										"type": "string"
+									},
+									"village": {
+										"type": "string"
+									},
+									"economicSector": {
+										"type": "string"
+									},
+									"locale": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"en"
+										]
+									},
+									"email": {
+										"type": "string"
+									},
+									"gender": {
+										"type": "string"
+									},
+									"guardianContact": {
+										"type": "string"
+									},
+									"consents": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"purpose": {
+													"type": "string",
+													"enum": [
+														"terms",
+														"data_use",
+														"public_passport",
+														"leaderboard",
+														"mentor_contact",
+														"guardian"
+													]
+												},
+												"granted": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"purpose",
+												"granted"
+											],
+											"additionalProperties": false
+										}
+									}
+								},
+								"required": [
+									"name",
+									"phone",
+									"dateOfBirth",
+									"district",
+									"sector",
+									"village",
+									"economicSector",
+									"locale",
+									"consents"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"name": {
+													"type": "string"
+												},
+												"phone": {
+													"type": "string"
+												},
+												"active": {
+													"const": false,
+													"type": "boolean"
+												},
+												"codeSent": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"phone",
+												"active",
+												"codeSent"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/{id}/deactivation": {
+			"post": {
+				"operationId": "createStaffDeactivation",
+				"summary": "An admin or center manager switches another staff account off.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"deactivated": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"deactivated"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/{id}/password": {
+			"put": {
+				"operationId": "updateStaffPassword",
+				"summary": "Set a temporary password. The person must change it before doing anything else.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"password": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"reset": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"reset"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/context": {
+			"get": {
+				"operationId": "getStaffContext",
+				"summary": "What the signed-in person is allowed to grant.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"mode": {
+													"type": "string",
+													"enum": [
+														"admin",
+														"center",
+														"none"
+													]
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												},
+												"roles": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"code": {
+																"type": "string",
+																"enum": [
+																	"learner",
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"content_author",
+																	"content_reviewer",
+																	"hardware_officer",
+																	"committee_member",
+																	"auditor",
+																	"platform_admin",
+																	"mentor",
+																	"public_verifier"
+																]
+															},
+															"name": {
+																"type": "string"
+															},
+															"scopeType": {
+																"type": "string",
+																"enum": [
+																	"center",
+																	"self",
+																	"district",
+																	"global"
+																]
+															}
+														},
+														"required": [
+															"code",
+															"name",
+															"scopeType"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"mode",
+												"centers",
+												"roles"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/create": {
+			"post": {
+				"operationId": "createStaffUser",
+				"summary": "Create a staff account. The temporary password must be changed at first sign-in.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									},
+									"role": {
+										"type": "string",
+										"enum": [
+											"learner",
+											"trainer",
+											"center_manager",
+											"district_coordinator",
+											"content_author",
+											"content_reviewer",
+											"hardware_officer",
+											"committee_member",
+											"auditor",
+											"platform_admin",
+											"mentor",
+											"public_verifier"
+										]
+									},
+									"scopeType": {
+										"type": "string",
+										"enum": [
+											"center",
+											"self",
+											"district",
+											"global"
+										]
+									},
+									"scopeId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name",
+									"email",
+									"password",
+									"role",
+									"scopeType",
+									"scopeId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"email": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"mustChangePassword": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"email",
+												"name",
+												"mustChangePassword"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff": {
+			"get": {
+				"operationId": "getStaff",
+				"summary": "Staff accounts this person is allowed to see.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"staff": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string",
+																"nullable": true
+															},
+															"email": {
+																"type": "string"
+															},
+															"deactivated": {
+																"type": "boolean"
+															},
+															"mustChangePassword": {
+																"type": "boolean"
+															},
+															"role": {
+																"type": "string",
+																"enum": [
+																	"learner",
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"content_author",
+																	"content_reviewer",
+																	"hardware_officer",
+																	"committee_member",
+																	"auditor",
+																	"platform_admin",
+																	"mentor",
+																	"public_verifier"
+																]
+															},
+															"roleName": {
+																"type": "string"
+															},
+															"scopeType": {
+																"type": "string"
+															},
+															"scopeId": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"email",
+															"deactivated",
+															"mustChangePassword",
+															"role",
+															"roleName",
+															"scopeType",
+															"scopeId"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"staff"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/system/health": {
 			"get": {
 				"operationId": "getSystemHealth",
@@ -799,6 +6703,617 @@
 					},
 					"400": {
 						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tasks/{id}/criteria": {
+			"post": {
+				"operationId": "createTaskCriterion",
+				"summary": "Add one weighted rubric row to a draft task.",
+				"tags": [
+					"tasks"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"weight": {
+										"type": "number"
+									},
+									"promptEn": {
+										"type": "string"
+									},
+									"promptRw": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"weight",
+									"promptEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tasks/{id}/update": {
+			"put": {
+				"operationId": "updateTaskDraft",
+				"summary": "Replace a task's words and evidence type.",
+				"tags": [
+					"tasks"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"instructionsEn": {
+										"type": "string"
+									},
+									"instructionsRw": {
+										"type": "string"
+									},
+									"evidenceType": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
 						"content": {
 							"application/json": {
 								"schema": {
