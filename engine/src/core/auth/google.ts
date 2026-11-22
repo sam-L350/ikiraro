@@ -111,6 +111,27 @@ function requireGoogleConfig() {
 	return { clientId, clientSecret, callbackUrl };
 }
 
+class AccountClosed extends Error {
+	constructor() {
+		super("account_closed");
+		this.name = "AccountClosed";
+	}
+}
+
+async function assertAccountOpen(userId: number): Promise<void> {
+	const [person] = await db
+		.select({
+			deletedAt: users.deletedAt,
+			deactivatedAt: users.deactivatedAt,
+		})
+		.from(users)
+		.where(eq(users.id, userId))
+		.limit(1);
+	if (!person || person.deletedAt || person.deactivatedAt) {
+		throw new AccountClosed();
+	}
+}
+
 async function upsertGoogleUser(profile: GoogleProfile): Promise<number> {
 	const email = profile.email?.toLowerCase();
 	if (!email) throw new Error("Google profile has no email");
@@ -127,6 +148,7 @@ async function upsertGoogleUser(profile: GoogleProfile): Promise<number> {
 		.limit(1);
 
 	if (existingAccount) {
+		await assertAccountOpen(existingAccount.userId);
 		await db
 			.update(users)
 			.set({ name: profile.name ?? null, picture: profile.picture ?? null })
@@ -143,6 +165,7 @@ async function upsertGoogleUser(profile: GoogleProfile): Promise<number> {
 	let userId: number;
 	if (existingUser) {
 		userId = existingUser.id;
+		await assertAccountOpen(userId);
 		await db
 			.update(users)
 			.set({ name: profile.name ?? null, picture: profile.picture ?? null })
@@ -294,6 +317,9 @@ export const googleAuthRoutes = defineRawRoutes([
 				headers.append("set-cookie", stateCookie("", 0));
 				return new Response(null, { status: 302, headers });
 			} catch (error) {
+				if (error instanceof AccountClosed) {
+					return redirectWithError("account_closed", context);
+				}
 				context.logger.error("google oauth callback error", { error });
 				return redirectWithError("unexpected_error", context);
 			}

@@ -14,7 +14,8 @@ import { errors } from "../api/error";
  */
 export async function requireAuth(): Promise<User> {
 	const user = await getRequestContext().user();
-	if (!user) throw errors.unauthorized();
+	if (!user || user.deletedAt || user.deactivatedAt)
+		throw errors.unauthorized();
 	return user;
 }
 

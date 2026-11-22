@@ -45,6 +45,12 @@ export default function LoginPage() {
 			<LoginForm redirectTo={redirectTo} />
 			<Link
 				className="mt-6 font-sans text-sm font-semibold text-fg underline-offset-4 hover:underline"
+				to="/recover"
+			>
+				{t("getBackIn")}
+			</Link>
+			<Link
+				className="mt-3 font-sans text-sm font-semibold text-fg underline-offset-4 hover:underline"
 				to="/register"
 			>
 				{t("createAccount")}

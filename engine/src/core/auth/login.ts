@@ -208,6 +208,7 @@ export type MatchedOtp = {
 		email: string;
 		name: string | null;
 		activatedAt: Date | null;
+		deactivatedAt: Date | null;
 	};
 };
 
@@ -263,6 +264,7 @@ export async function readMatchingOtp(
 			email: users.email,
 			name: users.name,
 			activatedAt: users.activatedAt,
+			deactivatedAt: users.deactivatedAt,
 		})
 		.from(users)
 		.where(and(eq(users.phone, phone), isNull(users.deletedAt)))
@@ -292,6 +294,12 @@ async function loginWithOtp(
 			{ reason: "not_active" },
 		);
 	}
+	if (matched.user.deactivatedAt) {
+		throw errors.badRequest(
+			"This account is deactivated. Get back in with a code.",
+			{ reason: "deactivated" },
+		);
+	}
 	await consumeOtpChallenge(database, matched.challengeId);
 	clearFailures(guardKey("otp", matched.phone));
 	return issue(database, matched.user, input.ip, "otp");
@@ -312,6 +320,7 @@ async function loginWithPassword(
 			name: users.name,
 			passwordHash: users.passwordHash,
 			activatedAt: users.activatedAt,
+			deactivatedAt: users.deactivatedAt,
 		})
 		.from(users)
 		.where(and(eq(users.email, email), isNull(users.deletedAt)))
@@ -324,6 +333,12 @@ async function loginWithPassword(
 		throw errors.badRequest(
 			"This account is not active yet. Enter the code to finish registration.",
 			{ reason: "not_active" },
+		);
+	}
+	if (user.deactivatedAt) {
+		throw errors.badRequest(
+			"This account is deactivated. Get back in with a code.",
+			{ reason: "deactivated" },
 		);
 	}
 	clearFailures(key);

@@ -27,6 +27,8 @@ function messageKey(error: unknown): MessageKey {
 			return "wrongPassword";
 		case "not_active":
 			return "notActive";
+		case "deactivated":
+			return "deactivated";
 		default:
 			return "tryAgain";
 	}

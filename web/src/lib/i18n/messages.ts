@@ -51,6 +51,20 @@ export const en = {
 	staffLogin: "Staff can sign in with email and a password.",
 	signInWithGoogle: "Sign in with Google",
 	createAccount: "Create an account",
+	getBackIn: "Get back in with a code",
+	recoverTitle: "Get back in",
+	recoverSentence: "We text a code to the phone on the account.",
+	deactivated: "This account is deactivated. Get back in with a code.",
+	accountClosed: "This account has been removed.",
+	privacyHeading: "This account",
+	deactivateTitle: "Deactivate this account",
+	deactivateBody:
+		"You are signed out. The record stays, and a code on your phone can open it again.",
+	deactivateAction: "Deactivate",
+	deleteTitle: "Ask to remove your details",
+	deleteBody:
+		"We queue the removal. Your name and phone go. Past decisions stay attached to a record that no longer names you.",
+	deleteAction: "Request deletion",
 	registerTitle: "Register",
 	registerSentence:
 		"A learner joins with a phone number. The account starts working after the code.",
@@ -187,6 +201,20 @@ export const rw: Record<MessageKey, string> = {
 	staffLogin: "Abakozi binjira n'imeyili n'ijambobanga.",
 	signInWithGoogle: "Injira na Google",
 	createAccount: "Fungura konti",
+	getBackIn: "Subira winjire ukoresheje kode",
+	recoverTitle: "Subira winjire",
+	recoverSentence: "Twohereza kode kuri telefoni iri kuri konti.",
+	deactivated: "Iyi konti yafunzwe. Subira winjire ukoresheje kode.",
+	accountClosed: "Iyi konti yakuweho.",
+	privacyHeading: "Iyi konti",
+	deactivateTitle: "Funga iyi konti",
+	deactivateBody:
+		"Usohoka. Inyandiko iguma, kandi kode kuri telefoni yawe ishobora kuyifungura.",
+	deactivateAction: "Funga",
+	deleteTitle: "Saba gukuraho amakuru yawe",
+	deleteBody:
+		"Tubika icyifuzo. Izina na telefoni biragenda. Ibyemezo by'ejo bibana n'inyandiko itagira izina.",
+	deleteAction: "Saba gukuraho",
 	registerTitle: "Iyandikishe",
 	registerSentence:
 		"Umunyeshuri yinjiye n'inimero ya telefoni. Konti itangira gukora nyuma ya kode.",

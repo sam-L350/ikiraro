@@ -58,6 +58,23 @@ export const configSettings = pgTable(
 	],
 );
 
+/**
+ * A queued privacy job. The user row stays so reviews and ledger rows keep
+ * something to point at. The anonymization job itself runs later.
+ */
+export const privacyRequests = pgTable("privacy_requests", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	userId: integer("user_id")
+		.notNull()
+		.unique()
+		.references(() => users.id, { onDelete: "restrict" }),
+	kind: text("kind").notNull(),
+	status: text("status").notNull().default("queued"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
 export const idempotencyKeys = pgTable(
 	"idempotency_keys",
 	{

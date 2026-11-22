@@ -4,6 +4,7 @@ export {
 	configSettings,
 	domainEvents,
 	idempotencyKeys,
+	privacyRequests,
 	systemAuditLogs,
 } from "./compliance";
 export type {

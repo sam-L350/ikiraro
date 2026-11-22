@@ -67,7 +67,9 @@ export function phoneEmail(phone: string): string {
 }
 
 export function visibleEmail(email: string): string | null {
-	return email.endsWith(PHONE_EMAIL_DOMAIN) ? null : email;
+	if (email.endsWith(PHONE_EMAIL_DOMAIN)) return null;
+	if (email.endsWith("@removed.ikiraro.local")) return null;
+	return email;
 }
 
 function isUniqueViolation(error: unknown): boolean {

@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { PrivacyActions } from "@/components/auth/privacy-actions";
 import { Spinner } from "@/components/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -287,6 +288,7 @@ function ProfileEditor({
 					})}
 				</ul>
 			</section>
+			<PrivacyActions />
 		</div>
 	);
 }
