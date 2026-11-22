@@ -11,6 +11,7 @@
  *   web/.generated/engine.ts               path-based `useEngine` / `callEngine` / `useEngineMutation`
  *   openapi.json                           OpenAPI document (repo root)
  */
+import { unlink } from "node:fs/promises";
 import path from "node:path";
 import ts from "typescript";
 
@@ -960,9 +961,24 @@ async function generateAll(
 	// Build the OpenAPI document from the freshly written manifest so it uses
 	// the exact runtime schemas.
 	const { createOpenApiDocument } = await import("../src/core/api/openapi.ts");
-	const manifest = (await import(
-		new URL(`endpoints.ts?ts=${Date.now()}`, engineGeneratedRoot).href
-	)) as { endpoints: Parameters<typeof createOpenApiDocument>[0] };
+	// A long-running watch keeps the first import of endpoints.ts. A unique
+	// file is the only way that process reads the manifest it just wrote.
+	const runtimeUrl = new URL(
+		`endpoints.${Date.now()}.ts`,
+		engineGeneratedRoot,
+	);
+	await Bun.write(
+		runtimeUrl,
+		await Bun.file(new URL("endpoints.ts", engineGeneratedRoot)).text(),
+	);
+	let manifest: { endpoints: Parameters<typeof createOpenApiDocument>[0] };
+	try {
+		manifest = (await import(runtimeUrl.href)) as {
+			endpoints: Parameters<typeof createOpenApiDocument>[0];
+		};
+	} finally {
+		await unlink(runtimeUrl);
+	}
 	const openapi = createOpenApiDocument(manifest.endpoints);
 
 	await writeIfChanged(
