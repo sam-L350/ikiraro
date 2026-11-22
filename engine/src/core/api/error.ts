@@ -32,8 +32,10 @@ export const errors = {
 		new ApiError(400, "BAD_REQUEST", message, details),
 	unauthorized: (message = "Authentication required") =>
 		new ApiError(401, "UNAUTHORIZED", message),
-	forbidden: (message = "You do not have access to this resource") =>
-		new ApiError(403, "FORBIDDEN", message),
+	forbidden: (
+		message = "You do not have access to this resource",
+		details?: unknown,
+	) => new ApiError(403, "FORBIDDEN", message, details),
 	notFound: (message = "Resource not found") =>
 		new ApiError(404, "NOT_FOUND", message),
 	conflict: (message = "Conflict", details?: unknown) =>

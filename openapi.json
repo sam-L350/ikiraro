@@ -36,6 +36,9 @@
 			"name": "registrations"
 		},
 		{
+			"name": "staff"
+		},
+		{
 			"name": "system"
 		},
 		{
@@ -286,6 +289,9 @@
 												"idleTimeoutMs": {
 													"type": "number",
 													"nullable": true
+												},
+												"mustChangePassword": {
+													"type": "boolean"
 												}
 											},
 											"required": [
@@ -296,7 +302,8 @@
 												"createdAt",
 												"roles",
 												"sharedDevice",
-												"idleTimeoutMs"
+												"idleTimeoutMs",
+												"mustChangePassword"
 											],
 											"additionalProperties": false
 										},
@@ -431,6 +438,127 @@
 					},
 					"400": {
 						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/password": {
+			"put": {
+				"operationId": "updateAuthPassword",
+				"summary": "Replace the signed-in person's password. This is allowed while a temporary",
+				"description": "password still has to be changed. Other routes are not.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"currentPassword": {
+										"type": "string"
+									},
+									"nextPassword": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"currentPassword",
+									"nextPassword"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"changed": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"changed"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -2788,6 +2916,708 @@
 					},
 					"400": {
 						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/{id}/deactivation": {
+			"post": {
+				"operationId": "createStaffDeactivation",
+				"summary": "An admin or center manager switches another staff account off.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"deactivated": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"deactivated"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/{id}/password": {
+			"put": {
+				"operationId": "updateStaffPassword",
+				"summary": "Set a temporary password. The person must change it before doing anything else.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"password": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"reset": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"reset"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/context": {
+			"get": {
+				"operationId": "getStaffContext",
+				"summary": "What the signed-in person is allowed to grant.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"mode": {
+													"type": "string",
+													"enum": [
+														"admin",
+														"center",
+														"none"
+													]
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												},
+												"roles": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"code": {
+																"type": "string",
+																"enum": [
+																	"learner",
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"content_author",
+																	"content_reviewer",
+																	"hardware_officer",
+																	"committee_member",
+																	"auditor",
+																	"platform_admin",
+																	"mentor",
+																	"public_verifier"
+																]
+															},
+															"name": {
+																"type": "string"
+															},
+															"scopeType": {
+																"type": "string",
+																"enum": [
+																	"center",
+																	"self",
+																	"district",
+																	"global"
+																]
+															}
+														},
+														"required": [
+															"code",
+															"name",
+															"scopeType"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"mode",
+												"centers",
+												"roles"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff/create": {
+			"post": {
+				"operationId": "createStaffUser",
+				"summary": "Create a staff account. The temporary password must be changed at first sign-in.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									},
+									"role": {
+										"type": "string",
+										"enum": [
+											"learner",
+											"trainer",
+											"center_manager",
+											"district_coordinator",
+											"content_author",
+											"content_reviewer",
+											"hardware_officer",
+											"committee_member",
+											"auditor",
+											"platform_admin",
+											"mentor",
+											"public_verifier"
+										]
+									},
+									"scopeType": {
+										"type": "string",
+										"enum": [
+											"center",
+											"self",
+											"district",
+											"global"
+										]
+									},
+									"scopeId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name",
+									"email",
+									"password",
+									"role",
+									"scopeType",
+									"scopeId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "number"
+												},
+												"email": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"mustChangePassword": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"email",
+												"name",
+												"mustChangePassword"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/staff": {
+			"get": {
+				"operationId": "getStaff",
+				"summary": "Staff accounts this person is allowed to see.",
+				"tags": [
+					"staff"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"staff": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string",
+																"nullable": true
+															},
+															"email": {
+																"type": "string"
+															},
+															"deactivated": {
+																"type": "boolean"
+															},
+															"mustChangePassword": {
+																"type": "boolean"
+															},
+															"role": {
+																"type": "string",
+																"enum": [
+																	"learner",
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"content_author",
+																	"content_reviewer",
+																	"hardware_officer",
+																	"committee_member",
+																	"auditor",
+																	"platform_admin",
+																	"mentor",
+																	"public_verifier"
+																]
+															},
+															"roleName": {
+																"type": "string"
+															},
+															"scopeType": {
+																"type": "string"
+															},
+															"scopeId": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"email",
+															"deactivated",
+															"mustChangePassword",
+															"role",
+															"roleName",
+															"scopeType",
+															"scopeId"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"staff"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
 						"content": {
 							"application/json": {
 								"schema": {

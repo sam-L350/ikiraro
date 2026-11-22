@@ -19,6 +19,7 @@ export type MeResponse = {
 	roles: { code: RoleCode; name: string }[];
 	sharedDevice: boolean;
 	idleTimeoutMs: number | null;
+	mustChangePassword: boolean;
 };
 
 /** Profile of the signed-in user. */
@@ -46,5 +47,6 @@ export async function getAuthMe(): Promise<MeResponse> {
 		),
 		sharedDevice,
 		idleTimeoutMs: sharedDevice ? await readSharedIdleMs(db) : null,
+		mustChangePassword: user.mustChangePassword,
 	};
 }

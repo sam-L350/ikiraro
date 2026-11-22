@@ -12,10 +12,27 @@ import { errors } from "../api/error";
  * }
  * ```
  */
+const PASSWORD_CHANGE_ROUTES = new Set([
+	"/api/v1/auth/me",
+	"/api/v1/auth/logout",
+	"/api/v1/auth/password",
+]);
+
+/** Routes a staff member may call before replacing a temporary password. */
+export function allowsPasswordChange(pathname: string): boolean {
+	return PASSWORD_CHANGE_ROUTES.has(pathname);
+}
+
 export async function requireAuth(): Promise<User> {
-	const user = await getRequestContext().user();
+	const context = getRequestContext();
+	const user = await context.user();
 	if (!user || user.deletedAt || user.deactivatedAt)
 		throw errors.unauthorized();
+	if (user.mustChangePassword && !allowsPasswordChange(context.url.pathname)) {
+		throw errors.forbidden("Change the temporary password before continuing.", {
+			reason: "password_change_required",
+		});
+	}
 	return user;
 }
 
