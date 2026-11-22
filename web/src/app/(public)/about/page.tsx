@@ -192,7 +192,7 @@ export default function AboutPage() {
 				</Card>
 			</section>
 
-			<section className="bg-grid-ink rounded-3xl bg-ink p-8 text-ink-fg sm:p-12">
+			<section className="rounded-[28px] bg-ink p-8 text-ink-fg sm:p-12">
 				<div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
 					<div>
 						<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
