@@ -15,5 +15,11 @@ export type {
 	User,
 } from "./identity";
 export { accounts, sessions, users } from "./identity";
+export {
+	consents,
+	declaredRelationships,
+	digitalPassports,
+	otpChallenges,
+} from "./registration";
 export type { NewTodo, Todo } from "./todos";
 export { todos } from "./todos";

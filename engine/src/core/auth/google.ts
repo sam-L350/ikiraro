@@ -6,6 +6,7 @@ import type { RequestContext } from "../api/context";
 import { defineRawRoutes } from "../api/raw";
 import { parseCookies, serializeCookie } from "../http/cookies";
 import { isOriginAllowed } from "../http/cors";
+import { insertUserWithPassport } from "../identity/create-user";
 import { createSession, sessionCookie } from "./sessions";
 
 /**
@@ -147,16 +148,20 @@ async function upsertGoogleUser(profile: GoogleProfile): Promise<number> {
 			.set({ name: profile.name ?? null, picture: profile.picture ?? null })
 			.where(eq(users.id, userId));
 	} else {
-		const [created] = await db
-			.insert(users)
-			.values({
+		const created = await db.transaction(async (tx) => {
+			const identity = await insertUserWithPassport(tx, {
 				email,
 				name: profile.name ?? null,
 				picture: profile.picture ?? null,
-			})
-			.returning({ id: users.id });
-		if (!created) throw new Error("Failed to create user");
-		userId = created.id;
+			});
+			await tx.insert(accounts).values({
+				userId: identity.userId,
+				provider: "google",
+				providerAccountId: profile.sub,
+			});
+			return identity.userId;
+		});
+		return created;
 	}
 
 	await db.insert(accounts).values({
