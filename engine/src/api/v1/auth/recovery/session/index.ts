@@ -11,11 +11,13 @@ import { db } from "../../../../../db";
 export async function createAuthRecoverySession(input: {
 	phone: string;
 	code: string;
+	sharedDevice?: boolean;
 }): Promise<{ id: number; email: string; name: string | null }> {
 	const session = await recoverSession(db, {
 		phone: input.phone,
 		code: input.code,
 		ip: clientIp(),
+		sharedDevice: input.sharedDevice,
 	});
 	appendResponseHeader("set-cookie", sessionCookie(session.token));
 	return session.user;

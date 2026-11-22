@@ -1,5 +1,6 @@
 import { type FormEvent, type ReactNode, useState } from "react";
 import { useNavigate } from "react-router";
+import { SharedComputerCheck } from "@/components/auth/shared-computer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
@@ -125,6 +126,7 @@ export function ActivationForm({ phone }: { phone: string }) {
 	const navigate = useNavigate();
 	const [number, setNumber] = useState(phone);
 	const [code, setCode] = useState("");
+	const [shared, setShared] = useState(false);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const send = useEngineMutation("/auth/otp");
 	const activate = useEngineMutation("/registrations/activation");
@@ -134,7 +136,7 @@ export function ActivationForm({ phone }: { phone: string }) {
 		setError(null);
 		try {
 			await activate.mutateAsync({
-				body: { phone: number, code },
+				body: { phone: number, code, sharedDevice: shared },
 			});
 			await refresh();
 			navigate("/home");
@@ -179,6 +181,7 @@ export function ActivationForm({ phone }: { phone: string }) {
 			{import.meta.env.DEV ? (
 				<p className="font-sans text-sm text-fg-muted">{t("devCodeHint")}</p>
 			) : null}
+			<SharedComputerCheck checked={shared} onChange={setShared} />
 			<div className="mt-2 flex flex-col items-start gap-2">
 				<Button type="submit" variant="sticker" disabled={activate.isPending}>
 					{t("activateAccount")}

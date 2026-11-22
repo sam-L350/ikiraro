@@ -279,6 +279,13 @@
 														],
 														"additionalProperties": false
 													}
+												},
+												"sharedDevice": {
+													"type": "boolean"
+												},
+												"idleTimeoutMs": {
+													"type": "number",
+													"nullable": true
 												}
 											},
 											"required": [
@@ -287,7 +294,9 @@
 												"name",
 												"picture",
 												"createdAt",
-												"roles"
+												"roles",
+												"sharedDevice",
+												"idleTimeoutMs"
 											],
 											"additionalProperties": false
 										},
@@ -565,6 +574,9 @@
 									},
 									"code": {
 										"type": "string"
+									},
+									"sharedDevice": {
+										"type": "boolean"
 									}
 								},
 								"required": [
@@ -692,6 +704,9 @@
 									},
 									"password": {
 										"type": "string"
+									},
+									"sharedDevice": {
+										"type": "boolean"
 									}
 								},
 								"required": [
@@ -764,6 +779,312 @@
 					},
 					"400": {
 						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/sessions/{id}/revoke": {
+			"delete": {
+				"operationId": "deleteAuthSession",
+				"summary": "End one session that belongs to the signed-in person.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"revoked": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"revoked"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/sessions": {
+			"get": {
+				"operationId": "getAuthSessions",
+				"summary": "Open sessions for the signed-in person. The id is the stored hash, so it",
+				"description": "cannot be replayed as a cookie.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sessions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"createdAt": {
+																"type": "string",
+																"description": "Date string"
+															},
+															"sharedDevice": {
+																"type": "boolean"
+															},
+															"current": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"createdAt",
+															"sharedDevice",
+															"current"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"sessions"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/sessions/revoke": {
+			"post": {
+				"operationId": "createAuthSessionsRevoke",
+				"summary": "End every session for this account, including the one on this computer.",
+				"tags": [
+					"auth"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"revoked": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"revoked"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1997,6 +2318,9 @@
 									},
 									"code": {
 										"type": "string"
+									},
+									"sharedDevice": {
+										"type": "boolean"
 									}
 								},
 								"required": [

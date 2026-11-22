@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { api, isApiClientError } from "@/lib/engine";
+import { clearOutbox } from "@/lib/offline/outbox";
 import { AuthContext, type AuthContextValue, type User } from "./context";
 
 export const AUTH_QUERY_KEY = ["auth", "me"] as const;
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		} catch (error) {
 			console.warn("Logout request failed; clearing local state anyway", error);
 		}
+		clearOutbox();
 		queryClient.setQueryData(AUTH_QUERY_KEY, null);
 		// Drop every cached engine response that may contain user-specific data.
 		await queryClient.resetQueries({ queryKey: ["engine"] });

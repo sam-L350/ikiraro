@@ -67,6 +67,8 @@ export const sessions = pgTable("sessions", {
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
 	expiresAt: timestamp("expires_at").notNull(),
+	/** A center computer. Idle time is short, and the screen names who is signed in. */
+	sharedDevice: boolean("shared_device").notNull().default(false),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

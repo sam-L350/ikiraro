@@ -132,15 +132,16 @@ async function issue(
 	user: SignedInUser,
 	ip: string,
 	method: "otp" | "password",
+	sharedDevice: boolean,
 ): Promise<{ token: string; user: SignedInUser }> {
-	const token = await createSession(user.id, database);
+	const token = await createSession(user.id, database, { sharedDevice });
 	await writeAudit(database, {
 		actorId: user.id,
 		action: "auth.session_created",
 		targetType: "user",
 		targetId: String(user.id),
 		ipAddress: ip,
-		metadata: { method },
+		metadata: { method, sharedDevice },
 	});
 	return {
 		token,
@@ -285,7 +286,7 @@ export async function consumeOtpChallenge(
 
 async function loginWithOtp(
 	database: LoginDb,
-	input: OtpLogin & { ip: string },
+	input: OtpLogin & { ip: string; sharedDevice?: boolean },
 ): Promise<{ token: string; user: SignedInUser }> {
 	const matched = await readMatchingOtp(database, input);
 	if (!matched.user.activatedAt) {
@@ -302,12 +303,18 @@ async function loginWithOtp(
 	}
 	await consumeOtpChallenge(database, matched.challengeId);
 	clearFailures(guardKey("otp", matched.phone));
-	return issue(database, matched.user, input.ip, "otp");
+	return issue(
+		database,
+		matched.user,
+		input.ip,
+		"otp",
+		input.sharedDevice === true,
+	);
 }
 
 async function loginWithPassword(
 	database: LoginDb,
-	input: PasswordLogin & { ip: string },
+	input: PasswordLogin & { ip: string; sharedDevice?: boolean },
 ): Promise<{ token: string; user: SignedInUser }> {
 	const email = input.email.trim().toLowerCase();
 	const key = guardKey("password", email);
@@ -347,13 +354,14 @@ async function loginWithPassword(
 		{ id: user.id, email: user.email, name: user.name },
 		input.ip,
 		"password",
+		input.sharedDevice === true,
 	);
 }
 
 /** Opens a session from a one-time code or from email and password. */
 export async function login(
 	database: LoginDb,
-	input: (OtpLogin | PasswordLogin) & { ip: string },
+	input: (OtpLogin | PasswordLogin) & { ip: string; sharedDevice?: boolean },
 ): Promise<{ token: string; user: SignedInUser }> {
 	switch (input.method) {
 		case "otp":

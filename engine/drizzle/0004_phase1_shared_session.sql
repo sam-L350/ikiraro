@@ -1,0 +1,1 @@
+ALTER TABLE "sessions" ADD COLUMN "shared_device" boolean DEFAULT false NOT NULL;

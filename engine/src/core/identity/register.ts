@@ -206,7 +206,7 @@ export async function registerLearner(
  */
 export async function activateLearner(
 	database: RegisterDb,
-	input: { phone: string; code: string; ip: string },
+	input: { phone: string; code: string; ip: string; sharedDevice?: boolean },
 ): Promise<{
 	token: string;
 	user: { id: number; email: string; name: string | null };
@@ -241,7 +241,9 @@ export async function activateLearner(
 			})
 			.onConflictDoNothing();
 
-		const session = await createSession(matched.user.id, tx);
+		const session = await createSession(matched.user.id, tx, {
+			sharedDevice: input.sharedDevice === true,
+		});
 		await writeAudit(tx, {
 			actorId: matched.user.id,
 			action: "registration.activated",

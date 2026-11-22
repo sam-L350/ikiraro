@@ -29,7 +29,7 @@ export async function requestRecovery(
  */
 export async function recoverSession(
 	database: RecoveryDb,
-	input: { phone: string; code: string; ip: string },
+	input: { phone: string; code: string; ip: string; sharedDevice?: boolean },
 ): Promise<{ token: string; user: SignedInUser }> {
 	const matched = await readMatchingOtp(database, input);
 	if (!matched.user.activatedAt) {
@@ -47,7 +47,9 @@ export async function recoverSession(
 			.where(eq(users.id, matched.user.id));
 	}
 
-	const token = await createSession(matched.user.id, database);
+	const token = await createSession(matched.user.id, database, {
+		sharedDevice: input.sharedDevice === true,
+	});
 	const user: SignedInUser = {
 		id: matched.user.id,
 		email: matched.user.email,

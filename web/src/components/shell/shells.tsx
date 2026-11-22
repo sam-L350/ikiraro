@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import { useSharedIdleLogout } from "@/lib/offline/use-shared-idle";
 
 export function PublicShell({ children }: { children: ReactNode }) {
 	const { t } = useI18n();
@@ -58,6 +59,7 @@ export function ProductShell({
 }) {
 	const { t } = useI18n();
 	const { user, isLoading, logout, refresh } = useAuth();
+	useSharedIdleLogout();
 	const { open, setOpen, targetRef } = useRolePreview<HTMLParagraphElement>();
 	const [switching, setSwitching] = useState(false);
 	const name = user?.name ?? user?.email ?? "…";
@@ -72,10 +74,16 @@ export function ProductShell({
 						<OpenPreviewButton onOpen={() => setOpen(true)} />
 						<p
 							ref={targetRef}
+							role="status"
 							className="font-sans text-sm font-semibold text-fg"
 						>
 							{isLoading ? "…" : t("signedInAs", { name })}
 						</p>
+						{user?.sharedDevice ? (
+							<p className="font-sans text-sm font-medium text-fg">
+								{t("sharedDeviceNote")}
+							</p>
+						) : null}
 						{roleName ? (
 							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 								{roleName}

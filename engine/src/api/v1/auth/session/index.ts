@@ -16,6 +16,7 @@ export async function createAuthSession(input: {
 	code?: string;
 	email?: string;
 	password?: string;
+	sharedDevice?: boolean;
 }): Promise<{ id: number; email: string; name: string | null }> {
 	const ip = clientIp();
 	switch (input.method) {
@@ -30,6 +31,7 @@ export async function createAuthSession(input: {
 				phone: input.phone,
 				code: input.code,
 				ip,
+				sharedDevice: input.sharedDevice,
 			});
 			appendResponseHeader("set-cookie", sessionCookie(session.token));
 			return session.user;
@@ -45,6 +47,7 @@ export async function createAuthSession(input: {
 				email: input.email,
 				password: input.password,
 				ip,
+				sharedDevice: input.sharedDevice,
 			});
 			appendResponseHeader("set-cookie", sessionCookie(session.token));
 			return session.user;

@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { SessionList } from "@/components/auth/session-list";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 
@@ -17,6 +18,7 @@ export default function StaffHomePage() {
 					<Link to="/register/assisted">{t("registerLearner")}</Link>
 				</Button>
 			</div>
+			<SessionList />
 		</section>
 	);
 }

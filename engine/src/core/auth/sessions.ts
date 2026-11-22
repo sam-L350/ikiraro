@@ -1,8 +1,13 @@
-import { eq, lt } from "drizzle-orm";
+import { and, eq, lt } from "drizzle-orm";
 import { env } from "../../config/env";
 import { type Database, db } from "../../db";
 import { sessions, type User, users } from "../../db/schema";
+import { errors } from "../api/error";
+import { writeAudit } from "../audit/write";
 import { parseCookies, serializeCookie } from "../http/cookies";
+import { readSharedIdleMs } from "./shared-idle";
+
+type SessionDb = Pick<Database, "delete" | "insert" | "select" | "update">;
 
 export const SESSION_COOKIE = "session";
 
@@ -31,15 +36,21 @@ function randomToken(): string {
 
 export async function createSession(
 	userId: number,
-	database: Pick<Database, "insert"> = db,
+	database: Pick<Database, "insert" | "select"> = db,
+	options: { sharedDevice?: boolean } = {},
 ): Promise<string> {
 	const token = randomToken();
-	const expiresAt = new Date(Date.now() + env.sessionTtlMs);
+	const sharedDevice = options.sharedDevice === true;
+	const lifetime = sharedDevice
+		? await readSharedIdleMs(database)
+		: env.sessionTtlMs;
+	const expiresAt = new Date(Date.now() + lifetime);
 
 	await database.insert(sessions).values({
 		id: await hashToken(token),
 		userId,
 		expiresAt,
+		sharedDevice,
 	});
 
 	return token;
@@ -57,13 +68,15 @@ export type ValidatedSession = {
  */
 export async function validateSession(
 	token: string,
+	database: SessionDb = db,
 ): Promise<ValidatedSession | null> {
 	if (!token.startsWith(TOKEN_PREFIX)) return null;
 
 	const id = await hashToken(token);
-	const [row] = await db
+	const [row] = await database
 		.select({
 			expiresAt: sessions.expiresAt,
+			sharedDevice: sessions.sharedDevice,
 			user: users,
 		})
 		.from(sessions)
@@ -75,17 +88,101 @@ export async function validateSession(
 
 	const now = Date.now();
 	if (row.expiresAt.getTime() <= now) {
-		await db.delete(sessions).where(eq(sessions.id, id));
+		await database.delete(sessions).where(eq(sessions.id, id));
 		return null;
 	}
 
 	let expiresAt = row.expiresAt;
-	if (row.expiresAt.getTime() - now < env.sessionTtlMs / 2) {
+	if (row.sharedDevice) {
+		const idle = await readSharedIdleMs(database);
+		expiresAt = new Date(now + idle);
+		await database
+			.update(sessions)
+			.set({ expiresAt })
+			.where(eq(sessions.id, id));
+	} else if (row.expiresAt.getTime() - now < env.sessionTtlMs / 2) {
 		expiresAt = new Date(now + env.sessionTtlMs);
-		await db.update(sessions).set({ expiresAt }).where(eq(sessions.id, id));
+		await database
+			.update(sessions)
+			.set({ expiresAt })
+			.where(eq(sessions.id, id));
 	}
 
 	return { user: row.user, expiresAt };
+}
+
+export type SessionSummary = {
+	id: string;
+	createdAt: Date;
+	sharedDevice: boolean;
+	current: boolean;
+};
+
+/** The signed-in person's open sessions. The token hash is an id, not a secret they can replay. */
+export async function listSessions(
+	database: Pick<Database, "select">,
+	input: { userId: number; token: string },
+): Promise<SessionSummary[]> {
+	const currentId = await hashToken(input.token);
+	const rows = await database
+		.select({
+			id: sessions.id,
+			createdAt: sessions.createdAt,
+			sharedDevice: sessions.sharedDevice,
+			expiresAt: sessions.expiresAt,
+		})
+		.from(sessions)
+		.where(eq(sessions.userId, input.userId));
+	const now = Date.now();
+	return rows
+		.filter((row) => row.expiresAt.getTime() > now)
+		.map((row) => ({
+			id: row.id,
+			createdAt: row.createdAt,
+			sharedDevice: row.sharedDevice,
+			current: row.id === currentId,
+		}));
+}
+
+/** Ends one of this person's sessions. Another person's id is not found. */
+export async function revokeSession(
+	database: SessionDb,
+	input: { userId: number; sessionId: string; token: string; ip: string },
+): Promise<{ revoked: true; current: boolean }> {
+	const [row] = await database
+		.select({ id: sessions.id })
+		.from(sessions)
+		.where(
+			and(eq(sessions.id, input.sessionId), eq(sessions.userId, input.userId)),
+		)
+		.limit(1);
+	if (!row) throw errors.notFound("Session not found");
+	const current = (await hashToken(input.token)) === row.id;
+	await database.delete(sessions).where(eq(sessions.id, row.id));
+	await writeAudit(database, {
+		actorId: input.userId,
+		action: "auth.session_revoked",
+		targetType: "session",
+		targetId: row.id,
+		ipAddress: input.ip,
+	});
+	return { revoked: true, current };
+}
+
+/** Ends every session for this account, including the one making the request. */
+export async function revokeAllSessions(
+	database: SessionDb,
+	input: { userId: number; ip: string },
+): Promise<{ revoked: true }> {
+	await database.delete(sessions).where(eq(sessions.userId, input.userId));
+	await writeAudit(database, {
+		actorId: input.userId,
+		action: "auth.sessions_revoked",
+		targetType: "user",
+		targetId: String(input.userId),
+		ipAddress: input.ip,
+	});
+	return { revoked: true };
 }
 
 export async function invalidateSession(token: string): Promise<void> {

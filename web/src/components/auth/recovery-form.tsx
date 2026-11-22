@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router";
+import { SharedComputerCheck } from "@/components/auth/shared-computer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
@@ -35,6 +36,7 @@ export function RecoveryForm({ redirectTo }: { redirectTo: string }) {
 	const [phone, setPhone] = useState("");
 	const [code, setCode] = useState("");
 	const [sent, setSent] = useState(false);
+	const [shared, setShared] = useState(false);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const send = useEngineMutation("/auth/recovery");
 	const open = useEngineMutation("/auth/recovery/session");
@@ -48,7 +50,7 @@ export function RecoveryForm({ redirectTo }: { redirectTo: string }) {
 				setSent(true);
 				return;
 			}
-			await open.mutateAsync({ body: { phone, code } });
+			await open.mutateAsync({ body: { phone, code, sharedDevice: shared } });
 			await refresh();
 			navigate(redirectTo);
 		} catch (caught) {
@@ -94,6 +96,7 @@ export function RecoveryForm({ redirectTo }: { redirectTo: string }) {
 					{t("devCodeHint")}
 				</p>
 			) : null}
+			<SharedComputerCheck checked={shared} onChange={setShared} />
 			<div className="mt-8">
 				<Button
 					type="submit"

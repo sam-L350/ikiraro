@@ -41,7 +41,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/1.2-phone-and-password-auth`
   - [x] `phase/1.3-registration-consent-profile`
   - [x] `phase/1.4-recovery-and-privacy-requests`
-  - [ ] `phase/1.5-shared-device-session`
+  - [x] `phase/1.5-shared-device-session`
   - [ ] `phase/1.6-staff-provisioning`
   - [ ] `phase/1.7-geography-and-centers`
 - [ ] Phase 2 — Content (`phase/2-content`)

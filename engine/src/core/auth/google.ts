@@ -227,6 +227,7 @@ export const googleAuthRoutes = defineRawRoutes([
 				state,
 				verifier,
 				redirect: redirectTarget,
+				shared: context.url.searchParams.get("shared") === "1",
 			});
 			return new Response(null, {
 				status: 302,
@@ -255,7 +256,12 @@ export const googleAuthRoutes = defineRawRoutes([
 				STATE_COOKIE
 			];
 			let stored:
-				| { state: string; verifier: string; redirect: string }
+				| {
+						state: string;
+						verifier: string;
+						redirect: string;
+						shared?: boolean;
+				  }
 				| undefined;
 			try {
 				stored = rawState ? JSON.parse(rawState) : undefined;
@@ -306,7 +312,9 @@ export const googleAuthRoutes = defineRawRoutes([
 				}
 
 				const userId = await upsertGoogleUser(profile);
-				const token = await createSession(userId);
+				const token = await createSession(userId, db, {
+					sharedDevice: stored.shared === true,
+				});
 				context.logger.info("user signed in", { userId, provider: "google" });
 
 				const headers = new Headers({

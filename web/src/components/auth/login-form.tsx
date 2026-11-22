@@ -1,6 +1,7 @@
 import { ArrowLeft, ChevronRight, KeyRound, Smartphone } from "lucide-react";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { useNavigate } from "react-router";
+import { SharedComputerCheck } from "@/components/auth/shared-computer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getLoginUrl, useAuth } from "@/lib/auth";
@@ -139,6 +140,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 	const [code, setCode] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [shared, setShared] = useState(false);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const [pending, setPending] = useState(false);
 
@@ -158,9 +160,19 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 				return;
 			}
 			if (step === "code") {
-				await api.createAuthSession({ method: "otp", phone, code });
+				await api.createAuthSession({
+					method: "otp",
+					phone,
+					code,
+					sharedDevice: shared,
+				});
 			} else if (step === "password") {
-				await api.createAuthSession({ method: "password", email, password });
+				await api.createAuthSession({
+					method: "password",
+					email,
+					password,
+					sharedDevice: shared,
+				});
 			} else {
 				return;
 			}
@@ -199,15 +211,20 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 						body={t("googleChoiceBody")}
 						tone="surface"
 						icon={<GoogleMark />}
-						href={getLoginUrl(redirectTo)}
+						href={getLoginUrl(redirectTo, shared)}
 					/>
 				</div>
+				<SharedComputerCheck checked={shared} onChange={setShared} />
 			</div>
 		);
 	}
 
 	return (
-		<form className="mt-4 flex w-full flex-col items-start" onSubmit={onSubmit}>
+		<form
+			className="mt-4 flex w-full flex-col items-start"
+			autoComplete={shared ? "off" : undefined}
+			onSubmit={onSubmit}
+		>
 			<Button
 				type="button"
 				variant="quiet"
@@ -229,7 +246,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 						<Input
 							id="login-email"
 							type="email"
-							autoComplete="username"
+							autoComplete={shared ? "off" : "username"}
 							value={email}
 							aria-invalid={error ? true : undefined}
 							onChange={(event) => setEmail(event.target.value)}
@@ -246,7 +263,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 						<Input
 							id="login-password"
 							type="password"
-							autoComplete="current-password"
+							autoComplete={shared ? "off" : "current-password"}
 							value={password}
 							aria-invalid={error ? true : undefined}
 							onChange={(event) => setPassword(event.target.value)}
@@ -291,6 +308,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 					{t("devCodeHint")}
 				</p>
 			) : null}
+			<SharedComputerCheck checked={shared} onChange={setShared} />
 			<div className="mt-8">
 				<Button type="submit" variant="sticker" disabled={pending}>
 					{step === "phone" ? t("sendCode") : t("signIn")}

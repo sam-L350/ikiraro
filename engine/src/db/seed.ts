@@ -1,5 +1,9 @@
 import { eq } from "drizzle-orm";
 import {
+	DEFAULT_SHARED_IDLE_MS,
+	SHARED_IDLE_KEY,
+} from "../core/auth/shared-idle";
+import {
 	PERMISSION_CODES,
 	PERMISSION_DESCRIPTIONS,
 	ROLE_CODES,
@@ -9,7 +13,7 @@ import {
 } from "../core/authz/catalog";
 import { seedDemoAccounts } from "./demo-accounts";
 import { db } from "./index";
-import { permissions, rolePermissions, roles } from "./schema";
+import { configSettings, permissions, rolePermissions, roles } from "./schema";
 
 function isRoleCode(value: string): value is RoleCode {
 	return (ROLE_CODES as readonly string[]).includes(value);
@@ -54,6 +58,19 @@ export async function seedFoundations(): Promise<void> {
 		.where(eq(roles.code, "learner"));
 	if (stored.length !== 1) {
 		throw new Error("Foundation seed did not store the learner role");
+	}
+
+	const [idle] = await db
+		.select({ version: configSettings.version })
+		.from(configSettings)
+		.where(eq(configSettings.key, SHARED_IDLE_KEY))
+		.limit(1);
+	if (!idle) {
+		await db.insert(configSettings).values({
+			key: SHARED_IDLE_KEY,
+			value: DEFAULT_SHARED_IDLE_MS,
+			version: 1,
+		});
 	}
 
 	await seedDemoAccounts();
