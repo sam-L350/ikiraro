@@ -55,6 +55,22 @@ describe("decideAccess", () => {
 		expect(other.ok).toBe(false);
 	});
 
+	test("a coordinator scoped to district A cannot manage district B", () => {
+		const decision = decideAccess({
+			actorId: "3",
+			permission: "district.manage",
+			assignments: [
+				{
+					role: "district_coordinator",
+					scopeType: "district",
+					scopeId: "district-a",
+				},
+			],
+			resource: { districtId: "district-b" },
+		});
+		expect(decision.ok).toBe(false);
+	});
+
 	test("two roles are unioned", () => {
 		const decision = decideAccess({
 			actorId: "4",
