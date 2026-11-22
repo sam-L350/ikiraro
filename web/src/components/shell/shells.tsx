@@ -1,15 +1,19 @@
 import { type ReactNode, useState } from "react";
 import { Link } from "react-router";
 import {
-	OpenPreviewButton,
 	RolePreviewPanel,
 	useRolePreview,
 } from "@/components/dev/role-preview";
 import { LanguageSwitch } from "@/components/shell/language-switch";
+import {
+	ProductIdentity,
+	ProductNav,
+	ProductNavLinks,
+} from "@/components/shell/product-nav";
 import { Wordmark } from "@/components/shell/wordmark";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { api } from "@/lib/engine";
+import { api, invalidateEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import { useSharedIdleLogout } from "@/lib/offline/use-shared-idle";
 
@@ -58,73 +62,62 @@ export function ProductShell({
 	surface: "learner" | "staff";
 }) {
 	const { t } = useI18n();
-	const { user, isLoading, logout, refresh } = useAuth();
+	const { user, logout, refresh } = useAuth();
 	useSharedIdleLogout();
 	const { open, setOpen, targetRef } = useRolePreview<HTMLParagraphElement>();
 	const [switching, setSwitching] = useState(false);
-	const name = user?.name ?? user?.email ?? "…";
-	const roleName = user?.roles[0]?.name;
 
 	return (
-		<div className="flex min-h-screen flex-col bg-canvas">
-			<header className="sticky top-0 z-40 border-b border-line bg-canvas">
-				<div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3 lg:px-12">
-					<div className="flex min-w-0 flex-col gap-1">
-						<Wordmark />
-						<OpenPreviewButton onOpen={() => setOpen(true)} />
-						<p
-							ref={targetRef}
-							role="status"
-							className="font-sans text-sm font-semibold text-fg"
-						>
-							{isLoading ? "…" : t("signedInAs", { name })}
-						</p>
-						{user?.sharedDevice ? (
-							<p className="font-sans text-sm font-medium text-fg">
-								{t("sharedDeviceNote")}
-							</p>
-						) : null}
-						{roleName ? (
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{roleName}
-							</p>
-						) : null}
-						<p className="font-sans text-sm text-fg-muted">
-							{t("centerPending")}
-						</p>
+		<div className="flex min-h-screen bg-canvas">
+			<ProductNav nameRef={targetRef} onPreview={() => setOpen(true)} />
+			<div className="flex min-w-0 flex-1 flex-col">
+				<header className="sticky top-0 z-40 border-b border-line bg-canvas">
+					<div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-6 lg:justify-end lg:px-12">
+						<div className="lg:hidden">
+							<Wordmark />
+						</div>
+						<div className="flex items-center gap-3">
+							<LanguageSwitch />
+							<Button
+								type="button"
+								variant="quiet"
+								onClick={() => void logout()}
+							>
+								{t("signOut")}
+							</Button>
+						</div>
 					</div>
-					<div className="flex items-center gap-3">
-						<LanguageSwitch />
-						<Button type="button" variant="quiet" onClick={() => void logout()}>
-							{t("signOut")}
-						</Button>
-					</div>
+				</header>
+				<div className="flex flex-col gap-4 px-6 pt-4 lg:hidden">
+					<ProductIdentity onPreview={() => setOpen(true)} />
+					<ProductNavLinks layout="row" />
 				</div>
-			</header>
-			<main className="mx-auto w-full max-w-6xl flex-1 px-6 py-12 lg:px-12">
-				{open ? (
-					<RolePreviewPanel
-						selected={user?.roles[0]?.code ?? null}
-						onSelect={(role) => {
-							setSwitching(true);
-							void api
-								.updateDevRole({ role })
-								.then(() => refresh())
-								.finally(() => {
-									setSwitching(false);
-									setOpen(false);
-								});
-						}}
-						onClose={() => setOpen(false)}
-					/>
-				) : null}
-				{switching ? (
-					<p className="mb-6 font-sans text-sm font-medium text-fg">
-						Switching role…
-					</p>
-				) : null}
-				{children}
-			</main>
+				<main className="mx-auto w-full max-w-6xl flex-1 px-6 py-12 lg:px-12">
+					{open ? (
+						<RolePreviewPanel
+							selected={user?.roles[0]?.code ?? null}
+							onSelect={(role) => {
+								setSwitching(true);
+								void api
+									.updateDevRole({ role })
+									.then(() => refresh())
+									.then(() => invalidateEngine("/staff/context"))
+									.finally(() => {
+										setSwitching(false);
+										setOpen(false);
+									});
+							}}
+							onClose={() => setOpen(false)}
+						/>
+					) : null}
+					{switching ? (
+						<p className="mb-6 font-sans text-sm font-medium text-fg">
+							Switching role…
+						</p>
+					) : null}
+					{children}
+				</main>
+			</div>
 		</div>
 	);
 }

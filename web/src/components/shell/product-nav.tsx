@@ -1,0 +1,135 @@
+import type { Ref } from "react";
+import { NavLink } from "react-router";
+import { OpenPreviewButton } from "@/components/dev/role-preview";
+import { Wordmark } from "@/components/shell/wordmark";
+import { useAuth } from "@/lib/auth";
+import { useEngine } from "@/lib/engine";
+import { useI18n } from "@/lib/i18n";
+import type { MessageKey } from "@/lib/i18n/messages";
+import { cn } from "@/lib/utils";
+
+type NavItem = {
+	to: string;
+	label: MessageKey;
+	end?: boolean;
+};
+
+function useProductNavItems(): NavItem[] {
+	const { user } = useAuth();
+	const isStaff = user?.roles.some((role) => role.code !== "learner") ?? false;
+	const context = useEngine("/staff/context", undefined, { enabled: isStaff });
+	const mode = context.data?.mode;
+	const canAddStaff = mode === "admin" || mode === "center";
+
+	const items: NavItem[] = [
+		{ to: "/home", label: "navHome", end: true },
+		{ to: "/profile", label: "yourProfile", end: true },
+	];
+	if (!isStaff) return items;
+	items.push(
+		{ to: "/staff", label: "staffTitle", end: true },
+		{ to: "/register/assisted", label: "registerLearner" },
+	);
+	if (canAddStaff) {
+		items.push({ to: "/staff/new", label: "staffAccounts" });
+	}
+	return items;
+}
+
+export function ProductIdentity({
+	nameRef,
+	onPreview,
+}: {
+	nameRef?: Ref<HTMLParagraphElement>;
+	onPreview: () => void;
+}) {
+	const { t } = useI18n();
+	const { user, isLoading } = useAuth();
+	const name = user?.name ?? user?.email ?? "…";
+	const roles = user?.roles ?? [];
+
+	return (
+		<div className="flex flex-col items-start gap-2">
+			<OpenPreviewButton onOpen={onPreview} />
+			<p
+				ref={nameRef}
+				role="status"
+				aria-label={isLoading ? undefined : t("signedInAs", { name })}
+				className="font-sans text-sm font-semibold text-fg"
+			>
+				{isLoading ? "…" : name}
+			</p>
+			{roles.length > 0 ? (
+				<ul className="flex flex-wrap gap-1">
+					{roles.map((role) => (
+						<li key={role.code}>
+							<span className="inline-flex rounded-full bg-ink px-3 py-1 font-meta text-xs font-semibold uppercase tracking-wide text-ink-fg">
+								{role.name}
+							</span>
+						</li>
+					))}
+				</ul>
+			) : null}
+			<p className="font-sans text-sm text-fg-muted">{t("centerPending")}</p>
+			{user?.sharedDevice ? (
+				<p className="font-sans text-sm font-medium text-fg">
+					{t("sharedDeviceNote")}
+				</p>
+			) : null}
+		</div>
+	);
+}
+
+export function ProductNavLinks({
+	layout = "rail",
+}: {
+	layout?: "rail" | "row";
+}) {
+	const { t } = useI18n();
+	const items = useProductNavItems();
+
+	return (
+		<nav aria-label={t("navLabel")}>
+			<ul
+				className={cn(
+					"flex items-start gap-1",
+					layout === "row" ? "flex-row flex-wrap" : "flex-col",
+				)}
+			>
+				{items.map((item) => (
+					<li key={item.to}>
+						<NavLink
+							to={item.to}
+							end={item.end}
+							className={({ isActive }) =>
+								cn(
+									"inline-flex min-h-11 items-center rounded-full px-4 font-sans text-sm font-semibold",
+									isActive ? "bg-ink text-ink-fg" : "text-fg hover:bg-surface",
+								)
+							}
+						>
+							{t(item.label)}
+						</NavLink>
+					</li>
+				))}
+			</ul>
+		</nav>
+	);
+}
+
+/** Desktop rail. On a narrow screen the same identity and links sit under the header. */
+export function ProductNav({
+	nameRef,
+	onPreview,
+}: {
+	nameRef?: Ref<HTMLParagraphElement>;
+	onPreview: () => void;
+}) {
+	return (
+		<aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-8 border-r border-line bg-canvas px-5 py-6 lg:flex">
+			<Wordmark />
+			<ProductIdentity nameRef={nameRef} onPreview={onPreview} />
+			<ProductNavLinks />
+		</aside>
+	);
+}
