@@ -44,6 +44,8 @@ export type Env = {
 	readonly debugApi: boolean;
 	readonly validateResponses: boolean;
 	readonly maxBodyBytes: number;
+	/** Lets a signed-in builder assume a role. Always false in production. */
+	readonly devRoleSwitch: boolean;
 };
 
 type Source = Record<string, string | undefined>;
@@ -229,6 +231,7 @@ export function parseEnv(source: Source): Env {
 		debugApi: read.bool("DEBUG_API", false),
 		validateResponses: read.bool("VALIDATE_RESPONSES", true),
 		maxBodyBytes: read.int("MAX_BODY_BYTES", 1024 * 1024, { min: 1024 }),
+		devRoleSwitch: !isProduction && read.bool("DEV_ROLE_SWITCH", true),
 	};
 
 	if (read.problems.length > 0) {

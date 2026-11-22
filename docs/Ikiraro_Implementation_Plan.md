@@ -446,6 +446,8 @@ main
 **Needs:** phase 0 on `DEV`  
 **Gate:** a trainer can register a learner at a center, the learner can confirm with an OTP, consent is stored, and a second center cannot see that learner.
 
+**Dev preview:** click the sign-in heading three times, pick a role, then sign in. The same gesture on “Signed in as” switches the role of the account you are already in. Production ignores this.
+
 #### 1.1 Identity schema
 
 - **Branch:** `phase/1.1-identity-schema`

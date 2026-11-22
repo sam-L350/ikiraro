@@ -15,6 +15,10 @@ export const ROLE_CODES = [
 
 export type RoleCode = (typeof ROLE_CODES)[number];
 
+export function isRoleCode(value: string): value is RoleCode {
+	return (ROLE_CODES as readonly string[]).includes(value);
+}
+
 export const PERMISSION_CODES = [
 	"profile.read.self",
 	"submission.review",

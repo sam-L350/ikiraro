@@ -48,6 +48,18 @@ describe("parseEnv", () => {
 		expect(message).toContain("GOOGLE_CLIENT_SECRET");
 	});
 
+	test("the role switch is on in development and off in production", () => {
+		expect(parseEnv({}).devRoleSwitch).toBe(true);
+		expect(parseEnv({ DEV_ROLE_SWITCH: "false" }).devRoleSwitch).toBe(false);
+		expect(
+			parseEnv({
+				NODE_ENV: "production",
+				DATABASE_URL: "postgres://localhost/db",
+				DEV_ROLE_SWITCH: "true",
+			}).devRoleSwitch,
+		).toBe(false);
+	});
+
 	test("strips trailing slashes from URL lists", () => {
 		const env = parseEnv({ CORS_ORIGINS: "https://a.com/, https://b.com" });
 		expect(env.corsOrigins).toEqual(["https://a.com", "https://b.com"]);

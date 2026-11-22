@@ -3,12 +3,8 @@ import { db } from "../../db";
 import { roles, userRoles } from "../../db/schema";
 import { errors } from "../api/error";
 import { requireAuth } from "../auth/require-auth";
-import { type PermissionCode, ROLE_CODES, type RoleCode } from "./catalog";
+import { isRoleCode, type PermissionCode } from "./catalog";
 import { decideAccess, type Resource, type ScopeType } from "./decide";
-
-function isRoleCode(value: string): value is RoleCode {
-	return (ROLE_CODES as readonly string[]).includes(value);
-}
 
 function isScopeType(value: string): value is ScopeType {
 	return (
