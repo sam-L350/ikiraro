@@ -43,6 +43,13 @@
       "when": 1795367968626,
       "tag": "0005_phase1_geography",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795369094737,
+      "tag": "0006_phase2_content_schema",
+      "breakpoints": true
     }
   ]
 }

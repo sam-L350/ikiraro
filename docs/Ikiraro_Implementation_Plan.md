@@ -45,7 +45,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/1.6-staff-provisioning`
   - [x] `phase/1.7-geography-and-centers`
 - [ ] Phase 2 — Content (`phase/2-content`)
-  - [ ] `phase/2.1-content-schema`
+  - [x] `phase/2.1-content-schema`
   - [ ] `phase/2.2-authoring`
   - [ ] `phase/2.3-review-and-publish`
   - [ ] `phase/2.4-content-versions`

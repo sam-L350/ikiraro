@@ -7,6 +7,18 @@ export {
 	privacyRequests,
 	systemAuditLogs,
 } from "./compliance";
+export type { ContentLocale, ContentStatus } from "./content";
+export {
+	badges,
+	contentVersions,
+	courses,
+	courseTranslations,
+	modules,
+	moduleTranslations,
+	rubricCriteria,
+	tasks,
+	taskTranslations,
+} from "./content";
 export {
 	centerStaff,
 	districts,
