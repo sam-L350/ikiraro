@@ -3,6 +3,10 @@ import { db } from "../../db";
 import { roles, userRoles } from "../../db/schema";
 import { errors } from "../api/error";
 import { requireAuth } from "../auth/require-auth";
+import {
+	centerStaffByRole,
+	expandCenterAssignments,
+} from "../geography/centers";
 import { isRoleCode, type PermissionCode } from "./catalog";
 import { decideAccess, type Resource, type ScopeType } from "./decide";
 
@@ -34,7 +38,7 @@ export async function authorize(input: {
 		.innerJoin(roles, eq(userRoles.roleId, roles.id))
 		.where(eq(userRoles.userId, user.id));
 
-	const assignments = rows.flatMap((row) => {
+	const stored = rows.flatMap((row) => {
 		if (!isRoleCode(row.code) || !isScopeType(row.scopeType)) return [];
 		return [
 			{
@@ -44,6 +48,10 @@ export async function authorize(input: {
 			},
 		];
 	});
+	const assignments = expandCenterAssignments(
+		stored,
+		await centerStaffByRole(db, user.id),
+	);
 
 	const decision = decideAccess({
 		actorId: String(user.id),

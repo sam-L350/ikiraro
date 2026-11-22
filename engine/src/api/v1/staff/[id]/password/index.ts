@@ -3,9 +3,8 @@ import { requireAuth } from "../../../../../core/auth/require-auth";
 import { authorize } from "../../../../../core/authz/authorize";
 import { clientIp } from "../../../../../core/http/client-ip";
 import {
-	readAssignments,
+	loadStaffContext,
 	resetStaffPassword,
-	staffContext,
 } from "../../../../../core/identity/staff";
 import { db } from "../../../../../db";
 
@@ -15,7 +14,7 @@ export async function updateStaffPassword(input: {
 	password: string;
 }): Promise<{ reset: true }> {
 	const user = await requireAuth();
-	const context = staffContext(await readAssignments(db, user.id));
+	const context = await loadStaffContext(db, user.id);
 	if (context.mode === "none") {
 		throw errors.forbidden("You cannot change that account.", {
 			reason: "role_ceiling",

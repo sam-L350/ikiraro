@@ -174,6 +174,8 @@ export const en = {
 	temporaryPassword: "Temporary password",
 	staffRole: "Role",
 	staffScope: "Place",
+	staffNoCenters: "No learning center is set up yet.",
+	unknownCenter: "Choose a learning center.",
 	createStaff: "Create the account",
 	cannotAddStaff: "Only an admin or a center manager can add staff.",
 	passwordChangeTitle: "Choose a password",
@@ -374,6 +376,8 @@ export const rw: Record<MessageKey, string> = {
 	temporaryPassword: "Ijambo ry'ibanga ry'agateganyo",
 	staffRole: "Uruhare",
 	staffScope: "Ahantu",
+	staffNoCenters: "Nta kigo cy'amasomo kirashyirwaho.",
+	unknownCenter: "Hitamo ikigo cy'amasomo.",
 	createStaff: "Fungura konti",
 	cannotAddStaff:
 		"Umuyobozi cyangwa umuyobozi w'ikigo ni we wongeyeho abakozi.",

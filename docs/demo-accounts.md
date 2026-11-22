@@ -21,4 +21,4 @@ On the sign-in page, choose **Use email and password**, then the address below. 
 | Mentor | mentor@demo.ikiraro.test |
 | Public verifier | verifier@demo.ikiraro.test |
 
-A trainer and a center manager are scoped to the preview center `dev-center`. The district coordinator is scoped to `dev-district`. The other staff roles are global. Run `bun run db:seed` from `engine/` to create or reset them.
+The trainer is assigned to Gitega Learning Center and Huye Learning Center. The center manager is assigned to Gitega only. The learner's home center is Gitega. The district coordinator is scoped to Nyarugenge. The other staff roles are global. Run `bun run db:seed` from `engine/` to create or reset them.

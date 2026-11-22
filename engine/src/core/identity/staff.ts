@@ -1,6 +1,12 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { Database } from "../../db";
-import { roles, sessions, userRoles, users } from "../../db/schema";
+import {
+	centerStaff,
+	roles,
+	sessions,
+	userRoles,
+	users,
+} from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { hashPassword, verifyPassword } from "../auth/password";
@@ -11,6 +17,7 @@ import {
 	type RoleCode,
 } from "../authz/catalog";
 import type { Assignment, ScopeType } from "../authz/decide";
+import { assignedCenterIds, centerExists } from "../geography/centers";
 import { insertUserWithPassport } from "./create-user";
 
 type StaffDb = Pick<
@@ -47,6 +54,7 @@ export function expectedScope(role: RoleCode): ScopeType {
 
 export function decideStaffGrant(input: {
 	assignments: readonly Assignment[];
+	centerIds: readonly string[];
 	role: RoleCode;
 	scopeType: ScopeType;
 	scopeId: string;
@@ -75,16 +83,14 @@ export function decideStaffGrant(input: {
 	);
 	if (admin) return { ok: true, permission: "admin.manage" };
 
-	const centers = input.assignments.flatMap((assignment) =>
-		assignment.role === "center_manager" &&
-		assignment.scopeType === "center" &&
-		assignment.scopeId
-			? [assignment.scopeId]
-			: [],
+	const managesCenter = input.assignments.some(
+		(assignment) =>
+			assignment.role === "center_manager" && assignment.scopeType === "center",
 	);
 	const centerRole = (CENTER_ROLES as readonly string[]).includes(input.role);
 	if (
-		centers.includes(input.scopeId) &&
+		managesCenter &&
+		input.centerIds.includes(input.scopeId) &&
 		centerRole &&
 		input.scopeType === "center"
 	) {
@@ -136,18 +142,28 @@ export type StaffContext = {
 	roles: { code: RoleCode; name: string; scopeType: ScopeType }[];
 };
 
-export function staffContext(assignments: readonly Assignment[]): StaffContext {
+export async function loadStaffContext(
+	database: Pick<Database, "select">,
+	userId: number,
+): Promise<StaffContext> {
+	const assignments = await readAssignments(database, userId);
+	const centerIds = await assignedCenterIds(database, userId, "center_manager");
+	return staffContext(assignments, centerIds);
+}
+
+export function staffContext(
+	assignments: readonly Assignment[],
+	centerIds: readonly string[] = [],
+): StaffContext {
 	const admin = assignments.some(
 		(assignment) =>
 			assignment.role === "platform_admin" && assignment.scopeType === "global",
 	);
-	const centers = assignments.flatMap((assignment) =>
-		assignment.role === "center_manager" &&
-		assignment.scopeType === "center" &&
-		assignment.scopeId
-			? [assignment.scopeId]
-			: [],
+	const managesCenter = assignments.some(
+		(assignment) =>
+			assignment.role === "center_manager" && assignment.scopeType === "center",
 	);
+	const centers = managesCenter ? [...centerIds] : [];
 	if (admin) {
 		return {
 			mode: "admin",
@@ -219,14 +235,28 @@ export async function createStaffAccount(
 	}
 	const password = cleanPassword(input.password);
 	const assignments = await readAssignments(database, input.actorId);
+	const centerIds = await assignedCenterIds(
+		database,
+		input.actorId,
+		"center_manager",
+	);
 	const gate = decideStaffGrant({
 		assignments,
+		centerIds,
 		role: input.role,
 		scopeType: input.scopeType,
 		scopeId: input.scopeId.trim(),
 	});
 	if (!gate.ok) {
 		throw errors.forbidden(gate.reason, { reason: "role_ceiling" });
+	}
+	const centerScope =
+		input.scopeType === "center" &&
+		(input.role === "trainer" || input.role === "center_manager");
+	if (centerScope && !(await centerExists(database, input.scopeId.trim()))) {
+		throw errors.badRequest("Choose a learning center.", {
+			reason: "unknown_center",
+		});
 	}
 
 	try {
@@ -260,6 +290,13 @@ export async function createStaffAccount(
 				scopeType: input.scopeType,
 				scopeId,
 			});
+			if (centerScope) {
+				await tx.insert(centerStaff).values({
+					centerId: scopeId,
+					userId: created.userId,
+					role: input.role,
+				});
+			}
 			await writeAudit(tx, {
 				actorId: input.actorId,
 				action: "staff.provisioned",
@@ -305,8 +342,7 @@ export async function listStaff(
 	database: Pick<Database, "select">,
 	actorId: number,
 ): Promise<StaffRow[]> {
-	const assignments = await readAssignments(database, actorId);
-	const context = staffContext(assignments);
+	const context = await loadStaffContext(database, actorId);
 	if (context.mode === "none") return [];
 	const rows = await database
 		.select({
@@ -360,9 +396,8 @@ async function assertCanManage(
 			reason: "self",
 		});
 	}
-	const actor = await readAssignments(database, actorId);
 	const target = await readAssignments(database, userId);
-	const context = staffContext(actor);
+	const context = await loadStaffContext(database, actorId);
 	if (context.mode === "admin") return;
 	const onlyOwnCenter =
 		context.mode === "center" &&

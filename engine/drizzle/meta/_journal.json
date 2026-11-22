@@ -36,6 +36,13 @@
       "when": 1795364556905,
       "tag": "0004_phase1_shared_session",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795367968626,
+      "tag": "0005_phase1_geography",
+      "breakpoints": true
     }
   ]
 }

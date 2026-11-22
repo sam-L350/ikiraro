@@ -18,6 +18,9 @@
 			"name": "auth"
 		},
 		{
+			"name": "centers"
+		},
+		{
 			"name": "consents"
 		},
 		{
@@ -1181,6 +1184,316 @@
 											},
 											"required": [
 												"revoked"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/centers/{id}": {
+			"get": {
+				"operationId": "getCenter",
+				"summary": "One center this person works at. A center outside that set stays hidden.",
+				"tags": [
+					"centers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"active": {
+													"type": "boolean"
+												},
+												"sector": {
+													"type": "string"
+												},
+												"district": {
+													"type": "string"
+												},
+												"province": {
+													"type": "string"
+												},
+												"latitude": {
+													"type": "number",
+													"nullable": true
+												},
+												"longitude": {
+													"type": "number",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"active",
+												"sector",
+												"district",
+												"province",
+												"latitude",
+												"longitude"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/centers": {
+			"get": {
+				"operationId": "getCenters",
+				"summary": "Centers this person works at, and the centers they may choose when adding staff.",
+				"tags": [
+					"centers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"assigned": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"active": {
+																"type": "boolean"
+															},
+															"sector": {
+																"type": "string"
+															},
+															"district": {
+																"type": "string"
+															},
+															"province": {
+																"type": "string"
+															},
+															"latitude": {
+																"type": "number",
+																"nullable": true
+															},
+															"longitude": {
+																"type": "number",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"active",
+															"sector",
+															"district",
+															"province",
+															"latitude",
+															"longitude"
+														],
+														"additionalProperties": false
+													}
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"active": {
+																"type": "boolean"
+															},
+															"sector": {
+																"type": "string"
+															},
+															"district": {
+																"type": "string"
+															},
+															"province": {
+																"type": "string"
+															},
+															"latitude": {
+																"type": "number",
+																"nullable": true
+															},
+															"longitude": {
+																"type": "number",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"active",
+															"sector",
+															"district",
+															"province",
+															"latitude",
+															"longitude"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"assigned",
+												"centers"
 											],
 											"additionalProperties": false
 										},

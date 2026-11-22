@@ -7,6 +7,13 @@ export {
 	privacyRequests,
 	systemAuditLogs,
 } from "./compliance";
+export {
+	centerStaff,
+	districts,
+	learningCenters,
+	provinces,
+	sectors,
+} from "./geography";
 export type {
 	Account,
 	NewAccount,

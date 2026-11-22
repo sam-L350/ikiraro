@@ -45,6 +45,8 @@ function reasonKey(error: unknown): MessageKey {
 			return "tryAgain";
 		case "name_required":
 			return "tryAgain";
+		case "unknown_center":
+			return "unknownCenter";
 		default:
 			return "tryAgain";
 	}
@@ -54,6 +56,7 @@ export default function AddStaffPage() {
 	const { t } = useI18n();
 	const { user } = useAuth();
 	const context = useEngine("/staff/context");
+	const directory = useEngine("/centers");
 	const list = useEngine("/staff");
 	const create = useEngineMutation("/staff/create");
 	const deactivate = useEngineMutation("/staff/:id/deactivation");
@@ -75,16 +78,27 @@ export default function AddStaffPage() {
 	const mode = context.data?.mode ?? "none";
 	const roles = context.data?.roles ?? [];
 	const selected = roles.find((item) => item.code === role) ?? roles[0];
-	const centers = context.data?.centers ?? [];
+	const managed = context.data?.centers ?? [];
+	const placeOptions = directory.data?.centers ?? [];
+	const placeNames = new Map(
+		placeOptions.map((center) => [center.id, center.name]),
+	);
 	const scopeType = selected?.scopeType ?? "center";
+	const chosenCenter =
+		scopeId && placeOptions.some((center) => center.id === scopeId)
+			? scopeId
+			: (placeOptions[0]?.id ?? "");
 	const lockedScope =
 		mode === "center"
-			? (centers[0] ?? "")
+			? (managed[0] ?? "")
 			: scopeType === "global"
 				? "global"
 				: scopeType === "self"
 					? "self"
-					: scopeId;
+					: scopeType === "center"
+						? chosenCenter
+						: scopeId;
+	const lockedLabel = placeNames.get(lockedScope) ?? lockedScope;
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -243,8 +257,32 @@ export default function AddStaffPage() {
 								))}
 							</select>
 						</label>
-						{mode === "admin" &&
-						(scopeType === "center" || scopeType === "district") ? (
+						{mode === "admin" && scopeType === "center" ? (
+							placeOptions.length === 0 ? (
+								<p className="font-sans text-sm font-medium text-fg">
+									{t("staffNoCenters")}
+								</p>
+							) : (
+								<label className="flex flex-col gap-2" htmlFor="staff-scope">
+									<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+										{t("staffScope")}
+									</span>
+									<select
+										id="staff-scope"
+										className="h-11 rounded-xl border border-ink/15 bg-canvas px-3 font-sans text-fg"
+										value={chosenCenter}
+										onChange={(event) => setScopeId(event.target.value)}
+										required
+									>
+										{placeOptions.map((center) => (
+											<option key={center.id} value={center.id}>
+												{center.name} · {center.district}
+											</option>
+										))}
+									</select>
+								</label>
+							)
+						) : mode === "admin" && scopeType === "district" ? (
 							<label className="flex flex-col gap-2" htmlFor="staff-scope">
 								<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 									{t("staffScope")}
@@ -258,7 +296,7 @@ export default function AddStaffPage() {
 							</label>
 						) : (
 							<p className="font-sans text-sm font-medium text-fg">
-								{t("staffScope")}: {lockedScope}
+								{t("staffScope")}: {lockedLabel}
 							</p>
 						)}
 						{error ? (
@@ -365,7 +403,7 @@ export default function AddStaffPage() {
 											person.scopeId &&
 											person.scopeId !== "global" &&
 											person.scopeId !== "self"
-												? person.scopeId
+												? (placeNames.get(person.scopeId) ?? person.scopeId)
 												: null;
 										return (
 											<li

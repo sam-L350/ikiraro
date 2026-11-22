@@ -1,13 +1,19 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { env } from "../../config/env";
 import { db } from "../../db";
-import { roles, userRoles } from "../../db/schema";
+import {
+	centerStaff,
+	learningCenters,
+	roles,
+	userRoles,
+	users,
+} from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { ROLE_NAMES, type RoleCode } from "./catalog";
 import type { ScopeType } from "./decide";
 
-/** Stable scope ids for the builder preview. Real centers arrive in phase 1.7. */
+/** Fallback scope ids for roles that are not tied to a learning center. */
 export const PREVIEW_CENTER_ID = "dev-center";
 export const PREVIEW_DISTRICT_ID = "dev-district";
 
@@ -65,6 +71,47 @@ export async function assumePreviewRole(
 			scopeType: assignment.scopeType,
 			scopeId: assignment.scopeId,
 		});
+		await tx.delete(centerStaff).where(eq(centerStaff.userId, userId));
+		const centers = await tx
+			.select({ id: learningCenters.id })
+			.from(learningCenters)
+			.where(eq(learningCenters.active, true))
+			.orderBy(asc(learningCenters.name));
+		if (role === "learner" && centers[0]) {
+			await tx
+				.update(users)
+				.set({ centerId: centers[0].id })
+				.where(eq(users.id, userId));
+		} else {
+			await tx
+				.update(users)
+				.set({ centerId: null })
+				.where(eq(users.id, userId));
+		}
+		if (role === "trainer") {
+			for (const center of centers.slice(0, 2)) {
+				await tx.insert(centerStaff).values({
+					centerId: center.id,
+					userId,
+					role: "trainer",
+				});
+			}
+		}
+		if (role === "center_manager") {
+			const taken = await tx
+				.select({ centerId: centerStaff.centerId })
+				.from(centerStaff)
+				.where(eq(centerStaff.role, "center_manager"));
+			const takenIds = new Set(taken.map((row) => row.centerId));
+			const free = centers.find((center) => !takenIds.has(center.id));
+			if (free) {
+				await tx.insert(centerStaff).values({
+					centerId: free.id,
+					userId,
+					role: "center_manager",
+				});
+			}
+		}
 		await writeAudit(tx, {
 			actorId: userId,
 			action: "dev.role_assumed",

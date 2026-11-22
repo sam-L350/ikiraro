@@ -3,6 +3,7 @@ import { requireAuth } from "../../../../core/auth/require-auth";
 import { authorize } from "../../../../core/authz/authorize";
 import type { RoleCode } from "../../../../core/authz/catalog";
 import type { ScopeType } from "../../../../core/authz/decide";
+import { assignedCenterIds } from "../../../../core/geography/centers";
 import { clientIp } from "../../../../core/http/client-ip";
 import {
 	createStaffAccount,
@@ -28,6 +29,7 @@ export async function createStaffUser(input: {
 	const user = await requireAuth();
 	const gate = decideStaffGrant({
 		assignments: await readAssignments(db, user.id),
+		centerIds: await assignedCenterIds(db, user.id, "center_manager"),
 		role: input.role,
 		scopeType: input.scopeType,
 		scopeId: input.scopeId,

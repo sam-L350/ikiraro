@@ -7,7 +7,16 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { useTestEnv } from "../../../test/helpers";
 import * as schema from "../../db/schema";
-import { roles, userRoles, users } from "../../db/schema";
+import {
+	centerStaff,
+	districts,
+	learningCenters,
+	provinces,
+	roles,
+	sectors,
+	userRoles,
+	users,
+} from "../../db/schema";
 import type { RequestContext } from "../api/context";
 import { requestStorage } from "../api/context";
 import { isApiError } from "../api/error";
@@ -81,6 +90,7 @@ const manager = [
 test("a center manager cannot assign a global admin role", () => {
 	const decision = decideStaffGrant({
 		assignments: manager,
+		centerIds: ["center-a"],
 		role: "platform_admin",
 		scopeType: "global",
 		scopeId: "global",
@@ -91,6 +101,7 @@ test("a center manager cannot assign a global admin role", () => {
 test("a center manager can assign a trainer in their own center", () => {
 	const decision = decideStaffGrant({
 		assignments: manager,
+		centerIds: ["center-a"],
 		role: "trainer",
 		scopeType: "center",
 		scopeId: "center-a",
@@ -119,11 +130,17 @@ describe.serial("staff provisioning", () => {
 				.where(eq(roles.code, "center_manager"))
 				.limit(1);
 			if (!role) throw new Error("center manager role is missing");
+			const centerId = await insertCenter(suite.db);
 			await suite.db.insert(userRoles).values({
 				userId: actor.userId,
 				roleId: role.id,
 				scopeType: "center",
-				scopeId: "center-a",
+				scopeId: centerId,
+			});
+			await suite.db.insert(centerStaff).values({
+				centerId,
+				userId: actor.userId,
+				role: "center_manager",
 			});
 
 			await expect(
@@ -146,7 +163,7 @@ describe.serial("staff provisioning", () => {
 				password: "temporary-pass",
 				role: "trainer",
 				scopeType: "center",
-				scopeId: "center-a",
+				scopeId: centerId,
 				ip: "test",
 			});
 			expect(created.mustChangePassword).toBe(true);
@@ -205,6 +222,41 @@ describe.serial("staff provisioning", () => {
 		30_000,
 	);
 });
+
+async function insertCenter(
+	database: NonNullable<typeof suite>["db"],
+): Promise<string> {
+	const code = crypto.randomUUID().slice(0, 8);
+	const [province] = await database
+		.insert(provinces)
+		.values({ code: `p-${code}`, name: "Test Province" })
+		.returning({ id: provinces.id });
+	if (!province) throw new Error("province was not stored");
+	const [district] = await database
+		.insert(districts)
+		.values({
+			code: `d-${code}`,
+			name: "Test District",
+			provinceId: province.id,
+		})
+		.returning({ id: districts.id });
+	if (!district) throw new Error("district was not stored");
+	const [sector] = await database
+		.insert(sectors)
+		.values({
+			code: `s-${code}`,
+			name: "Test Sector",
+			districtId: district.id,
+		})
+		.returning({ id: sectors.id });
+	if (!sector) throw new Error("sector was not stored");
+	const [center] = await database
+		.insert(learningCenters)
+		.values({ sectorId: sector.id, name: `Center ${code}`, active: true })
+		.returning({ id: learningCenters.id });
+	if (!center) throw new Error("center was not stored");
+	return center.id;
+}
 
 function fakeContext(pathname: string, user: schema.User): RequestContext {
 	const logger = {

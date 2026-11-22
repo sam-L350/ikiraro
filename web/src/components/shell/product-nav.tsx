@@ -45,8 +45,10 @@ export function ProductIdentity({
 }) {
 	const { t } = useI18n();
 	const { user, isLoading } = useAuth();
+	const directory = useEngine("/centers");
 	const name = user?.name ?? user?.email ?? "…";
 	const roles = user?.roles ?? [];
+	const assigned = directory.data?.assigned ?? [];
 
 	return (
 		<div className="flex flex-col items-start gap-2">
@@ -70,7 +72,13 @@ export function ProductIdentity({
 					))}
 				</ul>
 			) : null}
-			<p className="font-sans text-sm text-fg-muted">{t("centerPending")}</p>
+			{assigned.length > 0 ? (
+				<p className="font-sans text-sm text-fg-muted">
+					{assigned.map((center) => center.name).join(" · ")}
+				</p>
+			) : (
+				<p className="font-sans text-sm text-fg-muted">{t("centerPending")}</p>
+			)}
 			{user?.sharedDevice ? (
 				<p className="font-sans text-sm font-medium text-fg">
 					{t("sharedDeviceNote")}

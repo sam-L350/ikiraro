@@ -7,6 +7,7 @@ import {
 	serial,
 	text,
 	timestamp,
+	uuid,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -21,6 +22,8 @@ export const users = pgTable("users", {
 	district: text("district"),
 	sector: text("sector"),
 	village: text("village"),
+	/** Home learning center. Staff coverage lives in center_staff, not here. */
+	centerId: uuid("center_id"),
 	economicSector: text("economic_sector"),
 	locale: text("locale").notNull().default("rw"),
 	photoKey: text("photo_key"),
