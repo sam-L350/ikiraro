@@ -6,7 +6,7 @@ export default function NotFoundPage() {
 	const location = useLocation();
 
 	return (
-		<section className="bg-grid mx-auto flex max-w-xl flex-col items-center rounded-3xl border border-line bg-surface/70 px-8 py-16 text-center">
+		<section className="mx-auto flex max-w-xl flex-col items-center px-8 py-16 text-center">
 			<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-fg-subtle">
 				Error
 			</p>

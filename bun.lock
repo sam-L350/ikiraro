@@ -29,8 +29,9 @@
       "name": "web",
       "version": "0.2.0",
       "dependencies": {
-        "@fontsource-variable/geist": "^5.2.9",
-        "@fontsource-variable/geist-mono": "^5.3.0",
+        "@fontsource/anton": "^5.3.0",
+        "@fontsource/inter-tight": "^5.3.0",
+        "@fontsource/montserrat-alternates": "^5.3.0",
         "@tanstack/react-query": "^5.104.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -221,9 +222,11 @@
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.12", "", {}, "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="],
 
-    "@fontsource-variable/geist": ["@fontsource-variable/geist@5.3.0", "", {}, "sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA=="],
+    "@fontsource/anton": ["@fontsource/anton@5.3.0", "", {}, "sha512-OR1D5n124n2XRs66SbX7IjcOSptljEJE8FcDNnlni2y1/M6KpTx7cU2PIWzTSsBj4WFkHPw24On8qw3qkQZuTw=="],
 
-    "@fontsource-variable/geist-mono": ["@fontsource-variable/geist-mono@5.3.0", "", {}, "sha512-vBbuwDEo9AkrqADMXOrlAR3DFcJi4/JxeuU43FoiQERnNwsfXNnvxvReZG02cQKmyk4DZkZdBZX3oTDvy2zBAw=="],
+    "@fontsource/inter-tight": ["@fontsource/inter-tight@5.3.0", "", {}, "sha512-uRwIrjKSUcCKIFeO2qm3yECA9phwge6Y1qQZvUmwqFgiIVWUELwwuq7pFlmlpPtO33ZtFQVOXQGNuvna1JPs6A=="],
+
+    "@fontsource/montserrat-alternates": ["@fontsource/montserrat-alternates@5.3.0", "", {}, "sha512-PgdXHwkXQZ6YiE6aKgfFiMAn9vFf+5ADdVb95qMgJT/E/bvarrjeeTq+d8rWUAMvxpxn0jwFoGUNcvbzwSx68w=="],
 
     "@hono/node-server": ["@hono/node-server@2.1.4", "", { "peerDependencies": { "hono": "^4 || ^5.0.0-0" } }, "sha512-2g1qeHl4BduwDn6L8nkAvDrPUWPMlkQ//a5NhP/zIyaXKMjZNRV+cG9Csu+BiJFf6+68pqzjf4Hi5sJGKHuS1g=="],
 

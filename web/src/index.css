@@ -1,123 +1,147 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
+@import "@fontsource/anton/400.css";
+@import "@fontsource/montserrat-alternates/400.css";
+@import "@fontsource/montserrat-alternates/500.css";
+@import "@fontsource/montserrat-alternates/600.css";
+@import "@fontsource/montserrat-alternates/700.css";
+@import "@fontsource/inter-tight/500.css";
+@import "@fontsource/inter-tight/600.css";
 
 @custom-variant dark (&:is(.dark *));
 
-/* ─── Design tokens ────────────────────────────────────────────────────────
- * Semantic colours. Pages use these (bg-surface, text-fg-muted, border-line…)
- * and never raw palette values, so light/dark and rebranding are one edit.
- */
+/* Tokens from docs/ui-design-guidelines.md. Components use these names. */
 :root {
 	color-scheme: light;
 
-	--canvas: #f5f7f4;
-	--surface: #ffffff;
-	--surface-2: #eef1ec;
-	--surface-3: #e4e8e2;
-	--line: #e1e5de;
-	--line-strong: #c9cfc6;
+	--canvas: #f4f0ec;
+	--surface: #eee9e4;
+	--surface-2: #fafafa;
+	--surface-3: #eee9e4;
+	--taupe: #d7cdc5;
+	--ink: #252122;
+	--ink-fixed: #252122;
+	--ink-2: #3a3637;
+	--ink-3: #3a3637;
+	--fg: #252122;
+	--fg-muted: #827e7f;
+	--fg-subtle: #b2afb0;
+	--ink-fg: #fafafa;
+	--ink-muted: #b2afb0;
+	--ink-line: color-mix(in srgb, var(--ink) 12%, transparent);
 
-	--fg: #0e1411;
-	--fg-muted: #5a645e;
-	--fg-subtle: #8b958f;
+	--yellow: #f1e044;
+	--green: #25d572;
+	--sky: #91ceef;
+	--orange: #fc5702;
+	--magenta: #f380e7;
+	--violet: #664ff1;
 
-	--accent: #12b76a;
-	--accent-strong: #0e9a58;
-	--accent-fg: #04291a;
-	--accent-soft: #dcf5e8;
-	--accent-ring: rgba(18, 183, 106, 0.35);
+	--accent: var(--yellow);
+	--accent-strong: var(--ink);
+	--accent-fg: var(--ink);
+	--accent-soft: color-mix(in srgb, var(--yellow) 55%, var(--canvas));
+	--accent-ring: color-mix(in srgb, var(--ink) 40%, transparent);
 
-	--ink: #0d110f;
-	--ink-2: #151a17;
-	--ink-3: #1d2320;
-	--ink-fg: #f1f4f0;
-	--ink-muted: #96a09a;
-	--ink-line: #262d29;
+	--info: var(--sky);
+	--info-soft: color-mix(in srgb, var(--sky) 35%, var(--canvas));
+	--warn: var(--orange);
+	--warn-soft: color-mix(in srgb, var(--orange) 18%, var(--canvas));
+	--danger: #d92d20;
+	--danger-soft: #fde8e6;
 
-	--info: #3b7cf5;
-	--info-soft: #e3ecff;
-	--warn: #e39b2c;
-	--warn-soft: #fcf0da;
-	--danger: #e2484f;
-	--danger-soft: #fde7e8;
+	--line: color-mix(in srgb, var(--ink) 12%, var(--canvas));
+	--line-strong: color-mix(in srgb, var(--ink) 20%, var(--canvas));
 
-	--shadow-sm:
-		0 1px 2px rgba(14, 20, 17, 0.05), 0 1px 1px rgba(14, 20, 17, 0.03);
-	--shadow-md:
-		0 8px 24px -12px rgba(14, 20, 17, 0.18), 0 2px 6px rgba(14, 20, 17, 0.05);
-	--shadow-lg: 0 24px 60px -24px rgba(14, 20, 17, 0.3);
+	--shadow-sticker: 4px 4px 0 #000;
+	--shadow-sticker-press: 3px 3px 0 #000;
+	--shadow-sticker-sm: 2px 4px 0 var(--ink);
 
-	/* shadcn compatibility (components/ui/button.tsx etc.) */
+	--background: var(--canvas);
+	--foreground: var(--ink);
+	--card: var(--surface);
+	--card-foreground: var(--ink);
+	--popover: var(--canvas);
+	--popover-foreground: var(--ink);
+	--primary: var(--yellow);
+	--primary-foreground: var(--ink);
+	--secondary: var(--surface);
+	--secondary-foreground: var(--ink);
+	--muted: var(--surface);
+	--muted-foreground: var(--fg-muted);
+	--accent-shadcn: var(--surface);
+	--destructive: var(--danger);
+	--border: var(--line);
+	--input: color-mix(in srgb, var(--ink) 20%, var(--canvas));
+	--ring: var(--ink);
+	--radius: 1.25rem;
+}
+
+.dark {
+	color-scheme: dark;
+
+	--canvas: #252122;
+	--surface: #3a3637;
+	--surface-2: #fafafa;
+	--surface-3: #3a3637;
+	--taupe: #d7cdc5;
+	--ink: #141213;
+	--ink-fixed: #252122;
+	--ink-2: #3a3637;
+	--ink-3: #3a3637;
+	--fg: #f4f0ec;
+	--fg-muted: #b2afb0;
+	--fg-subtle: #827e7f;
+	--ink-fg: #f4f0ec;
+	--ink-muted: #b2afb0;
+	--ink-line: color-mix(in srgb, var(--fg) 12%, transparent);
+
+	--yellow: #f1e044;
+	--green: #25d572;
+	--sky: #91ceef;
+	--orange: #fc5702;
+	--magenta: #f380e7;
+	--violet: #664ff1;
+
+	--accent: var(--yellow);
+	--accent-strong: var(--yellow);
+	--accent-fg: #252122;
+	--accent-soft: color-mix(in srgb, var(--yellow) 24%, var(--canvas));
+
+	--info-soft: color-mix(in srgb, var(--sky) 35%, var(--canvas));
+	--warn-soft: color-mix(in srgb, var(--orange) 18%, var(--canvas));
+	--danger: #d92d20;
+	--danger-soft: #3f1619;
+
+	--line: color-mix(in srgb, var(--fg) 12%, var(--canvas));
+	--line-strong: color-mix(in srgb, var(--fg) 20%, var(--canvas));
+
 	--background: var(--canvas);
 	--foreground: var(--fg);
 	--card: var(--surface);
 	--card-foreground: var(--fg);
 	--popover: var(--surface);
 	--popover-foreground: var(--fg);
-	--primary: var(--ink);
-	--primary-foreground: var(--ink-fg);
-	--secondary: var(--surface-2);
+	--primary: var(--yellow);
+	--primary-foreground: #252122;
+	--secondary: var(--surface);
 	--secondary-foreground: var(--fg);
-	--muted: var(--surface-2);
+	--muted: var(--surface);
 	--muted-foreground: var(--fg-muted);
-	--accent-shadcn: var(--surface-2);
-	--destructive: var(--danger);
-	--border: var(--line);
-	--input: var(--line-strong);
-	--ring: var(--accent);
-	--radius: 0.75rem;
-}
-
-.dark {
-	color-scheme: dark;
-
-	--canvas: #0a0d0b;
-	--surface: #111513;
-	--surface-2: #181d1a;
-	--surface-3: #202623;
-	--line: #232a26;
-	--line-strong: #333b36;
-
-	--fg: #eef2ee;
-	--fg-muted: #a1aba4;
-	--fg-subtle: #6d776f;
-
-	--accent: #2fd484;
-	--accent-strong: #5fe3a3;
-	--accent-fg: #04291a;
-	--accent-soft: #11301f;
-	--accent-ring: rgba(47, 212, 132, 0.35);
-
-	--ink: #050706;
-	--ink-2: #0e1210;
-	--ink-3: #161b18;
-	--ink-fg: #f1f4f0;
-	--ink-muted: #8c968f;
-	--ink-line: #1f2522;
-
-	--info: #6ea0ff;
-	--info-soft: #122140;
-	--warn: #f0b24a;
-	--warn-soft: #3a2a0f;
-	--danger: #ff6b70;
-	--danger-soft: #3f1619;
-
-	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-	--shadow-md: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
-	--shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.8);
 }
 
 @theme inline {
-	--font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-	--font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+	--font-sans: "Montserrat Alternates", ui-sans-serif, system-ui, sans-serif;
+	--font-display: "Anton", ui-sans-serif, sans-serif;
+	--font-meta: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+	--font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
 
 	--color-canvas: var(--canvas);
 	--color-surface: var(--surface);
 	--color-surface-2: var(--surface-2);
 	--color-surface-3: var(--surface-3);
+	--color-taupe: var(--taupe);
 	--color-line: var(--line);
 	--color-line-strong: var(--line-strong);
 	--color-fg: var(--fg);
@@ -128,11 +152,18 @@
 	--color-accent-fg: var(--accent-fg);
 	--color-accent-soft: var(--accent-soft);
 	--color-ink: var(--ink);
+	--color-ink-fixed: var(--ink-fixed);
 	--color-ink-2: var(--ink-2);
 	--color-ink-3: var(--ink-3);
 	--color-ink-fg: var(--ink-fg);
 	--color-ink-muted: var(--ink-muted);
 	--color-ink-line: var(--ink-line);
+	--color-yellow: var(--yellow);
+	--color-green: var(--green);
+	--color-sky: var(--sky);
+	--color-orange: var(--orange);
+	--color-magenta: var(--magenta);
+	--color-violet: var(--violet);
 	--color-info: var(--info);
 	--color-info-soft: var(--info-soft);
 	--color-warn: var(--warn);
@@ -140,11 +171,10 @@
 	--color-danger: var(--danger);
 	--color-danger-soft: var(--danger-soft);
 
-	--shadow-sm: var(--shadow-sm);
-	--shadow-md: var(--shadow-md);
-	--shadow-lg: var(--shadow-lg);
+	--shadow-sticker: var(--shadow-sticker);
+	--shadow-sticker-press: var(--shadow-sticker-press);
+	--shadow-sticker-sm: var(--shadow-sticker-sm);
 
-	/* shadcn aliases */
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -169,74 +199,45 @@
 	--radius-3xl: calc(var(--radius) * 2.2);
 }
 
-/* ─── Utilities ──────────────────────────────────────────────────────────── */
-
-/* Dotted grid used behind hero / empty areas. */
-@utility bg-grid {
-	background-image: radial-gradient(
-		circle at 1px 1px,
-		color-mix(in oklab, var(--line-strong) 70%, transparent) 1px,
-		transparent 0
-	);
-	background-size: 22px 22px;
+@utility shadow-sticker {
+	box-shadow: var(--shadow-sticker);
 }
-
-@utility bg-grid-ink {
-	background-image: radial-gradient(
-		circle at 1px 1px,
-		rgba(255, 255, 255, 0.07) 1px,
-		transparent 0
-	);
-	background-size: 22px 22px;
+@utility shadow-sticker-press {
+	box-shadow: var(--shadow-sticker-press);
 }
-
-/* Soft radial glow (accent) for hero backgrounds. */
-@utility bg-glow {
-	background-image:
-		radial-gradient(
-			60% 50% at 20% 0%,
-			color-mix(in oklab, var(--accent) 22%, transparent),
-			transparent 70%
-		),
-		radial-gradient(
-			40% 40% at 90% 10%,
-			color-mix(in oklab, var(--info) 14%, transparent),
-			transparent 70%
-		);
+@utility shadow-sticker-sm {
+	box-shadow: var(--shadow-sticker-sm);
 }
-
-/* Thin top accent line on cards. */
-@utility card-accent {
-	position: relative;
-	overflow: hidden;
+@utility font-display {
+	font-family: var(--font-display);
 }
-@utility card-accent-bar {
-	content: "";
+@utility font-meta {
+	font-family: var(--font-meta);
 }
 
 @utility text-balance {
 	text-wrap: balance;
 }
-
+@utility text-pretty {
+	text-wrap: pretty;
+}
 @utility tabular {
 	font-variant-numeric: tabular-nums;
 }
 
-/* ─── Base ───────────────────────────────────────────────────────────────── */
-
 @layer base {
 	* {
-		@apply border-line outline-accent/50;
+		@apply border-line outline-ink/40;
 	}
 	html {
 		@apply font-sans antialiased;
-		font-feature-settings: "cv11", "ss01";
 	}
 	body {
-		@apply m-0 min-h-screen bg-canvas text-fg;
+		@apply m-0 min-h-screen bg-canvas text-fg text-pretty;
 	}
 	::selection {
-		background: color-mix(in oklab, var(--accent) 35%, transparent);
+		background: color-mix(in srgb, var(--yellow) 70%, transparent);
+		color: var(--ink);
 	}
 	code,
 	kbd,
@@ -244,48 +245,10 @@
 		@apply font-mono;
 	}
 	:where(p, li) code {
-		@apply rounded-md bg-surface-2 px-1.5 py-0.5 text-[0.85em] text-fg;
+		@apply rounded-md bg-surface px-1.5 py-0.5 text-[0.85em] text-ink;
 	}
 }
 
-/* ─── Keyframes ──────────────────────────────────────────────────────────── */
-
-@keyframes pulse-dot {
-	0%,
-	100% {
-		box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 60%, transparent);
-	}
-	70% {
-		box-shadow: 0 0 0 7px transparent;
-	}
-}
-
-@keyframes rise {
-	from {
-		opacity: 0;
-		transform: translateY(10px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-@utility animate-rise {
-	animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-@utility delay-1 {
-	animation-delay: 80ms;
-}
-@utility delay-2 {
-	animation-delay: 160ms;
-}
-@utility delay-3 {
-	animation-delay: 240ms;
-}
-
-/* Respect reduced-motion preferences: no entrance animations or transitions. */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,

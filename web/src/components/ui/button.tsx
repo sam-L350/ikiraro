@@ -4,29 +4,40 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-	"inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent font-semibold transition-all duration-150 outline-none select-none focus-visible:ring-3 focus-visible:ring-accent/40 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+	"inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap border border-transparent font-meta text-sm font-semibold uppercase tracking-wide outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ink/40 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 	{
 		variants: {
 			variant: {
+				sticker:
+					"h-11 rounded-full bg-yellow px-5 text-ink-fixed shadow-sticker transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-px hover:translate-y-px hover:shadow-sticker-press active:translate-x-1 active:translate-y-1 active:shadow-none",
+				ink: "h-11 rounded-full bg-green px-5 text-ink-fixed shadow-sticker-sm transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-px hover:translate-y-px active:translate-x-1 active:translate-y-1 active:shadow-none",
+				quiet:
+					"h-11 rounded-full bg-transparent px-3 text-fg shadow-none hover:underline",
+				destructive:
+					"h-11 rounded-full bg-danger px-5 text-white shadow-sticker transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-px hover:translate-y-px hover:shadow-sticker-press active:translate-x-1 active:translate-y-1 active:shadow-none",
 				default:
-					"bg-ink text-ink-fg shadow-sm hover:bg-ink-3 dark:bg-ink-fg dark:text-ink dark:hover:bg-white",
-				accent: "bg-accent text-accent-fg shadow-sm hover:bg-accent-strong",
-				outline: "border-line-strong bg-surface text-fg hover:bg-surface-2",
-				ghost: "text-fg-muted hover:bg-surface-2 hover:text-fg",
-				soft: "bg-surface-2 text-fg hover:bg-surface-3",
-				danger: "bg-danger-soft text-danger hover:bg-danger hover:text-white",
-				link: "text-accent-strong underline-offset-4 hover:underline dark:text-accent",
+					"h-11 rounded-full bg-ink px-5 text-ink-fg shadow-sticker-sm transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-px hover:translate-y-px active:translate-x-1 active:translate-y-1 active:shadow-none",
+				accent:
+					"h-11 rounded-full bg-yellow px-5 text-ink-fixed shadow-sticker transition-[transform,box-shadow] duration-150 ease-out hover:translate-x-px hover:translate-y-px hover:shadow-sticker-press active:translate-x-1 active:translate-y-1 active:shadow-none",
+				outline:
+					"h-11 rounded-full bg-transparent px-5 text-fg shadow-none hover:underline",
+				ghost:
+					"h-11 rounded-full bg-transparent px-3 text-fg shadow-none hover:bg-surface",
+				soft: "h-11 rounded-full bg-surface px-5 text-fg shadow-none",
+				danger:
+					"h-11 rounded-full bg-danger px-5 text-white shadow-sticker transition-[transform,box-shadow] duration-150 ease-out active:translate-x-1 active:translate-y-1 active:shadow-none",
+				link: "h-11 rounded-full bg-transparent px-0 text-fg shadow-none underline-offset-4 hover:underline",
 			},
 			size: {
-				default: "h-10 px-4 text-sm",
-				sm: "h-8 rounded-lg px-3 text-xs",
-				lg: "h-12 rounded-2xl px-6 text-base",
-				icon: "size-10",
-				"icon-sm": "size-8 rounded-lg",
+				default: "",
+				sm: "h-11 px-4 text-xs",
+				lg: "h-11 px-5",
+				icon: "size-11 rounded-full px-0",
+				"icon-sm": "size-11 rounded-full px-0",
 			},
 		},
 		defaultVariants: {
-			variant: "default",
+			variant: "sticker",
 			size: "default",
 		},
 	},
@@ -34,7 +45,7 @@ const buttonVariants = cva(
 
 function Button({
 	className,
-	variant = "default",
+	variant = "sticker",
 	size = "default",
 	asChild = false,
 	...props

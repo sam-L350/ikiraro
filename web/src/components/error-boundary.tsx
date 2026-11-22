@@ -28,7 +28,7 @@ export function RouteErrorBoundary() {
 	if (import.meta.env.DEV) console.error(error);
 
 	return (
-		<section className="bg-grid mx-auto max-w-lg rounded-3xl border border-line bg-surface/80 p-10 text-center shadow-md">
+		<section className="mx-auto max-w-lg rounded-[20px] bg-danger-soft p-10 text-center text-ink">
 			<div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-danger-soft text-danger">
 				<TriangleAlert className="size-6" aria-hidden />
 			</div>
