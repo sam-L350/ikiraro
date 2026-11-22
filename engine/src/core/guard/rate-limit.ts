@@ -20,6 +20,15 @@ export function resetRateLimits(): void {
 	buckets.clear();
 }
 
+/** One bucket per route, phone, and IP. A missing phone or IP stays its own slot. */
+export function rateLimitKey(parts: {
+	route: string;
+	phone?: string;
+	ip?: string;
+}): string {
+	return [parts.route, parts.phone ?? "", parts.ip ?? ""].join("\n");
+}
+
 export function consumeRateLimit(input: {
 	key: string;
 	limit: number;

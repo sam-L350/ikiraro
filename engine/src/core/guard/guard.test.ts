@@ -3,6 +3,7 @@ import { readLatestFlag } from "./flags";
 import { createMemoryIdempotencyStore, runIdempotent } from "./idempotency";
 import {
 	consumeRateLimit,
+	rateLimitKey,
 	resetRateLimits,
 	resetTestClock,
 	setTestClock,
@@ -46,6 +47,35 @@ describe("consumeRateLimit", () => {
 		expect(consumeRateLimit({ key, limit: 2, windowMs: 1_000 }).ok).toBe(false);
 		setTestClock(() => 2_100);
 		expect(consumeRateLimit({ key, limit: 2, windowMs: 1_000 }).ok).toBe(true);
+		resetTestClock();
+		resetRateLimits();
+	});
+
+	test("a phone, an IP, and a route do not share a bucket", () => {
+		resetRateLimits();
+		setTestClock(() => 5_000);
+		const base = {
+			phone: "250788000000",
+			ip: "203.0.113.8",
+			route: "POST /otp",
+		};
+		const key = rateLimitKey(base);
+		expect(consumeRateLimit({ key, limit: 1, windowMs: 1_000 }).ok).toBe(true);
+		expect(consumeRateLimit({ key, limit: 1, windowMs: 1_000 }).ok).toBe(false);
+		expect(
+			consumeRateLimit({
+				key: rateLimitKey({ ...base, route: "POST /login" }),
+				limit: 1,
+				windowMs: 1_000,
+			}).ok,
+		).toBe(true);
+		expect(
+			consumeRateLimit({
+				key: rateLimitKey({ ...base, ip: "203.0.113.9" }),
+				limit: 1,
+				windowMs: 1_000,
+			}).ok,
+		).toBe(true);
 		resetTestClock();
 		resetRateLimits();
 	});
