@@ -20,6 +20,13 @@ export type ModuleProgressStatus =
 	| "started"
 	| "complete";
 
+export type ProgressCriterion = {
+	id: string;
+	position: number;
+	promptEn: string;
+	promptRw: string;
+};
+
 export type ProgressTask = {
 	id: string;
 	moduleId: string;
@@ -27,6 +34,10 @@ export type ProgressTask = {
 	required: boolean;
 	titleEn: string;
 	titleRw: string;
+	instructionsEn: string;
+	instructionsRw: string;
+	evidenceType: string | null;
+	criteria: ProgressCriterion[];
 	status: TaskProgressStatus;
 };
 
@@ -55,6 +66,9 @@ export type EnrollmentProgress = {
 	courseId: string;
 	centerId: string;
 	contentVersionId: string;
+	startedAt: string;
+	courseTitleEn: string;
+	courseTitleRw: string;
 	requiredTotal: number;
 	requiredComplete: number;
 	modules: ProgressModule[];
@@ -76,6 +90,10 @@ type SnapshotTask = {
 	required: boolean;
 	titleEn: string;
 	titleRw: string;
+	instructionsEn: string;
+	instructionsRw: string;
+	evidenceType: string | null;
+	criteria: ProgressCriterion[];
 };
 
 function asRecord(value: JsonValue): Record<string, JsonValue> | null {
@@ -101,6 +119,29 @@ function requiresOf(record: Record<string, JsonValue>): string[] {
 	return value.filter((item): item is string => typeof item === "string");
 }
 
+function criteriaOf(record: Record<string, JsonValue>): ProgressCriterion[] {
+	const value = record.criteria;
+	if (!Array.isArray(value)) return [];
+	const criteria: ProgressCriterion[] = [];
+	for (const item of value) {
+		const row = asRecord(item);
+		if (!row || typeof row.id !== "string") continue;
+		criteria.push({
+			id: row.id,
+			position: positionOf(row),
+			promptEn: textOf(row, "promptEn"),
+			promptRw: textOf(row, "promptRw"),
+		});
+	}
+	criteria.sort((left, right) => left.position - right.position);
+	return criteria;
+}
+
+function evidenceOf(record: Record<string, JsonValue>): string | null {
+	const value = record.evidenceType;
+	return typeof value === "string" && value.length > 0 ? value : null;
+}
+
 function taskOf(value: JsonValue): SnapshotTask | null {
 	const record = asRecord(value);
 	if (!record || typeof record.id !== "string") return null;
@@ -110,6 +151,10 @@ function taskOf(value: JsonValue): SnapshotTask | null {
 		required: record.required !== false,
 		titleEn: textOf(record, "titleEn"),
 		titleRw: textOf(record, "titleRw"),
+		instructionsEn: textOf(record, "instructionsEn"),
+		instructionsRw: textOf(record, "instructionsRw"),
+		evidenceType: evidenceOf(record),
+		criteria: criteriaOf(record),
 	};
 }
 
@@ -125,13 +170,7 @@ export function parseProgressSnapshot(snapshot: JsonValue): SnapshotModule[] {
 			for (const taskValue of moduleRecord.tasks) {
 				const task = taskOf(taskValue);
 				if (task) {
-					tasks.push({
-						id: task.id,
-						position: task.position,
-						required: task.required,
-						titleEn: task.titleEn,
-						titleRw: task.titleRw,
-					});
+					tasks.push(task);
 				}
 			}
 		}
@@ -218,6 +257,9 @@ function present(
 		courseId: string;
 		centerId: string;
 		contentVersionId: string;
+		startedAt: Date;
+		courseTitleEn: string;
+		courseTitleRw: string;
 	},
 	modules: SnapshotModule[],
 	taskRows: ReadonlyMap<string, TaskProgressStatus>,
@@ -256,6 +298,9 @@ function present(
 		courseId: enrollment.courseId,
 		centerId: enrollment.centerId,
 		contentVersionId: enrollment.contentVersionId,
+		startedAt: enrollment.startedAt.toISOString(),
+		courseTitleEn: enrollment.courseTitleEn,
+		courseTitleRw: enrollment.courseTitleRw,
 		requiredTotal: requiredTasksFlat.length,
 		requiredComplete: requiredTasksFlat.filter(
 			(task) => task.status === "complete",
@@ -273,6 +318,7 @@ async function loadEnrollment(database: ProgressDb, enrollmentId: string) {
 			courseId: enrollments.courseId,
 			centerId: enrollments.centerId,
 			contentVersionId: enrollments.contentVersionId,
+			startedAt: enrollments.startedAt,
 			snapshot: contentVersions.snapshot,
 		})
 		.from(enrollments)
@@ -283,8 +329,18 @@ async function loadEnrollment(database: ProgressDb, enrollmentId: string) {
 		.where(eq(enrollments.id, enrollmentId))
 		.limit(1);
 	if (!enrollment) throw errors.notFound("That enrollment was not found.");
+	const titles = asRecord(enrollment.snapshot);
 	return {
-		enrollment,
+		enrollment: {
+			id: enrollment.id,
+			userId: enrollment.userId,
+			courseId: enrollment.courseId,
+			centerId: enrollment.centerId,
+			contentVersionId: enrollment.contentVersionId,
+			startedAt: enrollment.startedAt,
+			courseTitleEn: titles ? textOf(titles, "titleEn") : "",
+			courseTitleRw: titles ? textOf(titles, "titleRw") : "",
+		},
 		modules: parseProgressSnapshot(enrollment.snapshot),
 	};
 }

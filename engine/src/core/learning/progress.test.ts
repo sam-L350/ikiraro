@@ -102,6 +102,33 @@ describe("next task", () => {
 		expect(deriveNextTask(modules, new Set(["task-a", "task-c"]))).toBeNull();
 	});
 
+	test("a pinned task keeps its instructions, evidence type, and rubric", () => {
+		const modules = parseProgressSnapshot({
+			modules: [
+				{
+					id: "module-a",
+					position: 0,
+					tasks: [
+						{
+							id: "task-a",
+							instructionsEn: "Photograph the page.",
+							instructionsRw: "Fata ifoto y'urupapuro.",
+							evidenceType: "photo",
+							criteria: [
+								{ id: "criterion-a", promptEn: "The page is readable." },
+							],
+						},
+					],
+				},
+			],
+		});
+		const task = modules[0]?.tasks[0];
+		expect(task?.instructionsEn).toBe("Photograph the page.");
+		expect(task?.instructionsRw).toBe("Fata ifoto y'urupapuro.");
+		expect(task?.evidenceType).toBe("photo");
+		expect(task?.criteria[0]?.promptEn).toBe("The page is readable.");
+	});
+
 	test("a module stays closed until every required earlier module is complete", () => {
 		const modules = parseProgressSnapshot({
 			modules: [

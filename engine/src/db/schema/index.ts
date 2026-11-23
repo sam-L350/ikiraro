@@ -43,5 +43,3 @@ export {
 	digitalPassports,
 	otpChallenges,
 } from "./registration";
-export type { NewTodo, Todo } from "./todos";
-export { todos } from "./todos";

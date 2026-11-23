@@ -171,7 +171,7 @@ export default function AboutPage() {
 								["app/about/page.tsx", "/about"],
 								["app/users/[id]/page.tsx", "/users/:id"],
 								["app/docs/[...slug]/page.tsx", "/docs/*"],
-								["app/(protected)/todos/page.tsx", "/todos"],
+								["app/(protected)/(learner)/home/page.tsx", "/home"],
 								["app/layout.tsx", "wraps children"],
 								["app/not-found.tsx", "404"],
 							].map(([file, route]) => (
@@ -202,13 +202,12 @@ export default function AboutPage() {
 							See it running
 						</h2>
 						<p className="mt-2 max-w-lg text-sm text-ink-muted">
-							The todo demo uses every piece: a protected route, four generated
-							endpoints, optimistic mutations and cache invalidation.
+							The learner home shows the next task on the version they started.
 						</p>
 					</div>
 					<Button asChild size="lg" variant="accent">
-						<Link to="/todos">
-							Open the demo
+						<Link to="/home">
+							Open home
 							<ArrowRight className="size-4" aria-hidden />
 						</Link>
 					</Button>

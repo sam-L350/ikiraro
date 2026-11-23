@@ -53,7 +53,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
 - [ ] Phase 3 — Learning (`phase/3-learning`)
   - [x] `phase/3.1-catalog-enrollment`
   - [x] `phase/3.2-progress-and-prerequisites`
-  - [ ] `phase/3.3-learner-home-and-task`
+  - [x] `phase/3.3-learner-home-and-task`
   - [ ] `phase/3.4-audio-and-language`
 - [ ] Phase 4 — Trust loop (`phase/4-trust-loop`)
   - [ ] `phase/4.1-private-media`

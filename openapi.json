@@ -64,9 +64,6 @@
 		},
 		{
 			"name": "tasks"
-		},
-		{
-			"name": "todos"
 		}
 	],
 	"paths": {
@@ -5907,6 +5904,15 @@
 												"contentVersionId": {
 													"type": "string"
 												},
+												"startedAt": {
+													"type": "string"
+												},
+												"courseTitleEn": {
+													"type": "string"
+												},
+												"courseTitleRw": {
+													"type": "string"
+												},
 												"requiredTotal": {
 													"type": "number"
 												},
@@ -5974,6 +5980,43 @@
 																		"titleRw": {
 																			"type": "string"
 																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"promptEn",
+																					"promptRw"
+																				],
+																				"additionalProperties": false
+																			}
+																		},
 																		"status": {
 																			"type": "string",
 																			"enum": [
@@ -5990,6 +6033,10 @@
 																		"required",
 																		"titleEn",
 																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"evidenceType",
+																		"criteria",
 																		"status"
 																	],
 																	"additionalProperties": false
@@ -6042,6 +6089,9 @@
 												"courseId",
 												"centerId",
 												"contentVersionId",
+												"startedAt",
+												"courseTitleEn",
+												"courseTitleRw",
 												"requiredTotal",
 												"requiredComplete",
 												"modules",
@@ -6180,6 +6230,15 @@
 												"contentVersionId": {
 													"type": "string"
 												},
+												"startedAt": {
+													"type": "string"
+												},
+												"courseTitleEn": {
+													"type": "string"
+												},
+												"courseTitleRw": {
+													"type": "string"
+												},
 												"requiredTotal": {
 													"type": "number"
 												},
@@ -6247,6 +6306,43 @@
 																		"titleRw": {
 																			"type": "string"
 																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"promptEn",
+																					"promptRw"
+																				],
+																				"additionalProperties": false
+																			}
+																		},
 																		"status": {
 																			"type": "string",
 																			"enum": [
@@ -6263,6 +6359,10 @@
 																		"required",
 																		"titleEn",
 																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"evidenceType",
+																		"criteria",
 																		"status"
 																	],
 																	"additionalProperties": false
@@ -6315,6 +6415,9 @@
 												"courseId",
 												"centerId",
 												"contentVersionId",
+												"startedAt",
+												"courseTitleEn",
+												"courseTitleRw",
 												"requiredTotal",
 												"requiredComplete",
 												"modules",
@@ -6429,6 +6532,15 @@
 															"contentVersionId": {
 																"type": "string"
 															},
+															"startedAt": {
+																"type": "string"
+															},
+															"courseTitleEn": {
+																"type": "string"
+															},
+															"courseTitleRw": {
+																"type": "string"
+															},
 															"requiredTotal": {
 																"type": "number"
 															},
@@ -6496,6 +6608,43 @@
 																					"titleRw": {
 																						"type": "string"
 																					},
+																					"instructionsEn": {
+																						"type": "string"
+																					},
+																					"instructionsRw": {
+																						"type": "string"
+																					},
+																					"evidenceType": {
+																						"type": "string",
+																						"nullable": true
+																					},
+																					"criteria": {
+																						"type": "array",
+																						"items": {
+																							"type": "object",
+																							"properties": {
+																								"id": {
+																									"type": "string"
+																								},
+																								"position": {
+																									"type": "number"
+																								},
+																								"promptEn": {
+																									"type": "string"
+																								},
+																								"promptRw": {
+																									"type": "string"
+																								}
+																							},
+																							"required": [
+																								"id",
+																								"position",
+																								"promptEn",
+																								"promptRw"
+																							],
+																							"additionalProperties": false
+																						}
+																					},
 																					"status": {
 																						"type": "string",
 																						"enum": [
@@ -6512,6 +6661,10 @@
 																					"required",
 																					"titleEn",
 																					"titleRw",
+																					"instructionsEn",
+																					"instructionsRw",
+																					"evidenceType",
+																					"criteria",
 																					"status"
 																				],
 																				"additionalProperties": false
@@ -6564,6 +6717,9 @@
 															"courseId",
 															"centerId",
 															"contentVersionId",
+															"startedAt",
+															"courseTitleEn",
+															"courseTitleRw",
 															"requiredTotal",
 															"requiredComplete",
 															"modules",
@@ -12847,496 +13003,6 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication required",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/todos/{id}/delete": {
-			"delete": {
-				"operationId": "deleteTodo",
-				"summary": "Delete one of the signed-in user's todos.",
-				"tags": [
-					"todos"
-				],
-				"security": [
-					{
-						"cookieAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "number"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Successful response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"ok": {
-											"const": true,
-											"type": "boolean"
-										},
-										"data": {
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean"
-												}
-											},
-											"required": [
-												"success"
-											],
-											"additionalProperties": false
-										},
-										"meta": {
-											"type": "object",
-											"properties": {
-												"requestId": {
-													"type": "string"
-												},
-												"timestamp": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"requestId",
-												"timestamp"
-											],
-											"additionalProperties": false
-										}
-									},
-									"required": [
-										"ok",
-										"data",
-										"meta"
-									],
-									"additionalProperties": false
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Validation failed",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication required",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/todos/{id}/update": {
-			"put": {
-				"operationId": "updateTodo",
-				"summary": "Update the title and/or completion state of one of the signed-in user's todos.",
-				"tags": [
-					"todos"
-				],
-				"security": [
-					{
-						"cookieAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "number"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"title": {
-										"type": "string"
-									},
-									"completed": {
-										"type": "boolean"
-									}
-								},
-								"required": [],
-								"additionalProperties": false
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Successful response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"ok": {
-											"const": true,
-											"type": "boolean"
-										},
-										"data": {
-											"type": "object",
-											"properties": {
-												"id": {
-													"type": "number"
-												},
-												"title": {
-													"type": "string"
-												},
-												"completed": {
-													"type": "boolean"
-												},
-												"createdAt": {
-													"type": "string",
-													"description": "Date string"
-												},
-												"updatedAt": {
-													"type": "string",
-													"description": "Date string"
-												}
-											},
-											"required": [
-												"id",
-												"title",
-												"completed",
-												"createdAt",
-												"updatedAt"
-											],
-											"additionalProperties": false
-										},
-										"meta": {
-											"type": "object",
-											"properties": {
-												"requestId": {
-													"type": "string"
-												},
-												"timestamp": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"requestId",
-												"timestamp"
-											],
-											"additionalProperties": false
-										}
-									},
-									"required": [
-										"ok",
-										"data",
-										"meta"
-									],
-									"additionalProperties": false
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Validation failed",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication required",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/todos/create": {
-			"post": {
-				"operationId": "createTodo",
-				"summary": "Create a todo for the signed-in user.",
-				"tags": [
-					"todos"
-				],
-				"security": [
-					{
-						"cookieAuth": []
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"title": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"title"
-								],
-								"additionalProperties": false
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Successful response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"ok": {
-											"const": true,
-											"type": "boolean"
-										},
-										"data": {
-											"type": "object",
-											"properties": {
-												"id": {
-													"type": "number"
-												},
-												"title": {
-													"type": "string"
-												},
-												"completed": {
-													"type": "boolean"
-												},
-												"createdAt": {
-													"type": "string",
-													"description": "Date string"
-												},
-												"updatedAt": {
-													"type": "string",
-													"description": "Date string"
-												}
-											},
-											"required": [
-												"id",
-												"title",
-												"completed",
-												"createdAt",
-												"updatedAt"
-											],
-											"additionalProperties": false
-										},
-										"meta": {
-											"type": "object",
-											"properties": {
-												"requestId": {
-													"type": "string"
-												},
-												"timestamp": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"requestId",
-												"timestamp"
-											],
-											"additionalProperties": false
-										}
-									},
-									"required": [
-										"ok",
-										"data",
-										"meta"
-									],
-									"additionalProperties": false
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Validation failed",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication required",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/todos": {
-			"get": {
-				"operationId": "getTodos",
-				"summary": "List the signed-in user's todos, newest first.",
-				"tags": [
-					"todos"
-				],
-				"security": [
-					{
-						"cookieAuth": []
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Successful response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"ok": {
-											"const": true,
-											"type": "boolean"
-										},
-										"data": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"properties": {
-													"id": {
-														"type": "number"
-													},
-													"title": {
-														"type": "string"
-													},
-													"completed": {
-														"type": "boolean"
-													},
-													"createdAt": {
-														"type": "string",
-														"description": "Date string"
-													},
-													"updatedAt": {
-														"type": "string",
-														"description": "Date string"
-													}
-												},
-												"required": [
-													"id",
-													"title",
-													"completed",
-													"createdAt",
-													"updatedAt"
-												],
-												"additionalProperties": false
-											}
-										},
-										"meta": {
-											"type": "object",
-											"properties": {
-												"requestId": {
-													"type": "string"
-												},
-												"timestamp": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"requestId",
-												"timestamp"
-											],
-											"additionalProperties": false
-										}
-									},
-									"required": [
-										"ok",
-										"data",
-										"meta"
-									],
-									"additionalProperties": false
 								}
 							}
 						}

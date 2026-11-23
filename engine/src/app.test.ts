@@ -39,7 +39,9 @@ describe("generated application", () => {
 
 	test("protected endpoints return 401 without a session (and never touch the database)", async () => {
 		const app = createApp();
-		const response = await app.fetch(new Request("http://x/api/v1/todos"));
+		const response = await app.fetch(
+			new Request("http://x/api/v1/enrollments"),
+		);
 		const body = await readJson<ErrorBody>(response);
 		expect(response.status).toBe(401);
 		expect(body.error.code).toBe("UNAUTHORIZED");
@@ -48,10 +50,10 @@ describe("generated application", () => {
 	test("validation runs before the handler", async () => {
 		const app = createApp();
 		const response = await app.fetch(
-			new Request("http://x/api/v1/todos/create", {
+			new Request("http://x/api/v1/courses/create", {
 				method: "POST",
 				headers: { "content-type": "application/json" },
-				body: JSON.stringify({ title: 123 }),
+				body: JSON.stringify({ titleEn: 123 }),
 			}),
 		);
 		expect(response.status).toBe(400);
@@ -121,7 +123,7 @@ describe("generated application", () => {
 				{ get?: { security?: unknown[]; summary: string } }
 			>;
 		}>(await app.fetch(new Request("http://x/openapi.json")));
-		expect(body.paths["/api/v1/todos"]?.get?.security).toEqual([
+		expect(body.paths["/api/v1/enrollments"]?.get?.security).toEqual([
 			{ cookieAuth: [] },
 		]);
 		expect(body.paths["/api/v1/system/health"]?.get?.summary).toBe(
