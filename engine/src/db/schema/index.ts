@@ -51,6 +51,11 @@ export {
 } from "./learning";
 export { mediaObjects } from "./media";
 export {
+	notificationPreferences,
+	notifications,
+	notificationTemplates,
+} from "./notifications";
+export {
 	consents,
 	declaredRelationships,
 	digitalPassports,

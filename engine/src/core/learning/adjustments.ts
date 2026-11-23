@@ -3,7 +3,7 @@ import { alias } from "drizzle-orm/pg-core";
 import type { Database } from "../../db";
 import { pointAdjustments, pointTransactions, users } from "../../db/schema";
 import { errors } from "../api/error";
-import { writeAudit } from "../audit/write";
+import { writeAudit, writeEvent } from "../audit/write";
 
 const AMOUNT_LIMIT = 1_000_000;
 const REASON_LIMIT = 500;
@@ -270,6 +270,14 @@ export async function approvePointAdjustment(
 			metadata: {
 				learnerUserId: request.learnerUserId,
 				amount: request.amount,
+			},
+		});
+		await writeEvent(tx, {
+			name: "points.adjusted",
+			payload: {
+				userId: request.learnerUserId,
+				points: request.amount,
+				adjustmentId: request.id,
 			},
 		});
 	});

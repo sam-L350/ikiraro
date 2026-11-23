@@ -8,6 +8,8 @@
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { logger } from "./core/logger";
+import { drainNotifications } from "./core/notifications/drain";
+import { db } from "./db";
 
 const app = createApp();
 
@@ -28,8 +30,22 @@ logger.info(
 	},
 );
 
+let draining = false;
+const drainTimer = setInterval(() => {
+	if (draining) return;
+	draining = true;
+	drainNotifications(db)
+		.catch((error: unknown) => {
+			logger.error("notification drain failed", { error });
+		})
+		.finally(() => {
+			draining = false;
+		});
+}, 15_000);
+
 function shutdown(signal: string) {
 	logger.info(`received ${signal}, shutting down`);
+	clearInterval(drainTimer);
 	server.stop(true);
 	process.exit(0);
 }

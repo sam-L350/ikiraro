@@ -162,6 +162,13 @@
       "when": 1795446333989,
       "tag": "0022_phase5_manual_adjustments",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1795447283495,
+      "tag": "0023_phase6_notification_outbox",
+      "breakpoints": true
     }
   ]
 }

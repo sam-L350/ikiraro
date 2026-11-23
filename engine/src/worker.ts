@@ -8,6 +8,8 @@ import { createApp } from "./app";
 import { configureEnv } from "./config/env";
 import { cleanExpiredSessions } from "./core/auth/sessions";
 import { logger } from "./core/logger";
+import { drainNotifications } from "./core/notifications/drain";
+import { db } from "./db";
 
 type Bindings = Record<string, string | undefined>;
 type ExecutionContext = { waitUntil(promise: Promise<unknown>): void };
@@ -29,9 +31,14 @@ export default {
 	): Promise<void> {
 		configureEnv(bindings);
 		ctx.waitUntil(
-			cleanExpiredSessions().catch((error) => {
-				logger.error("failed to clean expired sessions", { error });
-			}),
+			Promise.all([
+				cleanExpiredSessions().catch((error) => {
+					logger.error("failed to clean expired sessions", { error });
+				}),
+				drainNotifications(db).catch((error) => {
+					logger.error("notification drain failed", { error });
+				}),
+			]),
 		);
 	},
 };

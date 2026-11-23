@@ -42,6 +42,7 @@ function useProductNavItems(): NavItem[] {
 	const items: NavItem[] = [
 		{ to: "/home", label: "navHome", end: true },
 		{ to: "/profile", label: "yourProfile", end: true },
+		{ to: "/inbox", label: "inboxNav" },
 	];
 	if (canUseCatalog) {
 		items.push({ to: "/catalog", label: "catalogNav" });
@@ -76,10 +77,23 @@ function useProductNavItems(): NavItem[] {
 	if (canReviewEvidence) {
 		items.push({ to: "/evidence", label: "evidenceQueueTitle" });
 	}
+	const canAnnounce =
+		user?.roles.some(
+			(role) =>
+				role.code === "center_manager" ||
+				role.code === "district_coordinator" ||
+				role.code === "platform_admin",
+		) ?? false;
+	if (canAnnounce) {
+		items.push({ to: "/announcements", label: "announcementsNav" });
+	}
 	const canAdjustPoints =
 		user?.roles.some((role) => role.code === "platform_admin") ?? false;
 	if (canAdjustPoints) {
-		items.push({ to: "/adjustments", label: "adjustmentsNav" });
+		items.push(
+			{ to: "/adjustments", label: "adjustmentsNav" },
+			{ to: "/notification-templates", label: "templatesNav" },
+		);
 	}
 	return items;
 }

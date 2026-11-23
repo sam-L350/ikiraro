@@ -36,9 +36,14 @@ export async function writeAudit(
 export async function writeEvent(
 	writer: DbWriter,
 	event: DomainEvent,
-): Promise<void> {
-	await writer.insert(domainEvents).values({
-		name: event.name,
-		payload: event.payload,
-	});
+): Promise<string> {
+	const [row] = await writer
+		.insert(domainEvents)
+		.values({
+			name: event.name,
+			payload: event.payload,
+		})
+		.returning({ id: domainEvents.id });
+	if (!row) throw new Error("The event was not stored.");
+	return row.id;
 }

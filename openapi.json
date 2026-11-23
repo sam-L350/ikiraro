@@ -15,6 +15,12 @@
 			"name": "account"
 		},
 		{
+			"name": "announcement-targets"
+		},
+		{
+			"name": "announcements"
+		},
+		{
 			"name": "auth"
 		},
 		{
@@ -49,6 +55,15 @@
 		},
 		{
 			"name": "modules"
+		},
+		{
+			"name": "notification-preferences"
+		},
+		{
+			"name": "notification-templates"
+		},
+		{
+			"name": "notifications"
 		},
 		{
 			"name": "passport"
@@ -157,6 +172,259 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/announcement-targets": {
+			"get": {
+				"operationId": "listAnnouncementTargetsQueue",
+				"summary": "Places the signed-in person may send an announcement.",
+				"tags": [
+					"announcement-targets"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												},
+												"districts": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"centers",
+												"districts"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/announcements/create": {
+			"post": {
+				"operationId": "createAnnouncementPost",
+				"summary": "Ask the drainer to deliver one center or district announcement.",
+				"tags": [
+					"announcements"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"scope": {
+										"type": "string",
+										"enum": [
+											"center",
+											"district"
+										]
+									},
+									"scopeId": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									},
+									"body": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"scope",
+									"scopeId",
+									"title",
+									"body"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}
@@ -9647,6 +9915,877 @@
 				}
 			}
 		},
+		"/api/v1/notification-preferences": {
+			"get": {
+				"operationId": "listNotificationPreferencesQueue",
+				"summary": "Channel choices for each event. Missing rows use the default.",
+				"tags": [
+					"notification-preferences"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"eventName": {
+														"type": "string",
+														"enum": [
+															"submission.created",
+															"submission.approved",
+															"submission.needs_revision",
+															"submission.rejected",
+															"badge.awarded",
+															"points.adjusted",
+															"grant.decided",
+															"follow_up.due",
+															"learner.stalled",
+															"announcement.posted"
+														]
+													},
+													"inApp": {
+														"type": "boolean"
+													},
+													"sms": {
+														"type": "boolean"
+													},
+													"email": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"eventName",
+													"inApp",
+													"sms",
+													"email"
+												],
+												"additionalProperties": false
+											}
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/notification-preferences/update": {
+			"put": {
+				"operationId": "updateNotificationPreference",
+				"summary": "Turn one channel on or off for one event.",
+				"tags": [
+					"notification-preferences"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"eventName": {
+										"type": "string"
+									},
+									"channel": {
+										"type": "string"
+									},
+									"enabled": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"eventName",
+									"channel",
+									"enabled"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"eventName": {
+														"type": "string",
+														"enum": [
+															"submission.created",
+															"submission.approved",
+															"submission.needs_revision",
+															"submission.rejected",
+															"badge.awarded",
+															"points.adjusted",
+															"grant.decided",
+															"follow_up.due",
+															"learner.stalled",
+															"announcement.posted"
+														]
+													},
+													"inApp": {
+														"type": "boolean"
+													},
+													"sms": {
+														"type": "boolean"
+													},
+													"email": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"eventName",
+													"inApp",
+													"sms",
+													"email"
+												],
+												"additionalProperties": false
+											}
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/notification-templates": {
+			"get": {
+				"operationId": "listNotificationTemplatesQueue",
+				"summary": "Every sentence an admin can edit, in both languages and every channel.",
+				"tags": [
+					"notification-templates"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"eventName": {
+														"type": "string",
+														"enum": [
+															"submission.created",
+															"submission.approved",
+															"submission.needs_revision",
+															"submission.rejected",
+															"badge.awarded",
+															"points.adjusted",
+															"grant.decided",
+															"follow_up.due",
+															"learner.stalled",
+															"announcement.posted"
+														]
+													},
+													"channel": {
+														"type": "string",
+														"enum": [
+															"in_app",
+															"sms",
+															"email"
+														]
+													},
+													"locale": {
+														"type": "string",
+														"enum": [
+															"rw",
+															"en"
+														]
+													},
+													"title": {
+														"type": "string"
+													},
+													"body": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"id",
+													"eventName",
+													"channel",
+													"locale",
+													"title",
+													"body"
+												],
+												"additionalProperties": false
+											}
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/notification-templates/update": {
+			"put": {
+				"operationId": "updateNotificationTemplate",
+				"summary": "Replace one template sentence. The next drain uses the new words.",
+				"tags": [
+					"notification-templates"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									},
+									"body": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"id",
+									"title",
+									"body"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"eventName": {
+													"type": "string",
+													"enum": [
+														"submission.created",
+														"submission.approved",
+														"submission.needs_revision",
+														"submission.rejected",
+														"badge.awarded",
+														"points.adjusted",
+														"grant.decided",
+														"follow_up.due",
+														"learner.stalled",
+														"announcement.posted"
+													]
+												},
+												"channel": {
+													"type": "string",
+													"enum": [
+														"in_app",
+														"sms",
+														"email"
+													]
+												},
+												"locale": {
+													"type": "string",
+													"enum": [
+														"rw",
+														"en"
+													]
+												},
+												"title": {
+													"type": "string"
+												},
+												"body": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"eventName",
+												"channel",
+												"locale",
+												"title",
+												"body"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/notifications/{id}/read": {
+			"post": {
+				"operationId": "createNotificationRead",
+				"summary": "Mark one inbox message read. Someone else's message stays hidden.",
+				"tags": [
+					"notifications"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"eventName": {
+													"type": "string",
+													"enum": [
+														"submission.created",
+														"submission.approved",
+														"submission.needs_revision",
+														"submission.rejected",
+														"badge.awarded",
+														"points.adjusted",
+														"grant.decided",
+														"follow_up.due",
+														"learner.stalled",
+														"announcement.posted"
+													]
+												},
+												"title": {
+													"type": "string"
+												},
+												"body": {
+													"type": "string"
+												},
+												"createdAt": {
+													"type": "string"
+												},
+												"readAt": {
+													"type": "string",
+													"nullable": true
+												},
+												"sms": {
+													"type": "string",
+													"enum": [
+														"queued",
+														"sent",
+														"failed",
+														"none"
+													]
+												},
+												"email": {
+													"type": "string",
+													"enum": [
+														"queued",
+														"sent",
+														"failed",
+														"none"
+													]
+												}
+											},
+											"required": [
+												"id",
+												"eventName",
+												"title",
+												"body",
+												"createdAt",
+												"readAt",
+												"sms",
+												"email"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/notifications": {
+			"get": {
+				"operationId": "listNotifications",
+				"summary": "The signed-in person's inbox. Refreshing this is the live update.",
+				"tags": [
+					"notifications"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"eventName": {
+														"type": "string",
+														"enum": [
+															"submission.created",
+															"submission.approved",
+															"submission.needs_revision",
+															"submission.rejected",
+															"badge.awarded",
+															"points.adjusted",
+															"grant.decided",
+															"follow_up.due",
+															"learner.stalled",
+															"announcement.posted"
+														]
+													},
+													"title": {
+														"type": "string"
+													},
+													"body": {
+														"type": "string"
+													},
+													"createdAt": {
+														"type": "string"
+													},
+													"readAt": {
+														"type": "string",
+														"nullable": true
+													},
+													"sms": {
+														"type": "string",
+														"enum": [
+															"queued",
+															"sent",
+															"failed",
+															"none"
+														]
+													},
+													"email": {
+														"type": "string",
+														"enum": [
+															"queued",
+															"sent",
+															"failed",
+															"none"
+														]
+													}
+												},
+												"required": [
+													"id",
+													"eventName",
+													"title",
+													"body",
+													"createdAt",
+													"readAt",
+													"sms",
+													"email"
+												],
+												"additionalProperties": false
+											}
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/passport": {
 			"get": {
 				"operationId": "getPassport",
@@ -15435,8 +16574,8 @@
 												"mode": {
 													"type": "string",
 													"enum": [
-														"admin",
 														"center",
+														"admin",
 														"none"
 													]
 												},
@@ -15475,8 +16614,8 @@
 																"type": "string",
 																"enum": [
 																	"center",
-																	"self",
 																	"district",
+																	"self",
 																	"global"
 																]
 															}
@@ -15596,8 +16735,8 @@
 										"type": "string",
 										"enum": [
 											"center",
-											"self",
 											"district",
+											"self",
 											"global"
 										]
 									},
