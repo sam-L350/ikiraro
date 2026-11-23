@@ -48,6 +48,17 @@ export type Env = {
 	readonly devRoleSwitch: boolean;
 	/** Pepper for one-time codes. Required in production. */
 	readonly otpPepper: string;
+	readonly sms: {
+		readonly username: string | undefined;
+		readonly apiKey: string | undefined;
+		readonly senderId: string | undefined;
+		readonly sandbox: boolean;
+		readonly fallbackUsername: string | undefined;
+		readonly fallbackApiKey: string | undefined;
+		readonly fallbackSenderId: string | undefined;
+		readonly webhookSecret: string | undefined;
+		readonly dailyCap: number;
+	};
 };
 
 type Source = Record<string, string | undefined>;
@@ -195,6 +206,22 @@ export function parseEnv(source: Source): Env {
 		);
 	}
 
+	const smsUsername = read.optional("SMS_USERNAME");
+	const smsApiKey = read.optional("SMS_API_KEY");
+	if ((smsUsername === undefined) !== (smsApiKey === undefined)) {
+		read.problems.push("SMS_USERNAME and SMS_API_KEY must be set together");
+	}
+	const smsFallbackUsername = read.optional("SMS_FALLBACK_USERNAME");
+	const smsFallbackApiKey = read.optional("SMS_FALLBACK_API_KEY");
+	if (
+		(smsFallbackUsername === undefined) !==
+		(smsFallbackApiKey === undefined)
+	) {
+		read.problems.push(
+			"SMS_FALLBACK_USERNAME and SMS_FALLBACK_API_KEY must be set together",
+		);
+	}
+
 	const env: Env = {
 		appName: read.string("APP_NAME", "starterkit-engine"),
 		appEnv,
@@ -235,6 +262,17 @@ export function parseEnv(source: Source): Env {
 		maxBodyBytes: read.int("MAX_BODY_BYTES", 1024 * 1024, { min: 1024 }),
 		devRoleSwitch: !isProduction && read.bool("DEV_ROLE_SWITCH", true),
 		otpPepper: read.string("OTP_PEPPER", isProduction ? "" : "dev-only-pepper"),
+		sms: {
+			username: smsUsername,
+			apiKey: smsApiKey,
+			senderId: read.optional("SMS_SENDER_ID"),
+			sandbox: read.bool("SMS_SANDBOX", false),
+			fallbackUsername: smsFallbackUsername,
+			fallbackApiKey: smsFallbackApiKey,
+			fallbackSenderId: read.optional("SMS_FALLBACK_SENDER_ID"),
+			webhookSecret: read.optional("SMS_WEBHOOK_SECRET"),
+			dailyCap: read.int("SMS_DAILY_CAP", 8, { min: 0 }),
+		},
 	};
 	if (isProduction && env.otpPepper.length < 16) {
 		read.problems.push(

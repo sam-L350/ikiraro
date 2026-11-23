@@ -18,8 +18,11 @@ import {
 	users,
 } from "../../db/schema";
 import { writeEvent } from "../audit/write";
+import { notificationSmsToday, readDailyCap } from "../sms/cap";
+import { recordAcceptedSend } from "../sms/charges";
+import { smsSender } from "../sms/select";
 import type { SmsSender } from "../sms/sender";
-import { logSmsSender } from "../sms/sender";
+import { SMS_SEND_LIMIT as SEND_LIMIT, SmsPermanentError } from "../sms/sender";
 import { type EmailSender, holdingEmailSender } from "./email";
 import {
 	defaultChannelEnabled,
@@ -35,7 +38,6 @@ import {
 } from "./templates";
 
 const BATCH = 25;
-const SEND_LIMIT = 5;
 const STALL_SCAN = 100;
 
 type NotifyDb = Pick<Database, "insert" | "select" | "update" | "transaction">;
@@ -492,9 +494,12 @@ async function deliverQueued(
 	eventIds?: readonly string[],
 ): Promise<void> {
 	if (eventIds && eventIds.length === 0) return;
+	const cap = await readDailyCap(database);
+	const sentToday = new Map<number, number>();
 	const waiting = await database
 		.select({
 			id: notifications.id,
+			userId: notifications.userId,
 			channel: notifications.channel,
 			title: notifications.title,
 			body: notifications.body,
@@ -502,6 +507,7 @@ async function deliverQueued(
 			lastError: notifications.lastError,
 			phone: users.phone,
 			email: users.email,
+			centerId: users.centerId,
 		})
 		.from(notifications)
 		.innerJoin(users, eq(users.id, notifications.userId))
@@ -547,13 +553,36 @@ async function deliverQueued(
 			}
 			case "sms": {
 				if (!row.phone) continue;
-				try {
-					await sms.send({ to: row.phone, body: row.body });
+				const used =
+					sentToday.get(row.userId) ??
+					(await notificationSmsToday(database, row.userId, new Date(), cap));
+				sentToday.set(row.userId, used);
+				if (used >= cap) {
+					if (row.lastError === "daily_cap") continue;
 					await database
 						.update(notifications)
-						.set({ status: "sent", sentAt: new Date(), lastError: null })
+						.set({ lastError: "daily_cap" })
 						.where(eq(notifications.id, row.id));
-				} catch {
+					continue;
+				}
+				try {
+					const result = await sms.send({ to: row.phone, body: row.body });
+					const accepted = await recordAcceptedSend(database, row, result);
+					if (accepted === "submitted") {
+						sentToday.set(row.userId, used + 1);
+					}
+				} catch (error) {
+					if (error instanceof SmsPermanentError) {
+						await database
+							.update(notifications)
+							.set({
+								status: "failed",
+								attempts: row.attempts + 1,
+								lastError: "sms_rejected",
+							})
+							.where(eq(notifications.id, row.id));
+						continue;
+					}
 					await markSendFailed(database, row.id, row.attempts, "sms_failed");
 				}
 				continue;
@@ -592,7 +621,7 @@ export async function drainNotifications(
 	deps: DrainDeps = {},
 	options: { eventIds?: readonly string[]; sweepStalled?: boolean } = {},
 ): Promise<void> {
-	const sms = deps.sms ?? logSmsSender;
+	const sms = deps.sms ?? smsSender();
 	const email = deps.email ?? holdingEmailSender;
 	const only = options.eventIds;
 	const limited = only !== undefined;

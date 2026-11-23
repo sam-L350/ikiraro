@@ -13,7 +13,7 @@ import { domainEvents } from "./compliance";
 import { users } from "./identity";
 
 const channelSql = sql`'in_app', 'sms', 'email'`;
-const statusSql = sql`'queued', 'sent', 'failed'`;
+const statusSql = sql`'queued', 'submitted', 'sent', 'failed'`;
 
 /** A sentence an admin can change without a deploy. One row per event, channel, and language. */
 export const notificationTemplates = pgTable(
@@ -102,6 +102,8 @@ export const notifications = pgTable(
 		status: text("status").notNull().default("queued"),
 		attempts: integer("attempts").notNull().default(0),
 		lastError: text("last_error"),
+		/** Set when a gateway accepts the text. The receipt, not the request, marks it sent. */
+		providerMessageId: text("provider_message_id"),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
@@ -117,6 +119,7 @@ export const notifications = pgTable(
 		),
 		check("notifications_channel", sql`${table.channel} in (${channelSql})`),
 		check("notifications_status", sql`${table.status} in (${statusSql})`),
+		uniqueIndex("notifications_provider_message").on(table.providerMessageId),
 		check("notifications_attempts", sql`${table.attempts} >= 0`),
 	],
 );

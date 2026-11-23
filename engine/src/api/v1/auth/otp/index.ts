@@ -1,6 +1,6 @@
 import { createOtp } from "../../../../core/auth/login";
 import { clientIp } from "../../../../core/http/client-ip";
-import { logSmsSender } from "../../../../core/sms/sender";
+import { smsSender } from "../../../../core/sms/select";
 import { db } from "../../../../db";
 
 /**
@@ -10,5 +10,5 @@ import { db } from "../../../../db";
 export async function createAuthOtp(input: {
 	phone: string;
 }): Promise<{ sent: true }> {
-	return createOtp(db, { phone: input.phone, ip: clientIp() }, logSmsSender);
+	return createOtp(db, { phone: input.phone, ip: clientIp() }, smsSender());
 }

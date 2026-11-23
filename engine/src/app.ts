@@ -1,6 +1,7 @@
 import { endpoints } from "../.generated/endpoints";
 import { createRuntime } from "./core/api/runtime";
 import { googleAuthRoutes } from "./core/auth/google";
+import { smsWebhookRoutes } from "./core/sms/webhook";
 import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
 
 /**
@@ -15,6 +16,7 @@ export function createApp() {
 		endpoints,
 		rawRoutes: [
 			...googleAuthRoutes,
+			...smsWebhookRoutes,
 			{
 				method: "PUT",
 				path: "/api/media/upload",

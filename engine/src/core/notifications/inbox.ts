@@ -19,7 +19,13 @@ import {
 
 type InboxDb = Pick<Database, "insert" | "select" | "update">;
 
-export type InboxDelivery = "queued" | "sent" | "failed" | "none";
+export type InboxDelivery =
+	| "queued"
+	| "submitted"
+	| "sent"
+	| "failed"
+	| "capped"
+	| "none";
 
 export type InboxItem = {
 	id: string;
@@ -32,9 +38,14 @@ export type InboxItem = {
 	email: InboxDelivery;
 };
 
-function deliveryOf(status: string | undefined): InboxDelivery {
+function deliveryOf(
+	status: string | undefined,
+	lastError: string | null | undefined,
+): InboxDelivery {
+	if (status === "queued" && lastError === "daily_cap") return "capped";
 	switch (status) {
 		case "queued":
+		case "submitted":
 		case "sent":
 		case "failed":
 			return status;
@@ -79,6 +90,7 @@ export async function listInbox(
 						eventName: notifications.eventName,
 						channel: notifications.channel,
 						status: notifications.status,
+						lastError: notifications.lastError,
 					})
 					.from(notifications)
 					.where(
@@ -110,8 +122,8 @@ export async function listInbox(
 				body: row.body,
 				createdAt: row.createdAt.toISOString(),
 				readAt: row.readAt ? row.readAt.toISOString() : null,
-				sms: deliveryOf(sms?.status),
-				email: deliveryOf(email?.status),
+				sms: deliveryOf(sms?.status, sms?.lastError),
+				email: deliveryOf(email?.status, email?.lastError),
 			},
 		];
 	});

@@ -71,7 +71,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/5.5-manual-adjustments`
 - [ ] Phase 6 — Pilot readiness (`phase/6-pilot-readiness`)
   - [x] `phase/6.1-notification-outbox`
-  - [ ] `phase/6.2-sms-production`
+  - [x] `phase/6.2-sms-production`
   - [ ] `phase/6.3-offline-pwa`
   - [ ] `phase/6.4-audit-and-privacy-tools`
   - [ ] `phase/6.5-misconduct-reports`

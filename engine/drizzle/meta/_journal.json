@@ -169,6 +169,13 @@
       "when": 1795447283495,
       "tag": "0023_phase6_notification_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795448307775,
+      "tag": "0024_phase6_sms_production",
+      "breakpoints": true
     }
   ]
 }

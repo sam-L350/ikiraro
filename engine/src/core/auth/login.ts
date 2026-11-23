@@ -3,9 +3,10 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { env } from "../../config/env";
 import type { Database } from "../../db";
 import { otpChallenges, users } from "../../db/schema";
-import { errors } from "../api/error";
+import { errors, isApiError } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { consumeRateLimit } from "../guard/rate-limit";
+import { rememberSmsSpend } from "../sms/charges";
 import type { SmsSender } from "../sms/sender";
 import { hashPassword, verifyPassword } from "./password";
 import { normalizeRwandanPhone } from "./phone";
@@ -178,7 +179,7 @@ export async function createOtp(
 	assertUnlocked(guardKey("otp", phone));
 
 	const [user] = await database
-		.select({ id: users.id })
+		.select({ id: users.id, centerId: users.centerId })
 		.from(users)
 		.where(and(eq(users.phone, phone), isNull(users.deletedAt)))
 		.limit(1);
@@ -197,7 +198,26 @@ export async function createOtp(
 		codeHash: await hashCode(phone, code),
 		expiresAt: new Date(now() + CODE_TTL_MS),
 	});
-	await sender.send({ to: phone, body: `Ikiraro code: ${code}` });
+	try {
+		const result = await sender.send({
+			to: phone,
+			body: `Ikiraro code: ${code}`,
+		});
+		if (result?.providerMessageId) {
+			await rememberSmsSpend(database, {
+				userId: user.id,
+				centerId: user.centerId,
+				notificationId: null,
+				provider: result.provider,
+				providerMessageId: result.providerMessageId,
+				currency: result.currency,
+				amount: result.amount,
+			});
+		}
+	} catch (error) {
+		if (isApiError(error)) throw error;
+		throw errors.unavailable("The text could not be sent. Try again.");
+	}
 	return { sent: true };
 }
 

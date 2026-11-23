@@ -61,6 +61,7 @@ export {
 	digitalPassports,
 	otpChallenges,
 } from "./registration";
+export { smsCharges } from "./sms";
 export { taskSubmissions } from "./submissions";
 export {
 	submissionVerifications,

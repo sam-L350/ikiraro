@@ -3,7 +3,7 @@ import { clientIp } from "../../../../core/http/client-ip";
 import type { ConsentPurpose } from "../../../../core/identity/consent";
 import { registerLearner } from "../../../../core/identity/register";
 import { requireRegistrar } from "../../../../core/identity/registrar";
-import { logSmsSender } from "../../../../core/sms/sender";
+import { smsSender } from "../../../../core/sms/select";
 import { db } from "../../../../db";
 
 /**
@@ -36,7 +36,7 @@ export async function createRegistrationAssisted(input: {
 	const created = await registerLearner(
 		db,
 		{ ...input, createdByUserId: trainer.id, ip: clientIp() },
-		logSmsSender,
+		smsSender(),
 	);
 	return { ...created, assistedBy: registrar.name };
 }

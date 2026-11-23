@@ -1,7 +1,7 @@
 import { clientIp } from "../../../core/http/client-ip";
 import type { ConsentPurpose } from "../../../core/identity/consent";
 import { registerLearner } from "../../../core/identity/register";
-import { logSmsSender } from "../../../core/sms/sender";
+import { smsSender } from "../../../core/sms/select";
 import { db } from "../../../db";
 
 /**
@@ -28,5 +28,5 @@ export async function createRegistration(input: {
 	active: false;
 	codeSent: boolean;
 }> {
-	return registerLearner(db, { ...input, ip: clientIp() }, logSmsSender);
+	return registerLearner(db, { ...input, ip: clientIp() }, smsSender());
 }

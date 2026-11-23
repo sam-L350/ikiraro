@@ -4,7 +4,7 @@ import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
 
-type Delivery = "queued" | "sent" | "failed" | "none";
+type Delivery = "queued" | "submitted" | "sent" | "failed" | "capped" | "none";
 
 type InboxItem = {
 	id: string;
@@ -130,6 +130,14 @@ export default function InboxPage() {
 							<p className="text-lg text-fg">{item.body}</p>
 							{item.sms === "queued" ? (
 								<p className="text-lg text-fg-muted">{t("inboxSmsQueued")}</p>
+							) : null}
+							{item.sms === "submitted" ? (
+								<p className="text-lg text-fg-muted">
+									{t("inboxSmsSubmitted")}
+								</p>
+							) : null}
+							{item.sms === "capped" ? (
+								<p className="text-lg text-fg-muted">{t("inboxSmsDailyCap")}</p>
 							) : null}
 							{item.sms === "failed" ? (
 								<p className="text-lg text-destructive">

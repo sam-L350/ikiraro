@@ -1,6 +1,6 @@
 import { requestRecovery } from "../../../../core/auth/recovery";
 import { clientIp } from "../../../../core/http/client-ip";
-import { logSmsSender } from "../../../../core/sms/sender";
+import { smsSender } from "../../../../core/sms/select";
 import { db } from "../../../../db";
 
 /**
@@ -13,6 +13,6 @@ export async function createAuthRecovery(input: {
 	return requestRecovery(
 		db,
 		{ phone: input.phone, ip: clientIp() },
-		logSmsSender,
+		smsSender(),
 	);
 }
