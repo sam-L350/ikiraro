@@ -111,7 +111,7 @@ export async function readAssignments(
 		})
 		.from(userRoles)
 		.innerJoin(roles, eq(userRoles.roleId, roles.id))
-		.where(eq(userRoles.userId, userId));
+		.where(and(eq(userRoles.userId, userId), isNull(userRoles.suspendedAt)));
 	return rows.flatMap((row) => {
 		if (!isRoleCode(row.code) || !isScope(row.scopeType)) return [];
 		return [

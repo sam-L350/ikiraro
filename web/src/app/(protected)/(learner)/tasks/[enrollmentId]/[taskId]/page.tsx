@@ -41,6 +41,7 @@ type StoredNotice =
 	| "note"
 	| "empty"
 	| "closed"
+	| "limit"
 	| "too_large"
 	| "failed";
 type HeldPhoto = {
@@ -368,7 +369,24 @@ export default function TaskPage() {
 	const attempts = (history.data?.submissions ?? []).filter(
 		(item) => item.taskId === taskId,
 	);
-	const blocked = attempts.some((item) => item.status !== "withdrawn");
+	const openAttempt = attempts.some(
+		(item) =>
+			item.status === "draft" ||
+			item.status === "pending" ||
+			item.status === "in_review",
+	);
+	const standingDecision = attempts.some(
+		(item) =>
+			(item.status === "approved" && !item.revoked) ||
+			item.status === "rejected" ||
+			item.status === "escalated",
+	);
+	const revisions = attempts.filter(
+		(item) => item.status === "needs_revision",
+	).length;
+	const limited = revisions >= 4 && !openAttempt && !standingDecision;
+	const blocked = openAttempt || standingDecision || limited;
+	const canResend = revisions > 0 && !blocked;
 	const waiting = attempts.find(
 		(item) => item.status === "draft" || item.status === "pending",
 	);
@@ -522,15 +540,22 @@ export default function TaskPage() {
 							onChange={(event) => void onFile(event)}
 						/>
 					) : null}
-					<Button
-						type="button"
-						className="w-fit"
-						disabled={start.isPending || sending || blocked}
-						onClick={() => void openEvidence()}
-					>
-						<EvidenceIcon kind={kind} />
-						{evidenceLabel(kind, t)}
-					</Button>
+					{limited ? (
+						<p className="text-lg text-fg">{t("meetTrainer")}</p>
+					) : (
+						<Button
+							type="button"
+							className="w-fit"
+							disabled={start.isPending || sending || blocked}
+							onClick={() => void openEvidence()}
+						>
+							<EvidenceIcon kind={kind} />
+							{evidenceLabel(kind, t)}
+						</Button>
+					)}
+					{canResend ? (
+						<p className="text-lg text-fg">{t("sendAgain")}</p>
+					) : null}
 					{held ? (
 						<p className="text-lg text-fg">{warningCopy(held.warning, t)}</p>
 					) : null}
@@ -697,6 +722,7 @@ function noticeFor(caught: unknown): StoredNotice {
 			? details.reason
 			: undefined;
 	if (reason === "too_large" || reason === "size") return "too_large";
+	if (reason === "limit") return "limit";
 	if (reason === "closed" || reason === "open" || reason === "review_started") {
 		return "closed";
 	}
@@ -712,6 +738,7 @@ function storedCopy(
 			| "evidenceStoredNote"
 			| "evidenceNoteEmpty"
 			| "evidenceClosed"
+			| "meetTrainer"
 			| "evidenceTooLarge"
 			| "evidenceUploadFailed",
 	) => string,
@@ -727,6 +754,8 @@ function storedCopy(
 			return t("evidenceNoteEmpty");
 		case "closed":
 			return t("evidenceClosed");
+		case "limit":
+			return t("meetTrainer");
 		case "too_large":
 			return t("evidenceTooLarge");
 		case "failed":

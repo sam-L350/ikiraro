@@ -7012,6 +7012,9 @@
 															"feedback": {
 																"type": "string",
 																"nullable": true
+															},
+															"revoked": {
+																"type": "boolean"
 															}
 														},
 														"required": [
@@ -7022,7 +7025,8 @@
 															"status",
 															"evidenceType",
 															"submittedAt",
-															"feedback"
+															"feedback",
+															"revoked"
 														],
 														"additionalProperties": false
 													}
@@ -13574,6 +13578,9 @@
 												"feedback": {
 													"type": "string",
 													"nullable": true
+												},
+												"revoked": {
+													"type": "boolean"
 												}
 											},
 											"required": [
@@ -13584,7 +13591,8 @@
 												"status",
 												"evidenceType",
 												"submittedAt",
-												"feedback"
+												"feedback",
+												"revoked"
 											],
 											"additionalProperties": false
 										},
@@ -13761,6 +13769,9 @@
 												"feedback": {
 													"type": "string",
 													"nullable": true
+												},
+												"revoked": {
+													"type": "boolean"
 												}
 											},
 											"required": [
@@ -13771,7 +13782,8 @@
 												"status",
 												"evidenceType",
 												"submittedAt",
-												"feedback"
+												"feedback",
+												"revoked"
 											],
 											"additionalProperties": false
 										},
@@ -14876,6 +14888,158 @@
 												"approved",
 												"badge",
 												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/verifications/{id}/revoke": {
+			"post": {
+				"operationId": "createVerificationRevocation",
+				"summary": "Undo an approval. A coordinator or an admin, and only by new rows.",
+				"tags": [
+					"verifications"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"reason": {
+										"type": "string"
+									},
+									"idempotencyKey": {
+										"type": "string"
+									},
+									"suspendReviewer": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"reason",
+									"idempotencyKey"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"verificationId": {
+													"type": "string"
+												},
+												"points": {
+													"type": "number"
+												},
+												"verifiedMinutes": {
+													"type": "number"
+												},
+												"badgeRevoked": {
+													"type": "boolean"
+												},
+												"reviewerSuspended": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"verificationId",
+												"points",
+												"verifiedMinutes",
+												"badgeRevoked",
+												"reviewerSuspended"
 											],
 											"additionalProperties": false
 										},

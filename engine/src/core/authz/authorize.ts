@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "../../db";
 import { roles, userRoles } from "../../db/schema";
 import { errors } from "../api/error";
@@ -36,7 +36,7 @@ export async function authorize(input: {
 		})
 		.from(userRoles)
 		.innerJoin(roles, eq(userRoles.roleId, roles.id))
-		.where(eq(userRoles.userId, user.id));
+		.where(and(eq(userRoles.userId, user.id), isNull(userRoles.suspendedAt)));
 
 	const stored = rows.flatMap((row) => {
 		if (!isRoleCode(row.code) || !isScopeType(row.scopeType)) return [];

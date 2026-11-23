@@ -53,6 +53,8 @@ export const userRoles = pgTable(
 			.references(() => roles.id, { onDelete: "cascade" }),
 		scopeType: text("scope_type").notNull(),
 		scopeId: text("scope_id"),
+		/** Set when a revocation suspends this role pending review. */
+		suspendedAt: timestamp("suspended_at", { withTimezone: true }),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),

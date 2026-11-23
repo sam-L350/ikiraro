@@ -53,5 +53,6 @@ export {
 export { taskSubmissions } from "./submissions";
 export {
 	submissionVerifications,
+	verificationRevocations,
 	verificationScores,
 } from "./verifications";

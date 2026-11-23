@@ -1,6 +1,11 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import type { Database } from "../../db";
-import { mediaObjects, taskSubmissions } from "../../db/schema";
+import {
+	mediaObjects,
+	submissionVerifications,
+	taskSubmissions,
+	verificationRevocations,
+} from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { isEvidenceType } from "../content/author";
@@ -33,6 +38,8 @@ export type SubmissionView = {
 	submittedAt: string | null;
 	/** The note from the recorded decision, when one exists. */
 	feedback: string | null;
+	/** True when an approval was reversed and no longer stands. */
+	revoked: boolean;
 };
 
 type SubmissionDb = Pick<
@@ -67,19 +74,25 @@ export function isSubmissionStatus(value: string): value is SubmissionStatus {
 	}
 }
 
-/** An open attempt blocks another. A finished review stays closed until a later phase. */
+/**
+ * An open attempt blocks another. A pass, a rejection, or an escalation stays
+ * closed. After a send-back the learner may try three more times.
+ */
 export function createBlock(
 	statuses: readonly SubmissionStatus[],
-): "ok" | "open" | "closed" {
+): "ok" | "open" | "closed" | "limit" {
 	let closed = false;
+	let revisions = 0;
 	for (const status of statuses) {
 		switch (status) {
 			case "draft":
 			case "pending":
 			case "in_review":
 				return "open";
-			case "approved":
 			case "needs_revision":
+				revisions += 1;
+				break;
+			case "approved":
 			case "rejected":
 			case "escalated":
 				closed = true;
@@ -92,7 +105,9 @@ export function createBlock(
 			}
 		}
 	}
-	return closed ? "closed" : "ok";
+	if (closed) return "closed";
+	if (revisions >= 4) return "limit";
+	return "ok";
 }
 
 /** Withdrawal is only allowed before a trainer starts the review. */
@@ -126,6 +141,7 @@ export function nextAttempt(attempts: readonly number[]): number {
 function present(
 	row: StoredRow,
 	feedback: string | null = null,
+	revoked = false,
 ): SubmissionView {
 	if (!isSubmissionStatus(row.status) || !isEvidenceType(row.evidenceType)) {
 		throw errors.internal("That submission could not be read.");
@@ -141,6 +157,7 @@ function present(
 		evidenceType,
 		submittedAt: row.submittedAt ? row.submittedAt.toISOString() : null,
 		feedback,
+		revoked,
 	};
 }
 
@@ -288,27 +305,51 @@ export async function createSubmission(
 				.select({
 					attempt: taskSubmissions.attempt,
 					status: taskSubmissions.status,
+					revoked: verificationRevocations.id,
 				})
 				.from(taskSubmissions)
+				.leftJoin(
+					submissionVerifications,
+					eq(submissionVerifications.submissionId, taskSubmissions.id),
+				)
+				.leftJoin(
+					verificationRevocations,
+					eq(
+						verificationRevocations.verificationId,
+						submissionVerifications.id,
+					),
+				)
 				.where(
 					and(
 						eq(taskSubmissions.enrollmentId, input.enrollmentId),
 						eq(taskSubmissions.taskId, input.taskId),
 					),
 				);
-			const statuses = earlier.flatMap((row) =>
-				isSubmissionStatus(row.status) ? [row.status] : [],
-			);
+			const statuses = earlier.flatMap((row) => {
+				if (!isSubmissionStatus(row.status)) return [];
+				if (row.status === "approved" && row.revoked !== null) return [];
+				return [row.status];
+			});
 			const block = createBlock(statuses);
-			if (block === "open") {
-				throw errors.conflict("This task already has something waiting.", {
-					reason: "open",
-				});
-			}
-			if (block === "closed") {
-				throw errors.conflict("This task is waiting on a trainer.", {
-					reason: "closed",
-				});
+			switch (block) {
+				case "ok":
+					break;
+				case "open":
+					throw errors.conflict("This task already has something waiting.", {
+						reason: "open",
+					});
+				case "closed":
+					throw errors.conflict("This task is waiting on a trainer.", {
+						reason: "closed",
+					});
+				case "limit":
+					throw errors.conflict("Meet a trainer before another attempt.", {
+						reason: "limit",
+					});
+				default: {
+					const unreachable: never = block;
+					throw unreachable;
+				}
 			}
 			const submittedAt = status === "pending" ? new Date() : null;
 			const [created] = await tx
@@ -479,7 +520,31 @@ export async function listSubmissions(
 		database,
 		rows.map((row) => row.id),
 	);
-	return rows.map((row) => present(row, notes.get(row.id) ?? null));
+	const revokedRows =
+		rows.length === 0
+			? []
+			: await database
+					.select({
+						submissionId: submissionVerifications.submissionId,
+					})
+					.from(verificationRevocations)
+					.innerJoin(
+						submissionVerifications,
+						eq(
+							submissionVerifications.id,
+							verificationRevocations.verificationId,
+						),
+					)
+					.where(
+						inArray(
+							submissionVerifications.submissionId,
+							rows.map((row) => row.id),
+						),
+					);
+	const revokedIds = new Set(revokedRows.map((row) => row.submissionId));
+	return rows.map((row) =>
+		present(row, notes.get(row.id) ?? null, revokedIds.has(row.id)),
+	);
 }
 
 /** Take an attempt back. A review that has started cannot be withdrawn. */

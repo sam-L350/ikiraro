@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+	boolean,
 	check,
 	integer,
 	pgTable,
@@ -85,5 +86,31 @@ export const verificationScores = pgTable(
 			table.criterionId,
 		),
 		check("verification_scores_range", sql`${table.score} between 0 and 100`),
+	],
+);
+
+/** A later reversal. The verification row it points at is never edited. */
+export const verificationRevocations = pgTable(
+	"verification_revocations",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		verificationId: uuid("verification_id")
+			.notNull()
+			.unique()
+			.references(() => submissionVerifications.id),
+		actorUserId: integer("actor_user_id")
+			.notNull()
+			.references(() => users.id),
+		reason: text("reason").notNull(),
+		suspendReviewer: boolean("suspend_reviewer").notNull().default(false),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		check(
+			"verification_revocations_reason",
+			sql`char_length(btrim(${table.reason})) > 0`,
+		),
 	],
 );

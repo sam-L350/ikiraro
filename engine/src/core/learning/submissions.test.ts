@@ -32,14 +32,22 @@ import {
 } from "./submissions";
 
 describe("submission rules", () => {
-	test("a waiting attempt blocks another, and a finished review stays closed", () => {
+	test("a waiting attempt blocks another, and three send-backs still leave one try", () => {
 		expect(createBlock([])).toBe("ok");
 		expect(createBlock(["withdrawn"])).toBe("ok");
 		expect(createBlock(["pending"])).toBe("open");
 		expect(createBlock(["draft", "withdrawn"])).toBe("open");
 		expect(createBlock(["in_review"])).toBe("open");
 		expect(createBlock(["approved"])).toBe("closed");
-		expect(createBlock(["needs_revision"])).toBe("closed");
+		expect(createBlock(["needs_revision"])).toBe("ok");
+		expect(
+			createBlock([
+				"needs_revision",
+				"needs_revision",
+				"needs_revision",
+				"needs_revision",
+			]),
+		).toBe("limit");
 		expect(createBlock(["rejected"])).toBe("closed");
 		expect(createBlock(["escalated"])).toBe("closed");
 		expect(nextAttempt([])).toBe(1);
