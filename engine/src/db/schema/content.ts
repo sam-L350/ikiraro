@@ -237,6 +237,9 @@ export const badges = pgTable(
 			.references(() => courses.id),
 		titleEn: text("title_en").notNull().default(""),
 		titleRw: text("title_rw"),
+		/** A plain sentence for someone who never saw the course. */
+		skillEn: text("skill_en"),
+		skillRw: text("skill_rw"),
 		level: integer("level").notNull().default(1),
 		rule: jsonb("rule")
 			.$type<BadgeRule>()

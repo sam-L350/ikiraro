@@ -44,6 +44,8 @@ type BadgeRule = {
 type CourseBadge = {
 	titleEn: string;
 	titleRw: string;
+	skillEn: string;
+	skillRw: string;
 	level: number;
 	missingKinyarwanda: boolean;
 	rule: BadgeRule;
@@ -621,6 +623,8 @@ function BadgeFields({
 	const save = useEngineMutation("/courses/:id/badge");
 	const [titleEn, setTitleEn] = useState(badge?.titleEn ?? "");
 	const [titleRw, setTitleRw] = useState(badge?.titleRw ?? "");
+	const [skillEn, setSkillEn] = useState(badge?.skillEn ?? "");
+	const [skillRw, setSkillRw] = useState(badge?.skillRw ?? "");
 	const [level, setLevel] = useState(String(badge?.level ?? 1));
 	const [allRequired, setAllRequired] = useState(
 		badge?.rule.allRequiredTasksApproved ?? true,
@@ -647,6 +651,8 @@ function BadgeFields({
 	const dirty =
 		titleEn !== (badge?.titleEn ?? "") ||
 		titleRw !== (badge?.titleRw ?? "") ||
+		skillEn !== (badge?.skillEn ?? "") ||
+		skillRw !== (badge?.skillRw ?? "") ||
 		level !== String(badge?.level ?? 1) ||
 		allRequired !== (badge?.rule.allRequiredTasksApproved ?? true) ||
 		minimumScore !== savedScore ||
@@ -664,6 +670,8 @@ function BadgeFields({
 					id: courseId,
 					titleEn,
 					titleRw,
+					skillEn,
+					skillRw,
 					level: Number(level),
 					allRequiredTasksApproved: allRequired,
 					minimumScore: minimumScore.trim() ? Number(minimumScore) : null,
@@ -696,6 +704,21 @@ function BadgeFields({
 					disabled={!editable}
 					onChange={setTitleRw}
 					hint={titleEn.trim().length > 0 && titleRw.trim().length === 0}
+				/>
+				<Field
+					id={`${courseId}-badge-skill-en`}
+					label={t("badgeSkillEn")}
+					value={skillEn}
+					disabled={!editable}
+					onChange={setSkillEn}
+				/>
+				<Field
+					id={`${courseId}-badge-skill-rw`}
+					label={t("badgeSkillRw")}
+					value={skillRw}
+					disabled={!editable}
+					onChange={setSkillRw}
+					hint={skillEn.trim().length > 0 && skillRw.trim().length === 0}
 				/>
 				<Field
 					id={`${courseId}-badge-level`}

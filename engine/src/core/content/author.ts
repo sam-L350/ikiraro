@@ -66,6 +66,8 @@ export type BadgeView = {
 	id: string;
 	titleEn: string;
 	titleRw: string;
+	skillEn: string;
+	skillRw: string;
 	level: number;
 	missingKinyarwanda: boolean;
 	rule: BadgeRule;
@@ -116,6 +118,19 @@ type CourseCatalog = {
 
 function clean(value: string | undefined): string {
 	return (value ?? "").trim();
+}
+
+const SKILL_LIMIT = 280;
+
+function cleanSkill(value: string | undefined): string | null {
+	const trimmed = clean(value);
+	if (!trimmed) return null;
+	if (trimmed.length > SKILL_LIMIT) {
+		throw errors.badRequest("That skill line is too long.", {
+			reason: "skill",
+		});
+	}
+	return trimmed;
 }
 
 function isContentStatus(value: string): value is ContentStatus {
@@ -472,12 +487,16 @@ async function readBadge(
 		.limit(1);
 	if (!row || row.titleEn.length === 0) return null;
 	const titleRw = row.titleRw ?? "";
+	const skillEn = row.skillEn ?? "";
+	const skillRw = row.skillRw ?? "";
 	return {
 		id: row.id,
 		titleEn: row.titleEn,
 		titleRw,
+		skillEn,
+		skillRw,
 		level: row.level,
-		missingKinyarwanda: gap(row.titleEn, titleRw),
+		missingKinyarwanda: gap(row.titleEn, titleRw) || gap(skillEn, skillRw),
 		rule: readBadgeRule(row.rule),
 	};
 }
@@ -920,6 +939,8 @@ export async function saveBadge(
 		courseId: string;
 		titleEn: string;
 		titleRw?: string;
+		skillEn?: string;
+		skillRw?: string;
 		level: number;
 		allRequiredTasksApproved: boolean;
 		minimumScore?: number | null;
@@ -930,6 +951,9 @@ export async function saveBadge(
 ): Promise<CourseView> {
 	await requireDraft(database, input.courseId);
 	const titleEn = requireEnglishTitle(clean(input.titleEn));
+	const titleRw = clean(input.titleRw) || null;
+	const skillEn = cleanSkill(input.skillEn);
+	const skillRw = cleanSkill(input.skillRw);
 	const rule = requireBadgeRule(input);
 	const level = requireLevel(input.level);
 	const [saved] = await database
@@ -937,7 +961,9 @@ export async function saveBadge(
 		.values({
 			courseId: input.courseId,
 			titleEn,
-			titleRw: clean(input.titleRw) || null,
+			titleRw,
+			skillEn,
+			skillRw,
 			level,
 			rule,
 		})
@@ -945,7 +971,9 @@ export async function saveBadge(
 			target: badges.courseId,
 			set: {
 				titleEn,
-				titleRw: clean(input.titleRw) || null,
+				titleRw,
+				skillEn,
+				skillRw,
 				level,
 				rule,
 			},

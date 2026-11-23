@@ -54,7 +54,10 @@ function useProductNavItems(): NavItem[] {
 				role.code === "center_manager",
 		) ?? false;
 	if (canReadPoints) {
-		items.push({ to: "/points", label: "pointsNav" });
+		items.push(
+			{ to: "/passport", label: "passportNav" },
+			{ to: "/points", label: "pointsNav" },
+		);
 	}
 	if (!isStaff) return items;
 	items.push(

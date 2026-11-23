@@ -54,6 +54,8 @@ export function publishedSnapshot(course: CourseView): JsonValue {
 					id: course.badge.id,
 					titleEn: course.badge.titleEn,
 					titleRw: course.badge.titleRw,
+					skillEn: course.badge.skillEn,
+					skillRw: course.badge.skillRw,
 					level: course.badge.level,
 					rule: {
 						allRequiredTasksApproved:

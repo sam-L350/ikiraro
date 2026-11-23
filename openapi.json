@@ -51,6 +51,9 @@
 			"name": "modules"
 		},
 		{
+			"name": "passport"
+		},
+		{
 			"name": "point-caps"
 		},
 		{
@@ -2388,6 +2391,12 @@
 									"titleRw": {
 										"type": "string"
 									},
+									"skillEn": {
+										"type": "string"
+									},
+									"skillRw": {
+										"type": "string"
+									},
 									"level": {
 										"type": "number"
 									},
@@ -2482,6 +2491,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -2515,6 +2530,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -3006,6 +3023,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -3039,6 +3062,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -3391,6 +3416,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -3424,6 +3455,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -3804,6 +3837,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -3837,6 +3876,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -4202,6 +4243,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -4235,6 +4282,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -4624,6 +4673,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -4657,6 +4712,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -5027,6 +5084,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -5060,6 +5123,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -5557,6 +5622,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -5590,6 +5661,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -8839,6 +8912,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -8872,6 +8951,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -9258,6 +9339,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -9291,6 +9378,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -9525,6 +9614,174 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passport": {
+			"get": {
+				"operationId": "getPassport",
+				"summary": "Hours, points, badges, and finished tasks for the signed-in learner.",
+				"tags": [
+					"passport"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"verifiedMinutes": {
+													"type": "number"
+												},
+												"hours": {
+													"type": "number"
+												},
+												"points": {
+													"type": "number"
+												},
+												"level": {
+													"type": "number",
+													"nullable": true
+												},
+												"badges": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"skillEn": {
+																"type": "string"
+															},
+															"skillRw": {
+																"type": "string"
+															},
+															"level": {
+																"type": "number"
+															},
+															"awardedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"skillEn",
+															"skillRw",
+															"level",
+															"awardedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"tasks": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"completedAt": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"completedAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"verifiedMinutes",
+												"hours",
+												"points",
+												"level",
+												"badges",
+												"tasks"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}
@@ -11135,6 +11392,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -11168,6 +11431,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -11524,6 +11789,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -11557,6 +11828,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -11926,6 +12199,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -11959,6 +12238,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -12328,6 +12609,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -12361,6 +12648,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -12736,6 +13025,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -12769,6 +13064,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -14667,6 +14964,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -14700,6 +15003,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"
@@ -15101,6 +15406,12 @@
 														"titleRw": {
 															"type": "string"
 														},
+														"skillEn": {
+															"type": "string"
+														},
+														"skillRw": {
+															"type": "string"
+														},
 														"level": {
 															"type": "number"
 														},
@@ -15134,6 +15445,8 @@
 														"id",
 														"titleEn",
 														"titleRw",
+														"skillEn",
+														"skillRw",
 														"level",
 														"missingKinyarwanda",
 														"rule"

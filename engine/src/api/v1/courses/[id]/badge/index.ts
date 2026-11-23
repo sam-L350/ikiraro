@@ -10,6 +10,8 @@ export async function updateCourseBadge(input: {
 	id: string;
 	titleEn: string;
 	titleRw?: string;
+	skillEn?: string;
+	skillRw?: string;
 	level: number;
 	allRequiredTasksApproved: boolean;
 	minimumScore?: number | null;
@@ -21,6 +23,8 @@ export async function updateCourseBadge(input: {
 		courseId: input.id,
 		titleEn: input.titleEn,
 		titleRw: input.titleRw,
+		skillEn: input.skillEn,
+		skillRw: input.skillRw,
 		level: input.level,
 		allRequiredTasksApproved: input.allRequiredTasksApproved,
 		minimumScore: input.minimumScore,
