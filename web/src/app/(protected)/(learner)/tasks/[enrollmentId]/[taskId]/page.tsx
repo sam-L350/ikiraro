@@ -8,6 +8,7 @@ import {
 	useState,
 } from "react";
 import { Link, useParams } from "react-router";
+import { MaskPhotoDialog } from "@/components/evidence/mask-photo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -109,6 +110,7 @@ export default function TaskPage() {
 	const [sending, setSending] = useState(false);
 	const [stored, setStored] = useState<StoredNotice | null>(null);
 	const [held, setHeld] = useState<HeldPhoto | null>(null);
+	const [maskFile, setMaskFile] = useState<File | null>(null);
 	const enrollment = useEngine(
 		"/enrollments/:id",
 		{ query: { id: enrollmentId } },
@@ -263,6 +265,15 @@ export default function TaskPage() {
 		const chosenFile = event.target.files?.[0];
 		event.target.value = "";
 		if (!chosenFile) return;
+		if (kind === "photo" && chosenFile.type.startsWith("image/")) {
+			setMaskFile(chosenFile);
+			return;
+		}
+		await sendPrepared(chosenFile);
+	}
+
+	async function sendPrepared(chosenFile: File) {
+		setMaskFile(null);
 		setSending(true);
 		setStored(null);
 		try {
@@ -408,9 +419,21 @@ export default function TaskPage() {
 		setAsked((current) => ({ ...current, [kindToLoad]: true }));
 	}
 
-	const attempts = (history.data?.submissions ?? []).filter(
-		(item) => item.taskId === taskId,
-	);
+	const attempts = (
+		(history.data?.submissions ?? []) as {
+			id: string;
+			taskId: string;
+			attempt: number;
+			status: SubmissionStatus;
+			feedback: string | null;
+			revoked: boolean;
+			duplicate?: "none" | "same" | "other";
+			appeal: {
+				status: "open" | "upheld" | "overturned";
+				decisionNote: string | null;
+			} | null;
+		}[]
+	).filter((item) => item.taskId === taskId);
 	const openAttempt = attempts.some(
 		(item) =>
 			item.status === "draft" ||
@@ -590,7 +613,7 @@ export default function TaskPage() {
 					) : (
 						<Button
 							type="button"
-							variant={blocked ? "quiet" : "sticker"}
+							variant={blocked || maskFile ? "quiet" : "sticker"}
 							className="w-fit"
 							disabled={start.isPending || sending || blocked}
 							onClick={() => void openEvidence()}
@@ -640,6 +663,12 @@ export default function TaskPage() {
 										</div>
 										{item.feedback ? (
 											<p className="text-lg text-fg">{item.feedback}</p>
+										) : null}
+										{item.duplicate === "same" ? (
+											<p className="text-lg text-fg">{t("duplicateSame")}</p>
+										) : null}
+										{item.duplicate === "other" ? (
+											<p className="text-lg text-fg">{t("duplicateOther")}</p>
 										) : null}
 										{item.appeal?.status === "open" ? (
 											<p className="text-lg text-fg">{t("appealWaiting")}</p>
@@ -712,6 +741,13 @@ export default function TaskPage() {
 					) : null}
 				</div>
 			)}
+			{maskFile ? (
+				<MaskPhotoDialog
+					file={maskFile}
+					onClose={() => setMaskFile(null)}
+					onUse={(next) => void sendPrepared(next)}
+				/>
+			) : null}
 		</div>
 	);
 }

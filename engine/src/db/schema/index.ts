@@ -66,6 +66,7 @@ export {
 export { smsCharges } from "./sms";
 export { taskSubmissions } from "./submissions";
 export {
+	inPersonChecks,
 	secondReviews,
 	submissionVerifications,
 	verificationRevocations,

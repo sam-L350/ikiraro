@@ -10,6 +10,8 @@ type ReviewUrgency = "ok" | "soon" | "overdue";
 type EscalationStage = "none" | "manager" | "district";
 type WaitingStatus = "pending" | "in_review";
 
+type DuplicateKind = "none" | "same" | "other";
+
 type QueueItem = {
 	id: string;
 	attempt: number;
@@ -21,6 +23,7 @@ type QueueItem = {
 	centerName: string;
 	taskTitleRw: string;
 	taskTitleEn: string;
+	duplicate: DuplicateKind;
 };
 
 function textFor(locale: "rw" | "en", rw: string, en: string): string {
@@ -81,6 +84,21 @@ function escalationKey(stage: EscalationStage): MessageKey | null {
 			return "escalatedDistrict";
 		default: {
 			const unreachable: never = stage;
+			return unreachable;
+		}
+	}
+}
+
+function duplicateKey(kind: DuplicateKind): MessageKey | null {
+	switch (kind) {
+		case "none":
+			return null;
+		case "same":
+			return "duplicateSamePill";
+		case "other":
+			return "duplicateOtherPill";
+		default: {
+			const unreachable: never = kind;
 			return unreachable;
 		}
 	}
@@ -173,6 +191,7 @@ export default function EvidenceQueuePage() {
 					{items.map((item) => {
 						const urgency = urgencyKey(item.urgency);
 						const escalation = escalationKey(item.escalation ?? "none");
+						const duplicate = duplicateKey(item.duplicate);
 						const learner = item.learnerName.trim() || t("learnerUnnamed");
 						return (
 							<li key={item.id} className="border-t border-ink/15 py-5">
@@ -201,6 +220,15 @@ export default function EvidenceQueuePage() {
 										) : null}
 										{escalation ? (
 											<Badge variant="pending">{t(escalation)}</Badge>
+										) : null}
+										{duplicate ? (
+											<Badge
+												variant={
+													item.duplicate === "other" ? "danger" : "pending"
+												}
+											>
+												{t(duplicate)}
+											</Badge>
 										) : null}
 										<Badge variant="neutral">{t(statusKey(item.status))}</Badge>
 									</div>

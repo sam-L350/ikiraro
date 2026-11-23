@@ -3753,6 +3753,9 @@
 									"minimumHours": {
 										"type": "number",
 										"nullable": true
+									},
+									"requiresInPerson": {
+										"type": "boolean"
 									}
 								},
 								"required": [
@@ -3846,6 +3849,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -3877,6 +3883,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -4378,6 +4385,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -4409,6 +4419,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -4771,6 +4782,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -4802,6 +4816,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -5192,6 +5207,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -5223,6 +5241,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -5598,6 +5617,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -5629,6 +5651,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -6028,6 +6051,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -6059,6 +6085,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -6439,6 +6466,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -6470,6 +6500,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -6977,6 +7008,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -7008,6 +7042,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -8467,6 +8502,14 @@
 																],
 																"additionalProperties": false,
 																"nullable": true
+															},
+															"duplicate": {
+																"type": "string",
+																"enum": [
+																	"none",
+																	"same",
+																	"other"
+																]
 															}
 														},
 														"required": [
@@ -8480,7 +8523,8 @@
 															"note",
 															"feedback",
 															"revoked",
-															"appeal"
+															"appeal",
+															"duplicate"
 														],
 														"additionalProperties": false
 													}
@@ -8965,6 +9009,14 @@
 												"taskTitleEn": {
 													"type": "string"
 												},
+												"duplicate": {
+													"type": "string",
+													"enum": [
+														"none",
+														"same",
+														"other"
+													]
+												},
 												"instructionsRw": {
 													"type": "string"
 												},
@@ -9013,6 +9065,9 @@
 														],
 														"additionalProperties": false
 													}
+												},
+												"requiresInPerson": {
+													"type": "boolean"
 												}
 											},
 											"required": [
@@ -9029,12 +9084,14 @@
 												"centerName",
 												"taskTitleRw",
 												"taskTitleEn",
+												"duplicate",
 												"instructionsRw",
 												"instructionsEn",
 												"note",
 												"evidenceUrl",
 												"evidenceContentType",
-												"criteria"
+												"criteria",
+												"requiresInPerson"
 											],
 											"additionalProperties": false
 										},
@@ -9340,6 +9397,14 @@
 															},
 															"taskTitleEn": {
 																"type": "string"
+															},
+															"duplicate": {
+																"type": "string",
+																"enum": [
+																	"none",
+																	"same",
+																	"other"
+																]
 															}
 														},
 														"required": [
@@ -9355,7 +9420,8 @@
 															"centerId",
 															"centerName",
 															"taskTitleRw",
-															"taskTitleEn"
+															"taskTitleEn",
+															"duplicate"
 														],
 														"additionalProperties": false
 													}
@@ -11340,6 +11406,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -11371,6 +11440,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -11767,6 +11837,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -11798,6 +11871,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -17339,6 +17413,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -17370,6 +17447,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -17736,6 +17814,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -17767,6 +17848,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -18146,6 +18228,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -18177,6 +18262,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -18556,6 +18642,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -18587,6 +18676,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -18972,6 +19062,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -19003,6 +19096,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -20702,6 +20796,14 @@
 													],
 													"additionalProperties": false,
 													"nullable": true
+												},
+												"duplicate": {
+													"type": "string",
+													"enum": [
+														"none",
+														"same",
+														"other"
+													]
 												}
 											},
 											"required": [
@@ -20715,7 +20817,8 @@
 												"note",
 												"feedback",
 												"revoked",
-												"appeal"
+												"appeal",
+												"duplicate"
 											],
 											"additionalProperties": false
 										},
@@ -20899,6 +21002,14 @@
 													],
 													"additionalProperties": false,
 													"nullable": true
+												},
+												"duplicate": {
+													"type": "string",
+													"enum": [
+														"none",
+														"same",
+														"other"
+													]
 												}
 											},
 											"required": [
@@ -20912,7 +21023,8 @@
 												"note",
 												"feedback",
 												"revoked",
-												"appeal"
+												"appeal",
+												"duplicate"
 											],
 											"additionalProperties": false
 										},
@@ -21119,6 +21231,14 @@
 													],
 													"additionalProperties": false,
 													"nullable": true
+												},
+												"duplicate": {
+													"type": "string",
+													"enum": [
+														"none",
+														"same",
+														"other"
+													]
 												}
 											},
 											"required": [
@@ -21132,7 +21252,8 @@
 												"note",
 												"feedback",
 												"revoked",
-												"appeal"
+												"appeal",
+												"duplicate"
 											],
 											"additionalProperties": false
 										},
@@ -21584,6 +21705,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -21615,6 +21739,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -22026,6 +22151,9 @@
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
+														"requiresInPerson": {
+															"type": "boolean"
+														},
 														"rule": {
 															"type": "object",
 															"properties": {
@@ -22057,6 +22185,7 @@
 														"skillRw",
 														"level",
 														"missingKinyarwanda",
+														"requiresInPerson",
 														"rule"
 													],
 													"additionalProperties": false,
@@ -22517,6 +22646,22 @@
 											],
 											"additionalProperties": false
 										}
+									},
+									"inPerson": {
+										"type": "object",
+										"properties": {
+											"location": {
+												"type": "string"
+											},
+											"observedAt": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"location",
+											"observedAt"
+										],
+										"additionalProperties": false
 									},
 									"idempotencyKey": {
 										"type": "string"

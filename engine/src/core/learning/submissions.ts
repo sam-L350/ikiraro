@@ -10,6 +10,7 @@ import {
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { isEvidenceType } from "../content/author";
+import { applyDuplicateFlag, isDuplicateKind } from "./duplicates";
 import { readEnrollmentProgress, startTaskProgress } from "./progress";
 import { readReviewSlaMs, reviewDueAt } from "./sla";
 import { feedbackForSubmissions } from "./verifications";
@@ -49,6 +50,8 @@ export type SubmissionView = {
 		status: "open" | "upheld" | "overturned";
 		decisionNote: string | null;
 	} | null;
+	/** none, the same learner, or another learner already sent this file. */
+	duplicate: "none" | "same" | "other";
 };
 
 type SubmissionDb = Pick<
@@ -66,6 +69,7 @@ type StoredRow = {
 	evidenceType: string;
 	note: string | null;
 	submittedAt: Date | null;
+	duplicateKind: string;
 };
 
 export function isSubmissionStatus(value: string): value is SubmissionStatus {
@@ -171,7 +175,11 @@ function present(
 	revoked = false,
 	appeal: SubmissionView["appeal"] = null,
 ): SubmissionView {
-	if (!isSubmissionStatus(row.status) || !isEvidenceType(row.evidenceType)) {
+	if (
+		!isSubmissionStatus(row.status) ||
+		!isEvidenceType(row.evidenceType) ||
+		!isDuplicateKind(row.duplicateKind)
+	) {
 		throw errors.internal("That submission could not be read.");
 	}
 	const status = row.status;
@@ -188,6 +196,7 @@ function present(
 		feedback,
 		revoked,
 		appeal,
+		duplicate: row.duplicateKind,
 	};
 }
 
@@ -256,6 +265,7 @@ const rowColumns = {
 	evidenceType: taskSubmissions.evidenceType,
 	note: taskSubmissions.note,
 	submittedAt: taskSubmissions.submittedAt,
+	duplicateKind: taskSubmissions.duplicateKind,
 };
 
 /** Store one attempt. The same client id returns the attempt already stored. */
@@ -418,6 +428,14 @@ export async function createSubmission(
 				})
 				.returning(rowColumns);
 			if (!created) throw errors.internal("The submission was not stored.");
+			const duplicate =
+				status === "pending"
+					? await applyDuplicateFlag(tx, {
+							submissionId: created.id,
+							ownerUserId: input.ownerUserId,
+							contentHash: evidence.contentHash,
+						})
+					: "none";
 			await writeAudit(tx, {
 				actorId: input.ownerUserId,
 				action: "submission.created",
@@ -428,6 +446,7 @@ export async function createSubmission(
 					status,
 					attempt: created.attempt,
 					evidenceType,
+					duplicate,
 				},
 			});
 			await writeEvent(tx, {
@@ -440,7 +459,7 @@ export async function createSubmission(
 					status,
 				},
 			});
-			return present(created);
+			return present({ ...created, duplicateKind: duplicate });
 		});
 	} catch (error) {
 		if (!isUniqueViolation(error)) throw error;
@@ -562,7 +581,10 @@ export async function saveDraftSubmission(
 	}
 	const note = input.note === undefined ? undefined : cleanNote(input.note);
 	const [row] = await database
-		.select(rowColumns)
+		.select({
+			...rowColumns,
+			contentHash: taskSubmissions.contentHash,
+		})
 		.from(taskSubmissions)
 		.where(eq(taskSubmissions.id, input.id))
 		.limit(1);
@@ -589,6 +611,13 @@ export async function saveDraftSubmission(
 			...(dueAt ? { reviewDueAt: dueAt } : {}),
 		})
 		.where(eq(taskSubmissions.id, row.id));
+	const duplicate = input.submit
+		? await applyDuplicateFlag(database, {
+				submissionId: row.id,
+				ownerUserId: input.ownerUserId,
+				contentHash: row.contentHash,
+			})
+		: row.duplicateKind;
 	if (input.submit) {
 		await writeAudit(database, {
 			actorId: input.ownerUserId,
@@ -596,7 +625,7 @@ export async function saveDraftSubmission(
 			targetType: "task_submission",
 			targetId: row.id,
 			ipAddress: input.ip,
-			metadata: { status: "pending", attempt: row.attempt },
+			metadata: { status: "pending", attempt: row.attempt, duplicate },
 		});
 		await writeEvent(database, {
 			name: "submission.created",
@@ -614,6 +643,7 @@ export async function saveDraftSubmission(
 		note: nextNote,
 		status: input.submit ? "pending" : "draft",
 		submittedAt,
+		duplicateKind: duplicate,
 	});
 }
 

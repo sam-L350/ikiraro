@@ -80,7 +80,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/7.1-review-sla`
   - [x] `phase/7.2-second-review-and-quality`
   - [x] `phase/7.3-appeals-and-feedback-library`
-  - [ ] `phase/7.4-evidence-integrity`
+  - [x] `phase/7.4-evidence-integrity`
   - [ ] `phase/7.5-sessions-and-attendance`
   - [ ] `phase/7.6-center-devices-and-directory`
   - [ ] `phase/7.7-inventory`

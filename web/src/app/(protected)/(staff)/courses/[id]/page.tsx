@@ -48,6 +48,7 @@ type CourseBadge = {
 	skillRw: string;
 	level: number;
 	missingKinyarwanda: boolean;
+	requiresInPerson?: boolean;
 	rule: BadgeRule;
 };
 
@@ -639,6 +640,9 @@ function BadgeFields({
 			? ""
 			: String(badge.rule.minimumHours),
 	);
+	const [requiresInPerson, setRequiresInPerson] = useState(
+		badge?.requiresInPerson === true,
+	);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const savedScore =
 		badge?.rule.minimumScore === null || badge?.rule.minimumScore === undefined
@@ -656,7 +660,8 @@ function BadgeFields({
 		level !== String(badge?.level ?? 1) ||
 		allRequired !== (badge?.rule.allRequiredTasksApproved ?? true) ||
 		minimumScore !== savedScore ||
-		minimumHours !== savedHours;
+		minimumHours !== savedHours ||
+		requiresInPerson !== (badge?.requiresInPerson === true);
 	useEffect(() => {
 		onDirty(`${courseId}-badge`, dirty);
 	}, [courseId, dirty, onDirty]);
@@ -676,6 +681,7 @@ function BadgeFields({
 					allRequiredTasksApproved: allRequired,
 					minimumScore: minimumScore.trim() ? Number(minimumScore) : null,
 					minimumHours: minimumHours.trim() ? Number(minimumHours) : null,
+					requiresInPerson,
 				},
 			});
 			await onSaved();
@@ -741,6 +747,22 @@ function BadgeFields({
 					/>
 					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 						{t("badgeAllTasks")}
+					</span>
+				</label>
+				<label
+					className="flex items-center gap-3"
+					htmlFor={`${courseId}-badge-visit`}
+				>
+					<input
+						id={`${courseId}-badge-visit`}
+						type="checkbox"
+						className="size-4 accent-ink"
+						checked={requiresInPerson}
+						disabled={!editable}
+						onChange={(event) => setRequiresInPerson(event.target.checked)}
+					/>
+					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+						{t("badgeInPerson")}
 					</span>
 				</label>
 				<Field

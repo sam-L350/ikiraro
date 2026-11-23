@@ -170,3 +170,39 @@ export const secondReviews = pgTable(
 		),
 	],
 );
+
+/**
+ * Where and when a trainer saw the learner do the work. Stored beside the
+ * approval, which itself is never edited.
+ */
+export const inPersonChecks = pgTable(
+	"in_person_checks",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		verificationId: uuid("verification_id")
+			.notNull()
+			.unique()
+			.references(() => submissionVerifications.id),
+		submissionId: uuid("submission_id")
+			.notNull()
+			.references(() => taskSubmissions.id),
+		reviewerUserId: integer("reviewer_user_id")
+			.notNull()
+			.references(() => users.id),
+		location: text("location").notNull(),
+		observedAt: timestamp("observed_at", { withTimezone: true }).notNull(),
+		recordedAt: timestamp("recorded_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		check(
+			"in_person_checks_location",
+			sql`char_length(btrim(${table.location})) between 1 and 160`,
+		),
+		check(
+			"in_person_checks_time",
+			sql`${table.observedAt} <= ${table.recordedAt} + interval '2 minutes'`,
+		),
+	],
+);

@@ -1,6 +1,7 @@
 import { and, asc, eq, inArray, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db";
 import {
+	contentVersions,
 	enrollments,
 	learningCenters,
 	mediaObjects,
@@ -21,6 +22,8 @@ import {
 import { readAssignments } from "../identity/staff";
 import { EVIDENCE_URL_SECONDS } from "../storage/limits";
 import type { ObjectStore } from "../storage/object-store";
+import { type DuplicateKind, isDuplicateKind } from "./duplicates";
+import { inPersonRequired } from "./in-person";
 import {
 	DEFAULT_REVIEW_SLA_MS,
 	type EscalationStage,
@@ -47,6 +50,7 @@ export type EvidenceQueueItem = {
 	centerName: string;
 	taskTitleRw: string;
 	taskTitleEn: string;
+	duplicate: DuplicateKind;
 };
 
 export type EvidenceQueue = {
@@ -69,6 +73,7 @@ export type EvidenceReview = EvidenceQueueItem & {
 	evidenceUrl: string | null;
 	evidenceContentType: string | null;
 	criteria: EvidenceCriterion[];
+	requiresInPerson: boolean;
 };
 
 type ReviewDb = Pick<Database, "insert" | "select" | "update">;
@@ -175,6 +180,8 @@ type QueueRow = {
 	centerName: string;
 	note: string | null;
 	mediaObjectId: string | null;
+	duplicateKind: string;
+	contentVersionId: string;
 };
 
 async function waitingRows(
@@ -198,6 +205,8 @@ async function waitingRows(
 			centerName: learningCenters.name,
 			note: taskSubmissions.note,
 			mediaObjectId: taskSubmissions.mediaObjectId,
+			duplicateKind: taskSubmissions.duplicateKind,
+			contentVersionId: taskSubmissions.contentVersionId,
 		})
 		.from(taskSubmissions)
 		.innerJoin(enrollments, eq(enrollments.id, taskSubmissions.enrollmentId))
@@ -269,7 +278,8 @@ function presentItem(
 	if (
 		!row.submittedAt ||
 		!isWaitingStatus(row.status) ||
-		!isEvidenceType(row.evidenceType)
+		!isEvidenceType(row.evidenceType) ||
+		!isDuplicateKind(row.duplicateKind)
 	) {
 		throw errors.internal("That submission could not be read.");
 	}
@@ -292,6 +302,7 @@ function presentItem(
 		centerName: row.centerName,
 		taskTitleRw: copy?.titleRw ?? "",
 		taskTitleEn: copy?.titleEn ?? "",
+		duplicate: row.duplicateKind,
 	};
 }
 
@@ -373,6 +384,11 @@ export async function readEvidenceReview(
 			evidenceContentType = media.contentType;
 		}
 	}
+	const [version] = await database
+		.select({ snapshot: contentVersions.snapshot })
+		.from(contentVersions)
+		.where(eq(contentVersions.id, row.contentVersionId))
+		.limit(1);
 	return {
 		...presentItem(row, copy, input.now ?? new Date()),
 		instructionsRw: copy?.instructionsRw ?? "",
@@ -381,6 +397,7 @@ export async function readEvidenceReview(
 		evidenceUrl,
 		evidenceContentType,
 		criteria: await criteriaFor(database, row.taskId),
+		requiresInPerson: inPersonRequired(version?.snapshot),
 	};
 }
 

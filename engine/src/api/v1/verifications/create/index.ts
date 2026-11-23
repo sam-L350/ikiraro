@@ -16,6 +16,7 @@ export async function createVerification(input: {
 	note?: string;
 	reasonCode?: string;
 	scores?: ScoreInput[];
+	inPerson?: { location: string; observedAt: string };
 	idempotencyKey?: string;
 }): Promise<{
 	id: string;
@@ -47,6 +48,7 @@ export async function createVerification(input: {
 		note: input.note,
 		reasonCode: input.reasonCode,
 		scores: input.scores,
+		inPerson: input.inPerson,
 		idempotencyKey: input.idempotencyKey,
 		ip: clientIp(),
 	});

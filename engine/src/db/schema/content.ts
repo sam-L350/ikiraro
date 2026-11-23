@@ -241,6 +241,8 @@ export const badges = pgTable(
 		skillEn: text("skill_en"),
 		skillRw: text("skill_rw"),
 		level: integer("level").notNull().default(1),
+		/** The trainer records where and when they saw the work. */
+		requiresInPerson: boolean("requires_in_person").notNull().default(false),
 		rule: jsonb("rule")
 			.$type<BadgeRule>()
 			.notNull()

@@ -3,6 +3,7 @@ import type { Database } from "../../db";
 import {
 	declaredRelationships,
 	enrollments,
+	inPersonChecks,
 	rubricCriteria,
 	submissionVerifications,
 	taskSubmissions,
@@ -11,6 +12,7 @@ import {
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { awardSubmission } from "./award";
+import { type InPersonInput, requiredVisit } from "./in-person";
 import { reviewCenters } from "./review-queue";
 import { openSecondReviewIfSampled } from "./second-review";
 
@@ -190,6 +192,7 @@ export async function createVerification(
 		note?: string;
 		reasonCode?: string;
 		scores?: ScoreInput[];
+		inPerson?: InPersonInput;
 		idempotencyKey?: string;
 		ip: string;
 	},
@@ -207,6 +210,7 @@ export async function createVerification(
 			taskId: taskSubmissions.taskId,
 			ownerUserId: taskSubmissions.ownerUserId,
 			centerId: enrollments.centerId,
+			contentVersionId: taskSubmissions.contentVersionId,
 		})
 		.from(taskSubmissions)
 		.innerJoin(enrollments, eq(enrollments.id, taskSubmissions.enrollmentId))
@@ -281,6 +285,13 @@ export async function createVerification(
 		.where(eq(rubricCriteria.taskId, row.taskId));
 	const scoreTotal = weightedScore(criteria, input.scores ?? []);
 	const scores = input.scores ?? [];
+	const now = new Date();
+	const visit = await requiredVisit(database, {
+		contentVersionId: row.contentVersionId,
+		decision,
+		inPerson: input.inPerson,
+		now,
+	});
 	if (decision === "approved") {
 		const key = input.idempotencyKey?.trim() ?? "";
 		if (!key) {
@@ -288,21 +299,45 @@ export async function createVerification(
 				reason: "key",
 			});
 		}
-		const awarded = await awardSubmission(database, {
-			reviewerId: input.reviewerId,
-			submissionId: row.id,
-			note,
-			scores,
-			idempotencyKey: key,
-			ip: input.ip,
+		return database.transaction(async (tx) => {
+			const awarded = await awardSubmission(tx, {
+				reviewerId: input.reviewerId,
+				submissionId: row.id,
+				note,
+				scores,
+				idempotencyKey: key,
+				ip: input.ip,
+			});
+			if (visit) {
+				const [check] = await tx
+					.insert(inPersonChecks)
+					.values({
+						verificationId: awarded.id,
+						submissionId: awarded.submissionId,
+						reviewerUserId: input.reviewerId,
+						location: visit.location,
+						observedAt: visit.observedAt,
+						recordedAt: now,
+					})
+					.returning({ id: inPersonChecks.id });
+				if (!check) throw errors.internal("The visit was not stored.");
+				await writeAudit(tx, {
+					actorId: input.reviewerId,
+					action: "verification.in_person",
+					targetType: "in_person_check",
+					targetId: check.id,
+					ipAddress: input.ip,
+					metadata: { submissionId: awarded.submissionId },
+				});
+			}
+			await openSecondReviewIfSampled(tx, {
+				verificationId: awarded.id,
+				submissionId: awarded.submissionId,
+				reviewerId: input.reviewerId,
+				ip: input.ip,
+			});
+			return awarded;
 		});
-		await openSecondReviewIfSampled(database, {
-			verificationId: awarded.id,
-			submissionId: awarded.submissionId,
-			reviewerId: input.reviewerId,
-			ip: input.ip,
-		});
-		return awarded;
 	}
 
 	return database.transaction(async (tx) => {

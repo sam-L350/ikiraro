@@ -32,6 +32,8 @@ type EvidenceReview = {
 	note: string | null;
 	evidenceUrl: string | null;
 	evidenceContentType: string | null;
+	duplicate?: "none" | "same" | "other";
+	requiresInPerson?: boolean;
 	criteria: {
 		id: string;
 		weight: number;
@@ -147,6 +149,12 @@ function decisionError(
 			return t("scoreBelow");
 		case "closed":
 			return t("evidenceLeftQueue");
+		case "in_person":
+			return t("inPersonMissing");
+		case "location":
+			return t("inPersonLocationInvalid");
+		case "observed":
+			return t("inPersonTimeInvalid");
 		default:
 			return t("tryAgain");
 	}
@@ -178,6 +186,8 @@ export default function EvidenceReviewPage() {
 	const [note, setNote] = useState("");
 	const [scores, setScores] = useState<Record<string, string>>({});
 	const [formError, setFormError] = useState<string | null>(null);
+	const [place, setPlace] = useState("");
+	const [seenAt, setSeenAt] = useState("");
 	const claimed = useRef(false);
 	const sheet = useRef<HTMLDialogElement>(null);
 	const approveKey = useRef(crypto.randomUUID());
@@ -259,6 +269,10 @@ export default function EvidenceReviewPage() {
 			setFormError(t("scoreInvalid"));
 			return;
 		}
+		if (item.requiresInPerson && (!place.trim() || !seenAt)) {
+			setFormError(t("inPersonMissing"));
+			return;
+		}
 		setFormError(null);
 		try {
 			await decide.mutateAsync({
@@ -268,6 +282,14 @@ export default function EvidenceReviewPage() {
 					note: t("approvedNote"),
 					idempotencyKey: approveKey.current,
 					...(parsed.length > 0 ? { scores: parsed } : {}),
+					...(item.requiresInPerson
+						? {
+								inPerson: {
+									location: place.trim(),
+									observedAt: new Date(seenAt).toISOString(),
+								},
+							}
+						: {}),
 				},
 			});
 			await invalidateEngine("/evidence-queue");
@@ -342,6 +364,12 @@ export default function EvidenceReviewPage() {
 					) : null}
 					{item.escalation === "district" ? (
 						<Badge variant="pending">{t("escalatedDistrict")}</Badge>
+					) : null}
+					{item.duplicate === "same" ? (
+						<Badge variant="pending">{t("duplicateSamePill")}</Badge>
+					) : null}
+					{item.duplicate === "other" ? (
+						<Badge variant="danger">{t("duplicateOtherPill")}</Badge>
 					) : null}
 				</div>
 				<p className="mt-3 font-sans text-lg text-fg">
@@ -432,6 +460,40 @@ export default function EvidenceReviewPage() {
 			{online ? null : (
 				<p className="font-sans text-lg text-fg">{t("offlineDecision")}</p>
 			)}
+			{item.duplicate === "same" ? (
+				<p className="font-sans text-lg text-fg">{t("duplicateSame")}</p>
+			) : null}
+			{item.duplicate === "other" ? (
+				<p className="font-sans text-lg text-fg">{t("duplicateOther")}</p>
+			) : null}
+			{item.requiresInPerson ? (
+				<div className="flex flex-col gap-4">
+					<p className="font-sans text-lg text-fg">{t("inPersonSentence")}</p>
+					<label className="flex flex-col gap-2" htmlFor="in-person-place">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+							{t("inPersonLocation")}
+						</span>
+						<input
+							id="in-person-place"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={place}
+							onChange={(event) => setPlace(event.target.value)}
+						/>
+					</label>
+					<label className="flex flex-col gap-2" htmlFor="in-person-when">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+							{t("inPersonWhen")}
+						</span>
+						<input
+							id="in-person-when"
+							type="datetime-local"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={seenAt}
+							onChange={(event) => setSeenAt(event.target.value)}
+						/>
+					</label>
+				</div>
+			) : null}
 			<Card variant="ink" className="flex flex-col gap-4">
 				<p className="font-sans text-lg text-ink-fg">{t("approveLater")}</p>
 				<Button

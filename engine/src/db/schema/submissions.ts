@@ -43,6 +43,8 @@ export const taskSubmissions = pgTable(
 		mediaObjectId: uuid("media_object_id").references(() => mediaObjects.id),
 		objectKey: text("object_key"),
 		contentHash: text("content_hash"),
+		/** none, the same learner, or another learner sent this exact file. */
+		duplicateKind: text("duplicate_kind").notNull().default("none"),
 		note: text("note"),
 		deviceInfo: text("device_info"),
 		geoLat: doublePrecision("geo_lat"),
@@ -72,6 +74,9 @@ export const taskSubmissions = pgTable(
 		index("task_submissions_review_due_idx")
 			.on(table.reviewDueAt)
 			.where(sql`${table.status} in ('pending', 'in_review')`),
+		index("task_submissions_content_hash_idx")
+			.on(table.contentHash)
+			.where(sql`${table.contentHash} is not null`),
 		check(
 			"task_submissions_status",
 			sql`${table.status} in (${submissionStatusSql})`,
@@ -84,6 +89,10 @@ export const taskSubmissions = pgTable(
 		check(
 			"task_submissions_escalation",
 			sql`${table.escalation} in ('none', 'manager', 'district')`,
+		),
+		check(
+			"task_submissions_duplicate_kind",
+			sql`${table.duplicateKind} in ('none', 'same', 'other')`,
 		),
 		check(
 			"task_submissions_review_due",

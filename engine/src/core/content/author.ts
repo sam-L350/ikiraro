@@ -70,6 +70,7 @@ export type BadgeView = {
 	skillRw: string;
 	level: number;
 	missingKinyarwanda: boolean;
+	requiresInPerson: boolean;
 	rule: BadgeRule;
 };
 
@@ -497,6 +498,7 @@ async function readBadge(
 		skillRw,
 		level: row.level,
 		missingKinyarwanda: gap(row.titleEn, titleRw) || gap(skillEn, skillRw),
+		requiresInPerson: row.requiresInPerson,
 		rule: readBadgeRule(row.rule),
 	};
 }
@@ -945,6 +947,7 @@ export async function saveBadge(
 		allRequiredTasksApproved: boolean;
 		minimumScore?: number | null;
 		minimumHours?: number | null;
+		requiresInPerson?: boolean;
 		actorId: number;
 		ip: string;
 	},
@@ -956,6 +959,7 @@ export async function saveBadge(
 	const skillRw = cleanSkill(input.skillRw);
 	const rule = requireBadgeRule(input);
 	const level = requireLevel(input.level);
+	const requiresInPerson = input.requiresInPerson === true;
 	const [saved] = await database
 		.insert(badges)
 		.values({
@@ -965,6 +969,7 @@ export async function saveBadge(
 			skillEn,
 			skillRw,
 			level,
+			requiresInPerson,
 			rule,
 		})
 		.onConflictDoUpdate({
@@ -975,6 +980,7 @@ export async function saveBadge(
 				skillEn,
 				skillRw,
 				level,
+				requiresInPerson,
 				rule,
 			},
 		})

@@ -16,6 +16,7 @@ export async function updateCourseBadge(input: {
 	allRequiredTasksApproved: boolean;
 	minimumScore?: number | null;
 	minimumHours?: number | null;
+	requiresInPerson?: boolean;
 }): Promise<CourseView> {
 	const user = await requireAuth();
 	await authorize({ permission: "content.write" });
@@ -29,6 +30,7 @@ export async function updateCourseBadge(input: {
 		allRequiredTasksApproved: input.allRequiredTasksApproved,
 		minimumScore: input.minimumScore,
 		minimumHours: input.minimumHours,
+		requiresInPerson: input.requiresInPerson,
 		actorId: user.id,
 		ip: clientIp(),
 	});
