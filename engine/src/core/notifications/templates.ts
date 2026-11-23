@@ -13,6 +13,7 @@ export const NOTIFICATION_EVENTS = [
 	"follow_up.due",
 	"learner.stalled",
 	"announcement.posted",
+	"submission.escalated",
 ] as const;
 
 export type NotificationEvent = (typeof NOTIFICATION_EVENTS)[number];
@@ -125,6 +126,16 @@ const COPY: Record<
 		en: { title: "Announcement", body: "{message}" },
 		rw: { title: "Itangazo", body: "{message}" },
 	},
+	"submission.escalated": {
+		en: {
+			title: "A review is overdue",
+			body: "Evidence is past the review time and now sits with you.",
+		},
+		rw: {
+			title: "Isuzuma ryarengeje igihe",
+			body: "Ibyemezo byarengeje igihe cyo gusuzuma, ubu biri kuri wowe.",
+		},
+	},
 };
 
 export function isNotificationEvent(value: string): value is NotificationEvent {
@@ -139,6 +150,7 @@ export function isNotificationEvent(value: string): value is NotificationEvent {
 		case "follow_up.due":
 		case "learner.stalled":
 		case "announcement.posted":
+		case "submission.escalated":
 			return true;
 		default:
 			return false;

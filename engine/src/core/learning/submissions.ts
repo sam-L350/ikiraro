@@ -10,6 +10,7 @@ import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { isEvidenceType } from "../content/author";
 import { readEnrollmentProgress, startTaskProgress } from "./progress";
+import { readReviewSlaMs, reviewDueAt } from "./sla";
 import { feedbackForSubmissions } from "./verifications";
 
 export const SUBMISSION_STATUSES = [
@@ -357,6 +358,9 @@ export async function createSubmission(
 				}
 			}
 			const submittedAt = status === "pending" ? new Date() : null;
+			const dueAt = submittedAt
+				? reviewDueAt(submittedAt, await readReviewSlaMs(tx))
+				: null;
 			const [created] = await tx
 				.insert(taskSubmissions)
 				.values({
@@ -376,6 +380,7 @@ export async function createSubmission(
 					geoLat: geo.geoLat,
 					geoLng: geo.geoLng,
 					submittedAt,
+					reviewDueAt: dueAt,
 				})
 				.returning(rowColumns);
 			if (!created) throw errors.internal("The submission was not stored.");
@@ -537,12 +542,17 @@ export async function saveDraftSubmission(
 	}
 	const nextNote = note === undefined ? row.note : note;
 	const submittedAt = input.submit ? new Date() : row.submittedAt;
+	const dueAt =
+		input.submit && submittedAt
+			? reviewDueAt(submittedAt, await readReviewSlaMs(database))
+			: null;
 	await database
 		.update(taskSubmissions)
 		.set({
 			note: nextNote,
 			status: input.submit ? "pending" : "draft",
 			submittedAt,
+			...(dueAt ? { reviewDueAt: dueAt } : {}),
 		})
 		.where(eq(taskSubmissions.id, row.id));
 	if (input.submit) {

@@ -7,6 +7,7 @@ import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
 
 type ReviewUrgency = "ok" | "soon" | "overdue";
+type EscalationStage = "none" | "manager" | "district";
 type WaitingStatus = "pending" | "in_review";
 
 type QueueItem = {
@@ -15,6 +16,7 @@ type QueueItem = {
 	status: WaitingStatus;
 	submittedAt: string;
 	urgency: ReviewUrgency;
+	escalation: EscalationStage;
 	learnerName: string;
 	centerName: string;
 	taskTitleRw: string;
@@ -64,6 +66,21 @@ function statusKey(status: WaitingStatus): MessageKey {
 			return "submissionInReview";
 		default: {
 			const unreachable: never = status;
+			return unreachable;
+		}
+	}
+}
+
+function escalationKey(stage: EscalationStage): MessageKey | null {
+	switch (stage) {
+		case "none":
+			return null;
+		case "manager":
+			return "escalatedManager";
+		case "district":
+			return "escalatedDistrict";
+		default: {
+			const unreachable: never = stage;
 			return unreachable;
 		}
 	}
@@ -155,6 +172,7 @@ export default function EvidenceQueuePage() {
 				<ul className="mt-10">
 					{items.map((item) => {
 						const urgency = urgencyKey(item.urgency);
+						const escalation = escalationKey(item.escalation ?? "none");
 						const learner = item.learnerName.trim() || t("learnerUnnamed");
 						return (
 							<li key={item.id} className="border-t border-ink/15 py-5">
@@ -180,6 +198,9 @@ export default function EvidenceQueuePage() {
 											>
 												{t(urgency)}
 											</Badge>
+										) : null}
+										{escalation ? (
+											<Badge variant="pending">{t(escalation)}</Badge>
 										) : null}
 										<Badge variant="neutral">{t(statusKey(item.status))}</Badge>
 									</div>

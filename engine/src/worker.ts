@@ -7,6 +7,7 @@
 import { createApp } from "./app";
 import { configureEnv } from "./config/env";
 import { cleanExpiredSessions } from "./core/auth/sessions";
+import { escalateOverdue } from "./core/learning/sla";
 import { logger } from "./core/logger";
 import { drainNotifications } from "./core/notifications/drain";
 import { db } from "./db";
@@ -35,9 +36,14 @@ export default {
 				cleanExpiredSessions().catch((error) => {
 					logger.error("failed to clean expired sessions", { error });
 				}),
-				drainNotifications(db).catch((error) => {
-					logger.error("notification drain failed", { error });
-				}),
+				escalateOverdue(db)
+					.catch((error) => {
+						logger.error("review escalation failed", { error });
+					})
+					.then(() => drainNotifications(db))
+					.catch((error) => {
+						logger.error("notification drain failed", { error });
+					}),
 			]),
 		);
 	},

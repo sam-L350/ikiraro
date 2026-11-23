@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { isApiError } from "../api/error";
 import { SHARED_IDLE_KEY } from "../auth/shared-idle";
+import { REVIEW_SLA_KEY } from "../learning/sla";
 import { SMS_DAILY_CAP_KEY } from "../sms/cap";
 import { MEDIA_MAX_KEY } from "../storage/limits";
 import { acceptedConfigValue } from "./config";
@@ -32,6 +33,15 @@ describe("config values", () => {
 		expect(acceptedConfigValue(SMS_DAILY_CAP_KEY, 0)).toBe(0);
 		expect(acceptedConfigValue(SMS_DAILY_CAP_KEY, 8)).toBe(8);
 		expect(statusOf(() => acceptedConfigValue(SMS_DAILY_CAP_KEY, 101))).toBe(
+			400,
+		);
+	});
+
+	test("a review window stays between one hour and fourteen days", () => {
+		expect(acceptedConfigValue(REVIEW_SLA_KEY, 72 * 60 * 60 * 1000)).toBe(
+			72 * 60 * 60 * 1000,
+		);
+		expect(statusOf(() => acceptedConfigValue(REVIEW_SLA_KEY, 60_000))).toBe(
 			400,
 		);
 	});

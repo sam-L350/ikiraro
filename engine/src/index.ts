@@ -7,6 +7,7 @@
  */
 import { createApp } from "./app";
 import { env } from "./config/env";
+import { escalateOverdue } from "./core/learning/sla";
 import { logger } from "./core/logger";
 import { drainNotifications } from "./core/notifications/drain";
 import { db } from "./db";
@@ -34,7 +35,11 @@ let draining = false;
 const drainTimer = setInterval(() => {
 	if (draining) return;
 	draining = true;
-	drainNotifications(db)
+	escalateOverdue(db)
+		.catch((error: unknown) => {
+			logger.error("review escalation failed", { error });
+		})
+		.then(() => drainNotifications(db))
 		.catch((error: unknown) => {
 			logger.error("notification drain failed", { error });
 		})

@@ -51,6 +51,10 @@ export const taskSubmissions = pgTable(
 			.notNull()
 			.defaultNow(),
 		submittedAt: timestamp("submitted_at", { withTimezone: true }),
+		/** When this attempt should have been reviewed. Null until it is sent. */
+		reviewDueAt: timestamp("review_due_at", { withTimezone: true }),
+		/** none, then the center manager, then the district coordinator. */
+		escalation: text("escalation").notNull().default("none"),
 		withdrawnAt: timestamp("withdrawn_at", { withTimezone: true }),
 	},
 	(table) => [
@@ -65,6 +69,9 @@ export const taskSubmissions = pgTable(
 		index("task_submissions_waiting")
 			.on(table.submittedAt)
 			.where(sql`${table.status} in ('pending', 'in_review')`),
+		index("task_submissions_review_due_idx")
+			.on(table.reviewDueAt)
+			.where(sql`${table.status} in ('pending', 'in_review')`),
 		check(
 			"task_submissions_status",
 			sql`${table.status} in (${submissionStatusSql})`,
@@ -73,6 +80,18 @@ export const taskSubmissions = pgTable(
 		check(
 			"task_submissions_evidence",
 			sql`${table.evidenceType} in ('photo', 'file', 'note')`,
+		),
+		check(
+			"task_submissions_escalation",
+			sql`${table.escalation} in ('none', 'manager', 'district')`,
+		),
+		check(
+			"task_submissions_review_due",
+			sql`(
+				${table.status} = 'draft'
+				and ${table.reviewDueAt} is null
+				and ${table.escalation} = 'none'
+			) or ${table.status} <> 'draft'`,
 		),
 	],
 );

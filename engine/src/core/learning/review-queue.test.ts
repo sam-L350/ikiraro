@@ -31,18 +31,16 @@ import { createMemoryObjectStore } from "../storage/object-store";
 import {
 	listEvidenceQueue,
 	readEvidenceReview,
-	reviewUrgency,
 	startEvidenceReview,
 } from "./review-queue";
+import { reviewUrgency } from "./sla";
 import { createSubmission, withdrawSubmission } from "./submissions";
 
-test("a photo is due soon in the last twelve hours of the window", () => {
+test("a review is due soon in the last twelve hours before the deadline", () => {
 	const now = new Date("2026-11-23T12:00:00.000Z");
-	expect(reviewUrgency(new Date("2026-11-23T11:00:00.000Z"), now)).toBe("ok");
-	expect(reviewUrgency(new Date("2026-11-20T23:00:00.000Z"), now)).toBe("soon");
-	expect(reviewUrgency(new Date("2026-11-20T12:00:00.000Z"), now)).toBe(
-		"overdue",
-	);
+	expect(reviewUrgency(new Date("2026-11-24T12:00:00.000Z"), now)).toBe("ok");
+	expect(reviewUrgency(new Date("2026-11-23T20:00:00.000Z"), now)).toBe("soon");
+	expect(reviewUrgency(now, now)).toBe("overdue");
 });
 
 function isUsable(url: string): boolean {
@@ -372,19 +370,19 @@ describe("evidence review queue", () => {
 			new Date(now.getTime() - count * 60 * 60 * 1000);
 		await database
 			.update(taskSubmissions)
-			.set({ submittedAt: hours(80) })
+			.set({ submittedAt: hours(80), reviewDueAt: hours(8) })
 			.where(eq(taskSubmissions.id, older.id));
 		await database
 			.update(taskSubmissions)
-			.set({ submittedAt: hours(1) })
+			.set({ submittedAt: hours(1), reviewDueAt: hours(-71) })
 			.where(eq(taskSubmissions.id, newer.id));
 		await database
 			.update(taskSubmissions)
-			.set({ submittedAt: hours(61) })
+			.set({ submittedAt: hours(61), reviewDueAt: hours(-11) })
 			.where(eq(taskSubmissions.id, photo.id));
 		await database
 			.update(taskSubmissions)
-			.set({ submittedAt: hours(100) })
+			.set({ submittedAt: hours(100), reviewDueAt: hours(28) })
 			.where(eq(taskSubmissions.id, outside.id));
 
 		const [trainerRole] = await database
@@ -430,8 +428,10 @@ describe("evidence review queue", () => {
 		});
 		expect(own.items.map((item) => item.id)).toEqual([older.id, newer.id]);
 		expect(own.items[0]?.urgency).toBe("overdue");
+		expect(own.items[0]?.escalation).toBe("manager");
 		expect(own.items[0]?.learnerName).toBe("Aline");
 		expect(own.items[1]?.urgency).toBe("ok");
+		expect(own.items[1]?.escalation).toBe("none");
 		expect(own.centers.map((center) => center.id)).toEqual([centerA.id]);
 
 		const both = await listEvidenceQueue(database, {

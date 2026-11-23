@@ -21,12 +21,17 @@ import {
 import { readAssignments } from "../identity/staff";
 import { EVIDENCE_URL_SECONDS } from "../storage/limits";
 import type { ObjectStore } from "../storage/object-store";
+import {
+	DEFAULT_REVIEW_SLA_MS,
+	type EscalationStage,
+	escalateOverdue,
+	escalationStage,
+	type ReviewUrgency,
+	reviewDueAt,
+	reviewUrgency,
+} from "./sla";
 
-/** Highlight window. Phase 7.1 stores the deadline and escalates it. */
-export const REVIEW_WINDOW_MS = 72 * 60 * 60 * 1000;
-const DUE_SOON_MS = 12 * 60 * 60 * 1000;
-
-export type ReviewUrgency = "ok" | "soon" | "overdue";
+export type { EscalationStage, ReviewUrgency };
 
 export type EvidenceQueueItem = {
 	id: string;
@@ -34,7 +39,9 @@ export type EvidenceQueueItem = {
 	status: "pending" | "in_review";
 	evidenceType: "photo" | "file" | "note";
 	submittedAt: string;
+	reviewDueAt: string;
 	urgency: ReviewUrgency;
+	escalation: EscalationStage;
 	learnerName: string;
 	centerId: string;
 	centerName: string;
@@ -71,14 +78,6 @@ export type ReviewCenter = {
 	name: string;
 	districtId: string;
 };
-
-/** Waiting time against the 72 hour review target. */
-export function reviewUrgency(submittedAt: Date, now: Date): ReviewUrgency {
-	const age = now.getTime() - submittedAt.getTime();
-	if (age >= REVIEW_WINDOW_MS) return "overdue";
-	if (age >= REVIEW_WINDOW_MS - DUE_SOON_MS) return "soon";
-	return "ok";
-}
 
 function isWaitingStatus(value: string): value is EvidenceQueueItem["status"] {
 	switch (value) {
@@ -169,6 +168,8 @@ type QueueRow = {
 	status: string;
 	evidenceType: string;
 	submittedAt: Date | null;
+	reviewDueAt: Date | null;
+	escalation: string;
 	learnerName: string | null;
 	centerId: string;
 	centerName: string;
@@ -190,6 +191,8 @@ async function waitingRows(
 			status: taskSubmissions.status,
 			evidenceType: taskSubmissions.evidenceType,
 			submittedAt: taskSubmissions.submittedAt,
+			reviewDueAt: taskSubmissions.reviewDueAt,
+			escalation: taskSubmissions.escalation,
 			learnerName: users.name,
 			centerId: enrollments.centerId,
 			centerName: learningCenters.name,
@@ -276,7 +279,14 @@ function presentItem(
 		status: row.status,
 		evidenceType: row.evidenceType,
 		submittedAt: row.submittedAt.toISOString(),
-		urgency: reviewUrgency(row.submittedAt, now),
+		reviewDueAt: (
+			row.reviewDueAt ?? reviewDueAt(row.submittedAt, DEFAULT_REVIEW_SLA_MS)
+		).toISOString(),
+		urgency: reviewUrgency(
+			row.reviewDueAt ?? reviewDueAt(row.submittedAt, DEFAULT_REVIEW_SLA_MS),
+			now,
+		),
+		escalation: escalationStage(row.escalation),
 		learnerName: row.learnerName?.trim() || "",
 		centerId: row.centerId,
 		centerName: row.centerName,
@@ -290,6 +300,7 @@ export async function listEvidenceQueue(
 	database: ReviewDb,
 	input: { reviewerId: number; centerId?: string; now?: Date },
 ): Promise<EvidenceQueue> {
+	await escalateOverdue(database, input.now ?? new Date());
 	const centers = await reviewCenters(database, input.reviewerId);
 	const rows = await waitingRows(database, allowedIds(centers, input.centerId));
 	const copy = await taskCopy(

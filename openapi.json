@@ -8355,12 +8355,23 @@
 												"submittedAt": {
 													"type": "string"
 												},
+												"reviewDueAt": {
+													"type": "string"
+												},
 												"urgency": {
 													"type": "string",
 													"enum": [
 														"ok",
 														"soon",
 														"overdue"
+													]
+												},
+												"escalation": {
+													"type": "string",
+													"enum": [
+														"district",
+														"none",
+														"manager"
 													]
 												},
 												"learnerName": {
@@ -8434,7 +8445,9 @@
 												"status",
 												"evidenceType",
 												"submittedAt",
+												"reviewDueAt",
 												"urgency",
+												"escalation",
 												"learnerName",
 												"centerId",
 												"centerName",
@@ -8718,12 +8731,23 @@
 															"submittedAt": {
 																"type": "string"
 															},
+															"reviewDueAt": {
+																"type": "string"
+															},
 															"urgency": {
 																"type": "string",
 																"enum": [
 																	"ok",
 																	"soon",
 																	"overdue"
+																]
+															},
+															"escalation": {
+																"type": "string",
+																"enum": [
+																	"district",
+																	"none",
+																	"manager"
 																]
 															},
 															"learnerName": {
@@ -8748,7 +8772,9 @@
 															"status",
 															"evidenceType",
 															"submittedAt",
+															"reviewDueAt",
 															"urgency",
+															"escalation",
 															"learnerName",
 															"centerId",
 															"centerName",
@@ -11114,7 +11140,8 @@
 															"grant.decided",
 															"follow_up.due",
 															"learner.stalled",
-															"announcement.posted"
+															"announcement.posted",
+															"submission.escalated"
 														]
 													},
 													"inApp": {
@@ -11254,7 +11281,8 @@
 															"grant.decided",
 															"follow_up.due",
 															"learner.stalled",
-															"announcement.posted"
+															"announcement.posted",
+															"submission.escalated"
 														]
 													},
 													"inApp": {
@@ -11380,7 +11408,8 @@
 															"grant.decided",
 															"follow_up.due",
 															"learner.stalled",
-															"announcement.posted"
+															"announcement.posted",
+															"submission.escalated"
 														]
 													},
 													"channel": {
@@ -11535,7 +11564,8 @@
 														"grant.decided",
 														"follow_up.due",
 														"learner.stalled",
-														"announcement.posted"
+														"announcement.posted",
+														"submission.escalated"
 													]
 												},
 												"channel": {
@@ -11695,7 +11725,8 @@
 														"grant.decided",
 														"follow_up.due",
 														"learner.stalled",
-														"announcement.posted"
+														"announcement.posted",
+														"submission.escalated"
 													]
 												},
 												"title": {
@@ -11714,23 +11745,23 @@
 												"sms": {
 													"type": "string",
 													"enum": [
+														"none",
 														"queued",
 														"submitted",
 														"sent",
 														"failed",
-														"capped",
-														"none"
+														"capped"
 													]
 												},
 												"email": {
 													"type": "string",
 													"enum": [
+														"none",
 														"queued",
 														"submitted",
 														"sent",
 														"failed",
-														"capped",
-														"none"
+														"capped"
 													]
 												}
 											},
@@ -11850,7 +11881,8 @@
 															"grant.decided",
 															"follow_up.due",
 															"learner.stalled",
-															"announcement.posted"
+															"announcement.posted",
+															"submission.escalated"
 														]
 													},
 													"title": {
@@ -11869,23 +11901,23 @@
 													"sms": {
 														"type": "string",
 														"enum": [
+															"none",
 															"queued",
 															"submitted",
 															"sent",
 															"failed",
-															"capped",
-															"none"
+															"capped"
 														]
 													},
 													"email": {
 														"type": "string",
 														"enum": [
+															"none",
 															"queued",
 															"submitted",
 															"sent",
 															"failed",
-															"capped",
-															"none"
+															"capped"
 														]
 													}
 												},
@@ -18530,8 +18562,8 @@
 													"type": "string",
 													"enum": [
 														"center",
-														"admin",
-														"none"
+														"none",
+														"admin"
 													]
 												},
 												"centers": {

@@ -11,10 +11,12 @@ import {
 	notificationPreferences,
 	notifications,
 	notificationTemplates,
+	roles,
 	sectors,
 	submissionVerifications,
 	taskProgress,
 	taskSubmissions,
+	userRoles,
 	users,
 } from "../../db/schema";
 import { writeEvent } from "../audit/write";
@@ -112,6 +114,48 @@ async function ownerFromVerification(
 		.where(eq(submissionVerifications.id, verificationId))
 		.limit(1);
 	return row?.ownerUserId ?? null;
+}
+
+async function managersAtCenter(
+	database: Pick<Database, "select">,
+	centerId: string,
+): Promise<number[]> {
+	const rows = await database
+		.select({ userId: centerStaff.userId })
+		.from(centerStaff)
+		.where(
+			and(
+				eq(centerStaff.centerId, centerId),
+				eq(centerStaff.role, "center_manager"),
+			),
+		);
+	return rows.map((row) => row.userId);
+}
+
+async function coordinatorsForCenter(
+	database: Pick<Database, "select">,
+	centerId: string,
+): Promise<number[]> {
+	const [center] = await database
+		.select({ districtId: sectors.districtId })
+		.from(learningCenters)
+		.innerJoin(sectors, eq(sectors.id, learningCenters.sectorId))
+		.where(eq(learningCenters.id, centerId))
+		.limit(1);
+	if (!center) return [];
+	const rows = await database
+		.select({ userId: userRoles.userId })
+		.from(userRoles)
+		.innerJoin(roles, eq(roles.id, userRoles.roleId))
+		.where(
+			and(
+				eq(roles.code, "district_coordinator"),
+				eq(userRoles.scopeType, "district"),
+				eq(userRoles.scopeId, center.districtId),
+				isNull(userRoles.suspendedAt),
+			),
+		);
+	return rows.map((row) => row.userId);
 }
 
 async function staffAtCenter(
@@ -235,6 +279,24 @@ async function planEvent(
 					vars: { points: String(points) },
 				},
 			];
+		}
+		case "submission.escalated": {
+			const submissionId = text(body.submissionId);
+			const stage = text(body.stage);
+			if (!submissionId || (stage !== "manager" && stage !== "district")) {
+				return "retry";
+			}
+			const audience = await submissionAudience(database, submissionId);
+			if (!audience) return "retry";
+			const ids =
+				stage === "manager"
+					? await managersAtCenter(database, audience.centerId)
+					: await coordinatorsForCenter(database, audience.centerId);
+			return [...new Set(ids)].map((userId) => ({
+				userId,
+				eventName: name,
+				vars: {},
+			}));
 		}
 		case "announcement.posted": {
 			const scope = text(body.scope);

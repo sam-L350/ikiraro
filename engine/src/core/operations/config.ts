@@ -4,6 +4,11 @@ import { configSettings, type JsonValue } from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { SHARED_IDLE_KEY } from "../auth/shared-idle";
+import {
+	MAX_REVIEW_SLA_MS,
+	MIN_REVIEW_SLA_MS,
+	REVIEW_SLA_KEY,
+} from "../learning/sla";
 import { SMS_DAILY_CAP_KEY } from "../sms/cap";
 import { MEDIA_MAX_KEY } from "../storage/limits";
 
@@ -22,13 +27,15 @@ export type ConfigSetting = {
 type KnownKey =
 	| typeof SHARED_IDLE_KEY
 	| typeof MEDIA_MAX_KEY
-	| typeof SMS_DAILY_CAP_KEY;
+	| typeof SMS_DAILY_CAP_KEY
+	| typeof REVIEW_SLA_KEY;
 
 function isKnownKey(key: string): key is KnownKey {
 	switch (key) {
 		case SHARED_IDLE_KEY:
 		case MEDIA_MAX_KEY:
 		case SMS_DAILY_CAP_KEY:
+		case REVIEW_SLA_KEY:
 			return true;
 		default:
 			return false;
@@ -58,6 +65,8 @@ export function acceptedConfigValue(key: string, value: number): number {
 			return inRange(value, 1024, MAX_MEDIA_BYTES);
 		case SMS_DAILY_CAP_KEY:
 			return inRange(value, 0, 100);
+		case REVIEW_SLA_KEY:
+			return inRange(value, MIN_REVIEW_SLA_MS, MAX_REVIEW_SLA_MS);
 		default: {
 			const unreachable: never = key;
 			return unreachable;

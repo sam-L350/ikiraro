@@ -21,6 +21,8 @@ type EvidenceReview = {
 	status: WaitingStatus;
 	evidenceType: "photo" | "file" | "note";
 	submittedAt: string;
+	urgency?: "ok" | "soon" | "overdue";
+	escalation?: "none" | "manager" | "district";
 	learnerName: string;
 	centerName: string;
 	taskTitleRw: string;
@@ -321,6 +323,18 @@ export default function EvidenceReviewPage() {
 						{title}
 					</h1>
 					<Badge variant="neutral">{t(statusKey(item.status))}</Badge>
+					{item.urgency === "soon" ? (
+						<Badge variant="pending">{t("dueSoon")}</Badge>
+					) : null}
+					{item.urgency === "overdue" ? (
+						<Badge variant="danger">{t("reviewOverdue")}</Badge>
+					) : null}
+					{item.escalation === "manager" ? (
+						<Badge variant="pending">{t("escalatedManager")}</Badge>
+					) : null}
+					{item.escalation === "district" ? (
+						<Badge variant="pending">{t("escalatedDistrict")}</Badge>
+					) : null}
 				</div>
 				<p className="mt-3 font-sans text-lg text-fg">
 					{learner} · {item.centerName} ·{" "}
