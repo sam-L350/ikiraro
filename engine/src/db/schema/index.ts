@@ -50,3 +50,7 @@ export {
 	otpChallenges,
 } from "./registration";
 export { taskSubmissions } from "./submissions";
+export {
+	submissionVerifications,
+	verificationScores,
+} from "./verifications";

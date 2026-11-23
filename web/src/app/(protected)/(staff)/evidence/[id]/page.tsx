@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -30,10 +32,18 @@ type EvidenceReview = {
 	criteria: {
 		id: string;
 		weight: number;
+		passThreshold: number;
 		promptRw: string;
 		promptEn: string;
 	}[];
 };
+
+type SendBackKind = "needs_revision" | "rejected";
+type RejectReason =
+	| "not_the_task"
+	| "not_the_learner"
+	| "unreadable"
+	| "incomplete";
 
 function textFor(locale: "rw" | "en", rw: string, en: string): string {
 	if (locale === "rw" && rw.trim()) return rw;
@@ -83,17 +93,94 @@ function waitingCopy(
 	return t("waitingDays", { count: String(days) });
 }
 
+const REJECT_REASONS = [
+	"not_the_task",
+	"not_the_learner",
+	"unreadable",
+	"incomplete",
+] as const;
+
+function reasonKey(reason: RejectReason): MessageKey {
+	switch (reason) {
+		case "not_the_task":
+			return "reasonNotTheTask";
+		case "not_the_learner":
+			return "reasonNotTheLearner";
+		case "unreadable":
+			return "reasonUnreadable";
+		case "incomplete":
+			return "reasonIncomplete";
+		default: {
+			const unreachable: never = reason;
+			return unreachable;
+		}
+	}
+}
+
+function decisionError(
+	caught: unknown,
+	t: (key: MessageKey) => string,
+): string {
+	if (!isApiClientError(caught)) return t("tryAgain");
+	const details = caught.details;
+	const reason =
+		details && typeof details === "object" && "reason" in details
+			? details.reason
+			: undefined;
+	switch (reason) {
+		case "self":
+			return t("conflictSelf");
+		case "relative":
+			return t("conflictRelative");
+		case "feedback":
+			return t("feedbackRequired");
+		case "note":
+			return t("rejectNoteRequired");
+		case "reason":
+			return t("rejectReasonRequired");
+		case "score":
+			return t("scoreInvalid");
+		case "closed":
+			return t("evidenceLeftQueue");
+		default:
+			return t("tryAgain");
+	}
+}
+
+function parsedScores(
+	criteria: EvidenceReview["criteria"],
+	draft: Record<string, string>,
+): { criterionId: string; score: number }[] | "invalid" {
+	const scores: { criterionId: string; score: number }[] = [];
+	for (const criterion of criteria) {
+		const raw = draft[criterion.id]?.trim() ?? "";
+		if (!/^\d+$/.test(raw)) return "invalid";
+		const score = Number(raw);
+		if (score > 100) return "invalid";
+		scores.push({ criterionId: criterion.id, score });
+	}
+	return scores;
+}
+
 export default function EvidenceReviewPage() {
 	const { id = "" } = useParams();
+	const navigate = useNavigate();
 	const { locale, t } = useI18n();
 	const [left, setLeft] = useState(false);
+	const [kind, setKind] = useState<SendBackKind>("needs_revision");
+	const [reason, setReason] = useState<RejectReason>("not_the_task");
+	const [note, setNote] = useState("");
+	const [scores, setScores] = useState<Record<string, string>>({});
+	const [formError, setFormError] = useState<string | null>(null);
 	const claimed = useRef(false);
+	const sheet = useRef<HTMLDialogElement>(null);
 	const review = useEngine(
 		"/evidence-queue/:id",
 		{ query: { id } },
 		{ enabled: id.length > 0 },
 	);
 	const start = useEngineMutation("/evidence-queue/:id/start");
+	const decide = useEngineMutation("/verifications/create");
 
 	useEffect(() => {
 		if (!id || review.data?.status !== "pending" || claimed.current) return;
@@ -150,6 +237,46 @@ export default function EvidenceReviewPage() {
 		(item.evidenceContentType ?? "").startsWith("image/");
 	const file =
 		item.evidenceUrl !== null && item.evidenceContentType === "application/pdf";
+
+	function openSheet() {
+		setFormError(null);
+		sheet.current?.showModal();
+	}
+
+	async function onSendBack(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const text = note.trim();
+		if (!text) {
+			setFormError(
+				t(
+					kind === "needs_revision" ? "feedbackRequired" : "rejectNoteRequired",
+				),
+			);
+			return;
+		}
+		const parsed = parsedScores(item.criteria, scores);
+		if (parsed === "invalid") {
+			setFormError(t("scoreInvalid"));
+			return;
+		}
+		setFormError(null);
+		try {
+			await decide.mutateAsync({
+				body: {
+					submissionId: id,
+					decision: kind,
+					note: text,
+					...(kind === "rejected" ? { reasonCode: reason } : {}),
+					...(parsed.length > 0 ? { scores: parsed } : {}),
+				},
+			});
+			sheet.current?.close();
+			await invalidateEngine("/evidence-queue");
+			navigate("/evidence");
+		} catch (caught) {
+			setFormError(decisionError(caught, t));
+		}
+	}
 
 	return (
 		<article className="flex flex-col gap-8">
@@ -219,13 +346,149 @@ export default function EvidenceReviewPage() {
 									</p>
 									<p className="mt-2 font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 										{t("criterionWeight", { count: String(criterion.weight) })}
+										{" · "}
+										{t("passAt", { count: String(criterion.passThreshold) })}
 									</p>
+									<label
+										className="mt-3 flex max-w-32 flex-col gap-2"
+										htmlFor={`score-${criterion.id}`}
+									>
+										<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+											{t("scoreLabel")}
+										</span>
+										<input
+											id={`score-${criterion.id}`}
+											inputMode="numeric"
+											className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg tabular-nums text-fg"
+											value={scores[criterion.id] ?? ""}
+											aria-invalid={
+												formError === t("scoreInvalid") || undefined
+											}
+											onChange={(event) =>
+												setScores((current) => ({
+													...current,
+													[criterion.id]: event.target.value,
+												}))
+											}
+										/>
+									</label>
 								</li>
 							))}
 						</ol>
 					)}
 				</section>
 			</div>
+			<Card variant="ink" className="flex flex-col gap-4">
+				<p className="font-sans text-lg text-ink-fg">{t("approveLater")}</p>
+				<Button type="button" variant="ink" className="w-fit" disabled>
+					{t("approveEvidence")}
+				</Button>
+				<p className="font-sans text-lg text-ink-fg">{t("sendBackSentence")}</p>
+				<Button
+					type="button"
+					variant="quiet"
+					className="w-fit text-ink-fg"
+					onClick={openSheet}
+				>
+					{t("sendBackEvidence")}
+				</Button>
+			</Card>
+			<dialog
+				ref={sheet}
+				className="w-[min(100%,36rem)] rounded-[28px] border border-line bg-canvas p-8 text-fg backdrop:bg-ink/40"
+				onClose={() => setFormError(null)}
+			>
+				<form
+					className="flex flex-col gap-4"
+					onSubmit={(event) => void onSendBack(event)}
+				>
+					<h2 className="font-sans text-2xl font-semibold text-fg">
+						{t("sendBackEvidence")}
+					</h2>
+					<div className="flex flex-wrap gap-2">
+						<Button
+							type="button"
+							variant={kind === "needs_revision" ? "soft" : "quiet"}
+							aria-pressed={kind === "needs_revision"}
+							onClick={() => {
+								setKind("needs_revision");
+								setFormError(null);
+							}}
+						>
+							{t("decisionNeedsRevision")}
+						</Button>
+						<Button
+							type="button"
+							variant={kind === "rejected" ? "soft" : "quiet"}
+							aria-pressed={kind === "rejected"}
+							onClick={() => {
+								setKind("rejected");
+								setFormError(null);
+							}}
+						>
+							{t("decisionReject")}
+						</Button>
+					</div>
+					{kind === "rejected" ? (
+						<label className="flex flex-col gap-2" htmlFor="reject-reason">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+								{t("rejectReasonLabel")}
+							</span>
+							<select
+								id="reject-reason"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={reason}
+								onChange={(event) => {
+									const next = event.target.value;
+									if (
+										next === "not_the_task" ||
+										next === "not_the_learner" ||
+										next === "unreadable" ||
+										next === "incomplete"
+									) {
+										setReason(next);
+									}
+								}}
+							>
+								{REJECT_REASONS.map((itemReason) => (
+									<option key={itemReason} value={itemReason}>
+										{t(reasonKey(itemReason))}
+									</option>
+								))}
+							</select>
+						</label>
+					) : null}
+					<label className="flex flex-col gap-2" htmlFor="decision-note">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+							{t(
+								kind === "needs_revision" ? "feedbackLabel" : "rejectNoteLabel",
+							)}
+						</span>
+						<textarea
+							id="decision-note"
+							className="min-h-32 rounded-md border border-line bg-card px-3 py-3 font-sans text-lg text-fg"
+							value={note}
+							aria-invalid={formError ? true : undefined}
+							onChange={(event) => setNote(event.target.value)}
+						/>
+					</label>
+					{formError ? (
+						<p className="font-sans text-lg text-danger">{formError}</p>
+					) : null}
+					<div className="flex flex-wrap gap-3">
+						<Button type="submit" disabled={decide.isPending}>
+							{t("sendThisBack")}
+						</Button>
+						<Button
+							type="button"
+							variant="quiet"
+							onClick={() => sheet.current?.close()}
+						>
+							{t("closeSheet")}
+						</Button>
+					</div>
+				</form>
+			</dialog>
 		</article>
 	);
 }

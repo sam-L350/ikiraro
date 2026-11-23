@@ -5,6 +5,7 @@ import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { isEvidenceType } from "../content/author";
 import { readEnrollmentProgress, startTaskProgress } from "./progress";
+import { feedbackForSubmissions } from "./verifications";
 
 export const SUBMISSION_STATUSES = [
 	"draft",
@@ -30,7 +31,7 @@ export type SubmissionView = {
 	status: SubmissionStatus;
 	evidenceType: "photo" | "file" | "note";
 	submittedAt: string | null;
-	/** Trainer feedback arrives with a decision. This phase has none. */
+	/** The note from the recorded decision, when one exists. */
 	feedback: string | null;
 };
 
@@ -122,7 +123,10 @@ export function nextAttempt(attempts: readonly number[]): number {
 	return highest + 1;
 }
 
-function present(row: StoredRow): SubmissionView {
+function present(
+	row: StoredRow,
+	feedback: string | null = null,
+): SubmissionView {
 	if (!isSubmissionStatus(row.status) || !isEvidenceType(row.evidenceType)) {
 		throw errors.internal("That submission could not be read.");
 	}
@@ -136,7 +140,7 @@ function present(row: StoredRow): SubmissionView {
 		status,
 		evidenceType,
 		submittedAt: row.submittedAt ? row.submittedAt.toISOString() : null,
-		feedback: null,
+		feedback,
 	};
 }
 
@@ -471,7 +475,11 @@ export async function listSubmissions(
 			),
 		)
 		.orderBy(desc(taskSubmissions.createdAt));
-	return rows.map(present);
+	const notes = await feedbackForSubmissions(
+		database,
+		rows.map((row) => row.id),
+	);
+	return rows.map((row) => present(row, notes.get(row.id) ?? null));
 }
 
 /** Take an attempt back. A review that has started cannot be withdrawn. */

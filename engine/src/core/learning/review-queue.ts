@@ -50,6 +50,7 @@ export type EvidenceQueue = {
 export type EvidenceCriterion = {
 	id: string;
 	weight: number;
+	passThreshold: number;
 	promptRw: string;
 	promptEn: string;
 };
@@ -310,6 +311,7 @@ async function criteriaFor(
 		.select({
 			id: rubricCriteria.id,
 			weight: rubricCriteria.weight,
+			passThreshold: rubricCriteria.passThreshold,
 			promptRw: rubricCriteria.promptRw,
 			promptEn: rubricCriteria.promptEn,
 		})
@@ -319,6 +321,7 @@ async function criteriaFor(
 	return rows.map((row) => ({
 		id: row.id,
 		weight: row.weight,
+		passThreshold: row.passThreshold,
 		promptRw: row.promptRw ?? "",
 		promptEn: row.promptEn ?? "",
 	}));
