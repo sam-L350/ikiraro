@@ -49,7 +49,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/2.2-authoring`
   - [x] `phase/2.3-review-and-publish`
   - [x] `phase/2.4-content-versions`
-  - [ ] `phase/2.5-rubrics-badges-media`
+  - [x] `phase/2.5-rubrics-badges-media`
 - [ ] Phase 3 — Learning (`phase/3-learning`)
   - [ ] `phase/3.1-catalog-enrollment`
   - [ ] `phase/3.2-progress-and-prerequisites`

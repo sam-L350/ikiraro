@@ -12,6 +12,7 @@ type ContentStatus = "draft" | "in_review" | "published" | "retired";
 type Criterion = {
 	id: string;
 	weight: number;
+	passThreshold: number;
 	promptEn: string;
 	promptRw: string;
 	missingKinyarwanda: boolean;
@@ -24,8 +25,28 @@ type Task = {
 	instructionsEn: string;
 	instructionsRw: string;
 	evidenceType: string | null;
+	passThreshold: number;
+	required: boolean;
+	imageKey: string;
+	audioKey: string;
+	jobAidKey: string;
+	outboundUrl: string;
 	missingKinyarwanda: boolean;
 	criteria: Criterion[];
+};
+
+type BadgeRule = {
+	allRequiredTasksApproved: boolean;
+	minimumScore: number | null;
+	minimumHours: number | null;
+};
+
+type CourseBadge = {
+	titleEn: string;
+	titleRw: string;
+	level: number;
+	missingKinyarwanda: boolean;
+	rule: BadgeRule;
 };
 
 type Module = {
@@ -46,6 +67,7 @@ type Course = {
 	summaryEn: string;
 	summaryRw: string;
 	missingKinyarwanda: boolean;
+	badge: CourseBadge | null;
 	modules: Module[];
 };
 
@@ -82,6 +104,16 @@ function reasonKey(error: unknown): MessageKey {
 			return "unknownEvidence";
 		case "weight_required":
 			return "weightRequired";
+		case "invalid_media_key":
+			return "invalidMediaKey";
+		case "invalid_outbound_url":
+			return "invalidOutboundUrl";
+		case "invalid_threshold":
+			return "invalidThreshold";
+		case "invalid_hours":
+			return "invalidHours";
+		case "invalid_level":
+			return "invalidLevel";
 		case "not_published":
 			return "nextDraftPublishedOnly";
 		default:
@@ -194,6 +226,13 @@ export default function CourseEditorPage() {
 			<div className="mt-8 flex flex-col gap-10">
 				<CourseFields
 					course={draft}
+					editable={editable}
+					onDirty={mark}
+					onSaved={() => course.invalidate()}
+				/>
+				<BadgeFields
+					courseId={draft.id}
+					badge={draft.badge}
 					editable={editable}
 					onDirty={mark}
 					onSaved={() => course.invalidate()}
@@ -453,6 +492,153 @@ function ModuleFields({
 	);
 }
 
+function BadgeFields({
+	courseId,
+	badge,
+	editable,
+	onDirty,
+	onSaved,
+}: {
+	courseId: string;
+	badge: CourseBadge | null;
+	editable: boolean;
+	onDirty: (key: string, dirty: boolean) => void;
+	onSaved: () => Promise<void>;
+}) {
+	const { t } = useI18n();
+	const save = useEngineMutation("/courses/:id/badge");
+	const [titleEn, setTitleEn] = useState(badge?.titleEn ?? "");
+	const [titleRw, setTitleRw] = useState(badge?.titleRw ?? "");
+	const [level, setLevel] = useState(String(badge?.level ?? 1));
+	const [allRequired, setAllRequired] = useState(
+		badge?.rule.allRequiredTasksApproved ?? true,
+	);
+	const [minimumScore, setMinimumScore] = useState(
+		badge?.rule.minimumScore === null || badge?.rule.minimumScore === undefined
+			? ""
+			: String(badge.rule.minimumScore),
+	);
+	const [minimumHours, setMinimumHours] = useState(
+		badge?.rule.minimumHours === null || badge?.rule.minimumHours === undefined
+			? ""
+			: String(badge.rule.minimumHours),
+	);
+	const [error, setError] = useState<MessageKey | null>(null);
+	const savedScore =
+		badge?.rule.minimumScore === null || badge?.rule.minimumScore === undefined
+			? ""
+			: String(badge.rule.minimumScore);
+	const savedHours =
+		badge?.rule.minimumHours === null || badge?.rule.minimumHours === undefined
+			? ""
+			: String(badge.rule.minimumHours);
+	const dirty =
+		titleEn !== (badge?.titleEn ?? "") ||
+		titleRw !== (badge?.titleRw ?? "") ||
+		level !== String(badge?.level ?? 1) ||
+		allRequired !== (badge?.rule.allRequiredTasksApproved ?? true) ||
+		minimumScore !== savedScore ||
+		minimumHours !== savedHours;
+	useEffect(() => {
+		onDirty(`${courseId}-badge`, dirty);
+	}, [courseId, dirty, onDirty]);
+
+	async function onSubmit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		setError(null);
+		try {
+			await save.mutateAsync({
+				body: {
+					id: courseId,
+					titleEn,
+					titleRw,
+					level: Number(level),
+					allRequiredTasksApproved: allRequired,
+					minimumScore: minimumScore.trim() ? Number(minimumScore) : null,
+					minimumHours: minimumHours.trim() ? Number(minimumHours) : null,
+				},
+			});
+			await onSaved();
+		} catch (caught) {
+			setError(reasonKey(caught));
+		}
+	}
+
+	return (
+		<section>
+			<h2 className="font-sans text-2xl font-semibold text-fg">
+				{t("badgeHeading")}
+			</h2>
+			<form className="mt-4 flex flex-col gap-4" onSubmit={onSubmit}>
+				<Field
+					id={`${courseId}-badge-en`}
+					label={t("badgeTitleEn")}
+					value={titleEn}
+					disabled={!editable}
+					onChange={setTitleEn}
+				/>
+				<Field
+					id={`${courseId}-badge-rw`}
+					label={t("badgeTitleRw")}
+					value={titleRw}
+					disabled={!editable}
+					onChange={setTitleRw}
+					hint={titleEn.trim().length > 0 && titleRw.trim().length === 0}
+				/>
+				<Field
+					id={`${courseId}-badge-level`}
+					label={t("badgeLevel")}
+					value={level}
+					disabled={!editable}
+					onChange={setLevel}
+				/>
+				<label
+					className="flex items-center gap-3"
+					htmlFor={`${courseId}-badge-all`}
+				>
+					<input
+						id={`${courseId}-badge-all`}
+						type="checkbox"
+						className="size-4 accent-ink"
+						checked={allRequired}
+						disabled={!editable}
+						onChange={(event) => setAllRequired(event.target.checked)}
+					/>
+					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+						{t("badgeAllTasks")}
+					</span>
+				</label>
+				<Field
+					id={`${courseId}-badge-score`}
+					label={t("minimumScore")}
+					value={minimumScore}
+					disabled={!editable}
+					onChange={setMinimumScore}
+				/>
+				<Field
+					id={`${courseId}-badge-hours`}
+					label={t("minimumHours")}
+					value={minimumHours}
+					disabled={!editable}
+					onChange={setMinimumHours}
+				/>
+				{error ? <Alert message={t(error)} /> : null}
+				{editable ? (
+					<div>
+						<Button
+							type="submit"
+							variant="soft"
+							disabled={save.isPending || !dirty}
+						>
+							{t("saveDraft")}
+						</Button>
+					</div>
+				) : null}
+			</form>
+		</section>
+	);
+}
+
 function TaskFields({
 	task,
 	editable,
@@ -471,13 +657,27 @@ function TaskFields({
 	const [instructionsEn, setInstructionsEn] = useState(task.instructionsEn);
 	const [instructionsRw, setInstructionsRw] = useState(task.instructionsRw);
 	const [evidenceType, setEvidenceType] = useState(task.evidenceType ?? "");
+	const [passThreshold, setPassThreshold] = useState(
+		String(task.passThreshold),
+	);
+	const [required, setRequired] = useState(task.required);
+	const [imageKey, setImageKey] = useState(task.imageKey);
+	const [audioKey, setAudioKey] = useState(task.audioKey);
+	const [jobAidKey, setJobAidKey] = useState(task.jobAidKey);
+	const [outboundUrl, setOutboundUrl] = useState(task.outboundUrl);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const dirty =
 		titleEn !== task.titleEn ||
 		titleRw !== task.titleRw ||
 		instructionsEn !== task.instructionsEn ||
 		instructionsRw !== task.instructionsRw ||
-		evidenceType !== (task.evidenceType ?? "");
+		evidenceType !== (task.evidenceType ?? "") ||
+		passThreshold !== String(task.passThreshold) ||
+		required !== task.required ||
+		imageKey !== task.imageKey ||
+		audioKey !== task.audioKey ||
+		jobAidKey !== task.jobAidKey ||
+		outboundUrl !== task.outboundUrl;
 	useEffect(() => {
 		onDirty(task.id, dirty);
 	}, [task.id, dirty, onDirty]);
@@ -494,6 +694,12 @@ function TaskFields({
 					instructionsEn,
 					instructionsRw,
 					evidenceType,
+					passThreshold: Number(passThreshold),
+					required,
+					imageKey,
+					audioKey,
+					jobAidKey,
+					outboundUrl,
 				},
 			});
 			await onSaved();
@@ -558,6 +764,59 @@ function TaskFields({
 						<option value="note">{t("evidenceNote")}</option>
 					</select>
 				</label>
+				<Field
+					id={`${task.id}-pass`}
+					label={t("passThreshold")}
+					value={passThreshold}
+					disabled={!editable}
+					onChange={setPassThreshold}
+				/>
+				<label
+					className="flex items-center gap-3"
+					htmlFor={`${task.id}-required`}
+				>
+					<input
+						id={`${task.id}-required`}
+						type="checkbox"
+						className="size-4 accent-ink"
+						checked={required}
+						disabled={!editable}
+						onChange={(event) => setRequired(event.target.checked)}
+					/>
+					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+						{t("taskRequired")}
+					</span>
+				</label>
+				<p className="font-sans text-sm text-fg-muted">{t("mediaKeyHint")}</p>
+				<Field
+					id={`${task.id}-image`}
+					label={t("imageKey")}
+					value={imageKey}
+					disabled={!editable}
+					onChange={setImageKey}
+				/>
+				<Field
+					id={`${task.id}-audio`}
+					label={t("audioKey")}
+					value={audioKey}
+					disabled={!editable}
+					onChange={setAudioKey}
+				/>
+				<Field
+					id={`${task.id}-job-aid`}
+					label={t("jobAidKey")}
+					value={jobAidKey}
+					disabled={!editable}
+					onChange={setJobAidKey}
+				/>
+				<Field
+					id={`${task.id}-link`}
+					label={t("outboundUrl")}
+					value={outboundUrl}
+					disabled={!editable}
+					onChange={setOutboundUrl}
+				/>
+				<p className="font-sans text-sm text-fg-muted">{t("outboundHint")}</p>
 				{error ? <Alert message={t(error)} /> : null}
 				{editable ? (
 					<div>
@@ -604,11 +863,15 @@ function CriterionFields({
 	const { t } = useI18n();
 	const save = useEngineMutation("/criteria/:id/update");
 	const [weight, setWeight] = useState(String(criterion.weight));
+	const [passThreshold, setPassThreshold] = useState(
+		String(criterion.passThreshold),
+	);
 	const [promptEn, setPromptEn] = useState(criterion.promptEn);
 	const [promptRw, setPromptRw] = useState(criterion.promptRw);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const dirty =
 		weight !== String(criterion.weight) ||
+		passThreshold !== String(criterion.passThreshold) ||
 		promptEn !== criterion.promptEn ||
 		promptRw !== criterion.promptRw;
 	useEffect(() => {
@@ -623,6 +886,7 @@ function CriterionFields({
 				body: {
 					id: criterion.id,
 					weight: Number(weight),
+					passThreshold: Number(passThreshold),
 					promptEn,
 					promptRw,
 				},
@@ -644,6 +908,13 @@ function CriterionFields({
 				value={weight}
 				disabled={!editable}
 				onChange={setWeight}
+			/>
+			<Field
+				id={`${criterion.id}-pass`}
+				label={t("passThreshold")}
+				value={passThreshold}
+				disabled={!editable}
+				onChange={setPassThreshold}
 			/>
 			<Field
 				id={`${criterion.id}-prompt-en`}
@@ -794,6 +1065,7 @@ function AddCriterion({
 	const { t } = useI18n();
 	const create = useEngineMutation("/tasks/:id/criteria");
 	const [weight, setWeight] = useState("1");
+	const [passThreshold, setPassThreshold] = useState("100");
 	const [promptEn, setPromptEn] = useState("");
 	const [promptRw, setPromptRw] = useState("");
 	const [error, setError] = useState<MessageKey | null>(null);
@@ -803,7 +1075,13 @@ function AddCriterion({
 		setError(null);
 		try {
 			await create.mutateAsync({
-				body: { id: taskId, weight: Number(weight), promptEn, promptRw },
+				body: {
+					id: taskId,
+					weight: Number(weight),
+					passThreshold: Number(passThreshold),
+					promptEn,
+					promptRw,
+				},
 			});
 			setPromptEn("");
 			setPromptRw("");
@@ -820,6 +1098,12 @@ function AddCriterion({
 				label={t("weightLabel")}
 				value={weight}
 				onChange={setWeight}
+			/>
+			<Field
+				id={`${taskId}-new-pass`}
+				label={t("passThreshold")}
+				value={passThreshold}
+				onChange={setPassThreshold}
 			/>
 			<Field
 				id={`${taskId}-new-prompt-en`}

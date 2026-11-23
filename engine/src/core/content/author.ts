@@ -1,6 +1,7 @@
 import { asc, eq, inArray, max } from "drizzle-orm";
 import type { Database } from "../../db";
 import {
+	badges,
 	courses,
 	courseTranslations,
 	modules,
@@ -9,9 +10,12 @@ import {
 	tasks,
 	taskTranslations,
 } from "../../db/schema";
-import type { ContentStatus } from "../../db/schema/content";
+import type { BadgeRule, ContentStatus } from "../../db/schema/content";
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
+import { readBadgeRule, requireBadgeRule, requireLevel } from "./badge";
+import { storeMediaKey, storeOutboundUrl } from "./media";
+import { requirePassThreshold } from "./rubric";
 
 type AuthorDb = Pick<Database, "insert" | "select" | "transaction" | "update">;
 
@@ -30,6 +34,7 @@ export type CriterionView = {
 	id: string;
 	position: number;
 	weight: number;
+	passThreshold: number;
 	promptEn: string;
 	promptRw: string;
 	missingKinyarwanda: boolean;
@@ -40,12 +45,27 @@ export type TaskView = {
 	position: number;
 	status: ContentStatus;
 	evidenceType: string | null;
+	passThreshold: number;
+	required: boolean;
+	imageKey: string;
+	audioKey: string;
+	jobAidKey: string;
+	outboundUrl: string;
 	titleEn: string;
 	titleRw: string;
 	instructionsEn: string;
 	instructionsRw: string;
 	missingKinyarwanda: boolean;
 	criteria: CriterionView[];
+};
+
+export type BadgeView = {
+	id: string;
+	titleEn: string;
+	titleRw: string;
+	level: number;
+	missingKinyarwanda: boolean;
+	rule: BadgeRule;
 };
 
 export type ModuleView = {
@@ -70,6 +90,7 @@ export type CourseView = {
 	missingKinyarwanda: boolean;
 	reviewNote: string;
 	approved: boolean;
+	badge: BadgeView | null;
 	modules: ModuleView[];
 };
 
@@ -277,6 +298,12 @@ export async function readCourse(
 						position: tasks.position,
 						status: tasks.status,
 						evidenceType: tasks.evidenceType,
+						passThreshold: tasks.passThreshold,
+						required: tasks.required,
+						imageKey: tasks.imageKey,
+						audioKey: tasks.audioKey,
+						jobAidKey: tasks.jobAidKey,
+						outboundUrl: tasks.outboundUrl,
 						locale: taskTranslations.locale,
 						title: taskTranslations.title,
 						instructions: taskTranslations.instructions,
@@ -335,6 +362,7 @@ export async function readCourse(
 					id: row.id,
 					position: row.position,
 					weight: row.weight,
+					passThreshold: row.passThreshold,
 					promptEn: row.promptEn ?? "",
 					promptRw: row.promptRw ?? "",
 					missingKinyarwanda: gap(row.promptEn ?? "", row.promptRw ?? ""),
@@ -345,6 +373,12 @@ export async function readCourse(
 					position: task.position,
 					status: task.status,
 					evidenceType: task.evidenceType,
+					passThreshold: task.passThreshold,
+					required: task.required,
+					imageKey: task.imageKey ?? "",
+					audioKey: task.audioKey ?? "",
+					jobAidKey: task.jobAidKey ?? "",
+					outboundUrl: task.outboundUrl ?? "",
 					titleEn: words.titleEn,
 					titleRw: words.titleRw,
 					instructionsEn: words.summaryEn,
@@ -375,6 +409,7 @@ export async function readCourse(
 		];
 	});
 
+	const badge = await readBadge(database, courseId);
 	return {
 		id: courseId,
 		status,
@@ -385,10 +420,33 @@ export async function readCourse(
 		missingKinyarwanda:
 			gap(courseText.titleEn, courseText.titleRw) ||
 			gap(courseText.summaryEn, courseText.summaryRw) ||
+			(badge?.missingKinyarwanda ?? false) ||
 			builtModules.some((module) => module.missingKinyarwanda),
 		reviewNote: courseRows[0]?.reviewNote ?? "",
 		approved: courseRows[0]?.reviewedByUserId != null,
+		badge,
 		modules: builtModules,
+	};
+}
+
+async function readBadge(
+	database: AuthorDb,
+	courseId: string,
+): Promise<BadgeView | null> {
+	const [row] = await database
+		.select()
+		.from(badges)
+		.where(eq(badges.courseId, courseId))
+		.limit(1);
+	if (!row || row.titleEn.length === 0) return null;
+	const titleRw = row.titleRw ?? "";
+	return {
+		id: row.id,
+		titleEn: row.titleEn,
+		titleRw,
+		level: row.level,
+		missingKinyarwanda: gap(row.titleEn, titleRw),
+		rule: readBadgeRule(row.rule),
 	};
 }
 
@@ -586,6 +644,12 @@ type TaskText = {
 	instructionsEn?: string;
 	instructionsRw?: string;
 	evidenceType?: string;
+	passThreshold?: number;
+	required?: boolean;
+	imageKey?: string;
+	audioKey?: string;
+	jobAidKey?: string;
+	outboundUrl?: string;
 };
 
 function storedEvidence(value: string | undefined): string | null {
@@ -630,7 +694,15 @@ async function writeTaskText(
 	}
 	await database
 		.update(tasks)
-		.set({ evidenceType: storedEvidence(input.evidenceType) })
+		.set({
+			evidenceType: storedEvidence(input.evidenceType),
+			passThreshold: requirePassThreshold(input.passThreshold),
+			required: input.required !== false,
+			imageKey: await storeMediaKey(input.imageKey, "image/*"),
+			audioKey: await storeMediaKey(input.audioKey, "audio/*"),
+			jobAidKey: await storeMediaKey(input.jobAidKey, "application/pdf"),
+			outboundUrl: storeOutboundUrl(input.outboundUrl),
+		})
 		.where(eq(tasks.id, taskId));
 }
 
@@ -687,6 +759,7 @@ export async function createCriterion(
 	input: {
 		taskId: string;
 		weight: number;
+		passThreshold?: number;
 		promptEn: string;
 		promptRw?: string;
 		actorId: number;
@@ -703,6 +776,7 @@ export async function createCriterion(
 			taskId: input.taskId,
 			position,
 			weight: requireWeight(input.weight),
+			passThreshold: requirePassThreshold(input.passThreshold),
 			promptEn,
 			promptRw: clean(input.promptRw) || null,
 		})
@@ -723,6 +797,7 @@ export async function updateCriterion(
 	input: {
 		criterionId: string;
 		weight: number;
+		passThreshold?: number;
 		promptEn: string;
 		promptRw?: string;
 		actorId: number;
@@ -735,11 +810,60 @@ export async function updateCriterion(
 		.update(rubricCriteria)
 		.set({
 			weight: requireWeight(input.weight),
+			passThreshold: requirePassThreshold(input.passThreshold),
 			promptEn: requireEnglishTitle(clean(input.promptEn)),
 			promptRw: clean(input.promptRw) || null,
 		})
 		.where(eq(rubricCriteria.id, input.criterionId));
 	return readCourse(database, courseId);
+}
+
+export async function saveBadge(
+	database: AuthorDb,
+	input: {
+		courseId: string;
+		titleEn: string;
+		titleRw?: string;
+		level: number;
+		allRequiredTasksApproved: boolean;
+		minimumScore?: number | null;
+		minimumHours?: number | null;
+		actorId: number;
+		ip: string;
+	},
+): Promise<CourseView> {
+	await requireDraft(database, input.courseId);
+	const titleEn = requireEnglishTitle(clean(input.titleEn));
+	const rule = requireBadgeRule(input);
+	const level = requireLevel(input.level);
+	const [saved] = await database
+		.insert(badges)
+		.values({
+			courseId: input.courseId,
+			titleEn,
+			titleRw: clean(input.titleRw) || null,
+			level,
+			rule,
+		})
+		.onConflictDoUpdate({
+			target: badges.courseId,
+			set: {
+				titleEn,
+				titleRw: clean(input.titleRw) || null,
+				level,
+				rule,
+			},
+		})
+		.returning({ id: badges.id });
+	if (!saved) throw errors.internal("The badge was not stored.");
+	await writeAudit(database, {
+		actorId: input.actorId,
+		action: "content.badge_saved",
+		targetType: "badge",
+		targetId: saved.id,
+		ipAddress: input.ip,
+	});
+	return readCourse(database, input.courseId);
 }
 
 export async function submitCourseForReview(

@@ -9,6 +9,7 @@ import { db } from "../../../../../db";
 export async function createTaskCriterion(input: {
 	id: string;
 	weight: number;
+	passThreshold?: number;
 	promptEn: string;
 	promptRw?: string;
 }): Promise<CourseView> {
@@ -17,6 +18,7 @@ export async function createTaskCriterion(input: {
 	return createCriterion(db, {
 		taskId: input.id,
 		weight: input.weight,
+		passThreshold: input.passThreshold,
 		promptEn: input.promptEn,
 		promptRw: input.promptRw,
 		actorId: user.id,

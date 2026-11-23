@@ -7,7 +7,7 @@ export {
 	privacyRequests,
 	systemAuditLogs,
 } from "./compliance";
-export type { ContentLocale, ContentStatus } from "./content";
+export type { BadgeRule, ContentLocale, ContentStatus } from "./content";
 export {
 	badges,
 	contentVersions,

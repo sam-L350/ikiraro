@@ -29,15 +29,36 @@ export function publishedSnapshot(course: CourseView): JsonValue {
 				instructionsEn: task.instructionsEn,
 				instructionsRw: task.instructionsRw,
 				evidenceType: task.evidenceType,
+				passThreshold: task.passThreshold,
+				required: task.required,
+				imageKey: task.imageKey,
+				audioKey: task.audioKey,
+				jobAidKey: task.jobAidKey,
+				outboundUrl: task.outboundUrl,
 				criteria: task.criteria.map((criterion) => ({
 					id: criterion.id,
 					position: criterion.position,
 					weight: criterion.weight,
+					passThreshold: criterion.passThreshold,
 					promptEn: criterion.promptEn,
 					promptRw: criterion.promptRw,
 				})),
 			})),
 		})),
+		badge: course.badge
+			? {
+					id: course.badge.id,
+					titleEn: course.badge.titleEn,
+					titleRw: course.badge.titleRw,
+					level: course.badge.level,
+					rule: {
+						allRequiredTasksApproved:
+							course.badge.rule.allRequiredTasksApproved,
+						minimumScore: course.badge.rule.minimumScore,
+						minimumHours: course.badge.rule.minimumHours,
+					},
+				}
+			: null,
 	};
 }
 

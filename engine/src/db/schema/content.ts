@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+	boolean,
 	check,
 	integer,
 	jsonb,
@@ -120,6 +121,16 @@ export const tasks = pgTable(
 		status: text("status").notNull().default("draft"),
 		/** Required before a course can be sent for review. Empty while the draft is still being written. */
 		evidenceType: text("evidence_type"),
+		/** Minimum weighted percent for the task to pass. */
+		passThreshold: integer("pass_threshold").notNull().default(100),
+		/** A badge that requires every required task ignores the others. */
+		required: boolean("required").notNull().default(true),
+		/** Storage keys. The bytes stay in the object store, which is a stub until phase 4.1. */
+		imageKey: text("image_key"),
+		audioKey: text("audio_key"),
+		jobAidKey: text("job_aid_key"),
+		/** A practice link, such as Irembo. A URL only, never a password. */
+		outboundUrl: text("outbound_url"),
 		retiredAt: timestamp("retired_at", { withTimezone: true }),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
@@ -128,6 +139,10 @@ export const tasks = pgTable(
 	(table) => [
 		uniqueIndex("tasks_module_position").on(table.moduleId, table.position),
 		check("tasks_status", sql`${table.status} in (${statusSql})`),
+		check(
+			"tasks_pass_threshold",
+			sql`${table.passThreshold} between 1 and 100`,
+		),
 	],
 );
 
@@ -158,6 +173,8 @@ export const rubricCriteria = pgTable(
 			.references(() => tasks.id),
 		position: integer("position").notNull().default(0),
 		weight: integer("weight").notNull(),
+		/** Minimum percent a trainer's score on this criterion must reach. */
+		passThreshold: integer("pass_threshold").notNull().default(100),
 		promptRw: text("prompt_rw"),
 		promptEn: text("prompt_en"),
 	},
@@ -167,18 +184,45 @@ export const rubricCriteria = pgTable(
 			table.position,
 		),
 		check("rubric_criteria_weight", sql`${table.weight} > 0`),
+		check(
+			"rubric_criteria_pass_threshold",
+			sql`${table.passThreshold} between 1 and 100`,
+		),
 	],
 );
 
-export const badges = pgTable("badges", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	courseId: uuid("course_id")
-		.notNull()
-		.references(() => courses.id),
-	createdAt: timestamp("created_at", { withTimezone: true })
-		.notNull()
-		.defaultNow(),
-});
+/** Unlock conditions stored with the badge and copied into the published snapshot. */
+export type BadgeRule = {
+	allRequiredTasksApproved: boolean;
+	minimumScore: number | null;
+	minimumHours: number | null;
+};
+
+export const badges = pgTable(
+	"badges",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		courseId: uuid("course_id")
+			.notNull()
+			.references(() => courses.id),
+		titleEn: text("title_en").notNull().default(""),
+		titleRw: text("title_rw"),
+		level: integer("level").notNull().default(1),
+		rule: jsonb("rule")
+			.$type<BadgeRule>()
+			.notNull()
+			.default(
+				sql`'{"allRequiredTasksApproved":true,"minimumScore":null,"minimumHours":null}'::jsonb`,
+			),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		uniqueIndex("badges_course").on(table.courseId),
+		check("badges_level", sql`${table.level} > 0`),
+	],
+);
 
 /** Immutable published snapshot. Later enrollment pins this row. */
 export const contentVersions = pgTable(

@@ -1711,6 +1711,410 @@
 				}
 			}
 		},
+		"/api/v1/courses/{id}/badge": {
+			"put": {
+				"operationId": "updateCourseBadge",
+				"summary": "Save the badge rule on a draft. Publishing copies it onto the course version.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"level": {
+										"type": "number"
+									},
+									"allRequiredTasksApproved": {
+										"type": "boolean"
+									},
+									"minimumScore": {
+										"type": "number",
+										"nullable": true
+									},
+									"minimumHours": {
+										"type": "number",
+										"nullable": true
+									}
+								},
+								"required": [
+									"titleEn",
+									"level",
+									"allRequiredTasksApproved"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"passThreshold",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"badge",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/courses/{id}/draft": {
 			"post": {
 				"operationId": "createCourseDraftRevision",
@@ -1794,6 +2198,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -1853,6 +2309,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -1882,6 +2356,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -1896,6 +2373,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -1909,6 +2387,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -1945,6 +2429,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -2079,6 +2564,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -2138,6 +2675,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -2167,6 +2722,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -2181,6 +2739,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -2194,6 +2753,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -2230,6 +2795,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -2392,6 +2958,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -2451,6 +3069,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -2480,6 +3116,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -2494,6 +3133,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -2507,6 +3147,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -2543,6 +3189,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -2690,6 +3337,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -2749,6 +3448,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -2778,6 +3495,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -2792,6 +3512,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -2805,6 +3526,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -2841,6 +3568,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -3003,6 +3731,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -3062,6 +3842,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -3091,6 +3889,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -3105,6 +3906,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -3118,6 +3920,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -3154,6 +3962,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -3306,6 +4115,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -3365,6 +4226,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -3394,6 +4273,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -3408,6 +4290,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -3421,6 +4304,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -3457,6 +4346,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -3669,6 +4559,9 @@
 									"weight": {
 										"type": "number"
 									},
+									"passThreshold": {
+										"type": "number"
+									},
 									"promptEn": {
 										"type": "string"
 									},
@@ -3733,6 +4626,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -3792,6 +4737,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -3821,6 +4784,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -3835,6 +4801,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -3848,6 +4815,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -3884,6 +4857,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -4559,6 +5533,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -4618,6 +5644,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -4647,6 +5691,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -4661,6 +5708,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -4674,6 +5722,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -4710,6 +5764,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -4872,6 +5927,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -4931,6 +6038,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -4960,6 +6085,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -4974,6 +6102,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -4987,6 +6116,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -5023,6 +6158,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -6214,6 +7350,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -6273,6 +7461,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -6302,6 +7508,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -6316,6 +7525,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -6329,6 +7539,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -6368,6 +7584,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules",
 												"ownCourse"
 											],
@@ -6503,6 +7720,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -6562,6 +7831,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -6591,6 +7878,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -6605,6 +7895,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -6618,6 +7909,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -6657,6 +7954,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules",
 												"ownCourse"
 											],
@@ -6805,6 +8103,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -6864,6 +8214,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -6893,6 +8261,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -6907,6 +8278,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -6920,6 +8292,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -6959,6 +8337,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules",
 												"ownCourse"
 											],
@@ -7107,6 +8486,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -7166,6 +8597,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -7195,6 +8644,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -7209,6 +8661,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -7222,6 +8675,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -7261,6 +8720,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules",
 												"ownCourse"
 											],
@@ -7415,6 +8875,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -7474,6 +8986,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -7503,6 +9033,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -7517,6 +9050,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -7530,6 +9064,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -7569,6 +9109,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules",
 												"ownCourse"
 											],
@@ -8820,6 +10361,9 @@
 									"weight": {
 										"type": "number"
 									},
+									"passThreshold": {
+										"type": "number"
+									},
 									"promptEn": {
 										"type": "string"
 									},
@@ -8884,6 +10428,58 @@
 												"approved": {
 													"type": "boolean"
 												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -8943,6 +10539,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -8972,6 +10586,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -8986,6 +10603,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -8999,6 +10617,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -9035,6 +10659,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
@@ -9142,6 +10767,24 @@
 									},
 									"evidenceType": {
 										"type": "string"
+									},
+									"passThreshold": {
+										"type": "number"
+									},
+									"required": {
+										"type": "boolean"
+									},
+									"imageKey": {
+										"type": "string"
+									},
+									"audioKey": {
+										"type": "string"
+									},
+									"jobAidKey": {
+										"type": "string"
+									},
+									"outboundUrl": {
+										"type": "string"
 									}
 								},
 								"required": [
@@ -9199,6 +10842,58 @@
 												},
 												"approved": {
 													"type": "boolean"
+												},
+												"badge": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"level": {
+															"type": "number"
+														},
+														"missingKinyarwanda": {
+															"type": "boolean"
+														},
+														"rule": {
+															"type": "object",
+															"properties": {
+																"allRequiredTasksApproved": {
+																	"type": "boolean"
+																},
+																"minimumScore": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"minimumHours": {
+																	"type": "number",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"allRequiredTasksApproved",
+																"minimumScore",
+																"minimumHours"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"id",
+														"titleEn",
+														"titleRw",
+														"level",
+														"missingKinyarwanda",
+														"rule"
+													],
+													"additionalProperties": false,
+													"nullable": true
 												},
 												"modules": {
 													"type": "array",
@@ -9259,6 +10954,24 @@
 																			"type": "string",
 																			"nullable": true
 																		},
+																		"passThreshold": {
+																			"type": "number"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		},
+																		"imageKey": {
+																			"type": "string"
+																		},
+																		"audioKey": {
+																			"type": "string"
+																		},
+																		"jobAidKey": {
+																			"type": "string"
+																		},
+																		"outboundUrl": {
+																			"type": "string"
+																		},
 																		"titleEn": {
 																			"type": "string"
 																		},
@@ -9288,6 +11001,9 @@
 																					"weight": {
 																						"type": "number"
 																					},
+																					"passThreshold": {
+																						"type": "number"
+																					},
 																					"promptEn": {
 																						"type": "string"
 																					},
@@ -9302,6 +11018,7 @@
 																					"id",
 																					"position",
 																					"weight",
+																					"passThreshold",
 																					"promptEn",
 																					"promptRw",
 																					"missingKinyarwanda"
@@ -9315,6 +11032,12 @@
 																		"position",
 																		"status",
 																		"evidenceType",
+																		"passThreshold",
+																		"required",
+																		"imageKey",
+																		"audioKey",
+																		"jobAidKey",
+																		"outboundUrl",
 																		"titleEn",
 																		"titleRw",
 																		"instructionsEn",
@@ -9351,6 +11074,7 @@
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
+												"badge",
 												"modules"
 											],
 											"additionalProperties": false
