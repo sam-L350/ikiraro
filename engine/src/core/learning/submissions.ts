@@ -36,6 +36,8 @@ export type SubmissionView = {
 	status: SubmissionStatus;
 	evidenceType: "photo" | "file" | "note";
 	submittedAt: string | null;
+	/** The learner's own words, when the attempt is a note or a draft. */
+	note: string | null;
 	/** The note from the recorded decision, when one exists. */
 	feedback: string | null;
 	/** True when an approval was reversed and no longer stands. */
@@ -55,6 +57,7 @@ type StoredRow = {
 	attempt: number;
 	status: string;
 	evidenceType: string;
+	note: string | null;
 	submittedAt: Date | null;
 };
 
@@ -156,6 +159,7 @@ function present(
 		status,
 		evidenceType,
 		submittedAt: row.submittedAt ? row.submittedAt.toISOString() : null,
+		note: row.note,
 		feedback,
 		revoked,
 	};
@@ -224,6 +228,7 @@ const rowColumns = {
 	attempt: taskSubmissions.attempt,
 	status: taskSubmissions.status,
 	evidenceType: taskSubmissions.evidenceType,
+	note: taskSubmissions.note,
 	submittedAt: taskSubmissions.submittedAt,
 };
 
@@ -495,6 +500,77 @@ async function readMedia(
 		contentHash: media.sha256,
 		note: null,
 	};
+}
+
+/**
+ * Change a draft the learner still owns. A review, a rejection, or an
+ * approval is left as the server stored it.
+ */
+export async function saveDraftSubmission(
+	database: SubmissionDb,
+	input: {
+		id: string;
+		ownerUserId: number;
+		note?: string;
+		submit: boolean;
+		ip: string;
+	},
+): Promise<SubmissionView> {
+	if (!isUuid(input.id)) {
+		throw errors.badRequest("That submission id is not usable.", {
+			reason: "id",
+		});
+	}
+	const note = input.note === undefined ? undefined : cleanNote(input.note);
+	const [row] = await database
+		.select(rowColumns)
+		.from(taskSubmissions)
+		.where(eq(taskSubmissions.id, input.id))
+		.limit(1);
+	if (!row || row.ownerUserId !== input.ownerUserId) {
+		throw errors.notFound("That submission was not found.");
+	}
+	if (!isSubmissionStatus(row.status) || row.status !== "draft") {
+		throw errors.conflict("The server already decided this attempt.", {
+			reason: "closed",
+		});
+	}
+	const nextNote = note === undefined ? row.note : note;
+	const submittedAt = input.submit ? new Date() : row.submittedAt;
+	await database
+		.update(taskSubmissions)
+		.set({
+			note: nextNote,
+			status: input.submit ? "pending" : "draft",
+			submittedAt,
+		})
+		.where(eq(taskSubmissions.id, row.id));
+	if (input.submit) {
+		await writeAudit(database, {
+			actorId: input.ownerUserId,
+			action: "submission.created",
+			targetType: "task_submission",
+			targetId: row.id,
+			ipAddress: input.ip,
+			metadata: { status: "pending", attempt: row.attempt },
+		});
+		await writeEvent(database, {
+			name: "submission.created",
+			payload: {
+				submissionId: row.id,
+				enrollmentId: row.enrollmentId,
+				taskId: row.taskId,
+				attempt: row.attempt,
+				status: "pending",
+			},
+		});
+	}
+	return present({
+		...row,
+		note: nextNote,
+		status: input.submit ? "pending" : "draft",
+		submittedAt,
+	});
 }
 
 /** The learner's attempts on this enrollment, newest first. */

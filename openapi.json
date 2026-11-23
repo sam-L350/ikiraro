@@ -7365,6 +7365,10 @@
 																"type": "string",
 																"nullable": true
 															},
+															"note": {
+																"type": "string",
+																"nullable": true
+															},
 															"feedback": {
 																"type": "string",
 																"nullable": true
@@ -7381,6 +7385,7 @@
 															"status",
 															"evidenceType",
 															"submittedAt",
+															"note",
 															"feedback",
 															"revoked"
 														],
@@ -10557,8 +10562,10 @@
 													"type": "string",
 													"enum": [
 														"queued",
+														"submitted",
 														"sent",
 														"failed",
+														"capped",
 														"none"
 													]
 												},
@@ -10566,8 +10573,10 @@
 													"type": "string",
 													"enum": [
 														"queued",
+														"submitted",
 														"sent",
 														"failed",
+														"capped",
 														"none"
 													]
 												}
@@ -10708,8 +10717,10 @@
 														"type": "string",
 														"enum": [
 															"queued",
+															"submitted",
 															"sent",
 															"failed",
+															"capped",
 															"none"
 														]
 													},
@@ -10717,8 +10728,10 @@
 														"type": "string",
 														"enum": [
 															"queued",
+															"submitted",
 															"sent",
 															"failed",
+															"capped",
 															"none"
 														]
 													}
@@ -17000,6 +17013,189 @@
 				}
 			}
 		},
+		"/api/v1/submissions/{id}/update": {
+			"put": {
+				"operationId": "updateTaskSubmission",
+				"summary": "Keep or send a draft the learner still owns. A decided attempt is refused",
+				"description": "so the server's review stands.",
+				"tags": [
+					"submissions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"note": {
+										"type": "string"
+									},
+									"submit": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"submit"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"enrollmentId": {
+													"type": "string"
+												},
+												"taskId": {
+													"type": "string"
+												},
+												"attempt": {
+													"type": "number"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"pending",
+														"approved",
+														"needs_revision",
+														"rejected",
+														"escalated",
+														"withdrawn"
+													]
+												},
+												"evidenceType": {
+													"type": "string",
+													"enum": [
+														"photo",
+														"file",
+														"note"
+													]
+												},
+												"submittedAt": {
+													"type": "string",
+													"nullable": true
+												},
+												"note": {
+													"type": "string",
+													"nullable": true
+												},
+												"feedback": {
+													"type": "string",
+													"nullable": true
+												},
+												"revoked": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"enrollmentId",
+												"taskId",
+												"attempt",
+												"status",
+												"evidenceType",
+												"submittedAt",
+												"note",
+												"feedback",
+												"revoked"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/submissions/{id}/withdraw": {
 			"post": {
 				"operationId": "createSubmissionWithdraw",
@@ -17087,6 +17283,10 @@
 													"type": "string",
 													"nullable": true
 												},
+												"note": {
+													"type": "string",
+													"nullable": true
+												},
 												"feedback": {
 													"type": "string",
 													"nullable": true
@@ -17103,6 +17303,7 @@
 												"status",
 												"evidenceType",
 												"submittedAt",
+												"note",
 												"feedback",
 												"revoked"
 											],
@@ -17278,6 +17479,10 @@
 													"type": "string",
 													"nullable": true
 												},
+												"note": {
+													"type": "string",
+													"nullable": true
+												},
 												"feedback": {
 													"type": "string",
 													"nullable": true
@@ -17294,6 +17499,7 @@
 												"status",
 												"evidenceType",
 												"submittedAt",
+												"note",
 												"feedback",
 												"revoked"
 											],

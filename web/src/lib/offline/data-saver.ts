@@ -1,3 +1,5 @@
+import { postOffline } from "./register";
+
 const STORAGE_KEY = "ikiraro.dataSaver";
 
 type SaverStorage = {
@@ -23,6 +25,7 @@ export function writeDataSaver(
 	} catch {
 		// The choice still applies for this visit.
 	}
+	postOffline({ type: "data-saver", on });
 }
 
 /** A storage key is not fetched until data saver is off or the learner asks. */

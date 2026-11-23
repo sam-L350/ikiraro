@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { useOnline } from "@/lib/offline/use-online";
 
 type Adjustment = {
 	id: string;
@@ -39,6 +40,7 @@ function reasonKey(error: unknown): MessageKey {
 
 export default function AdjustmentsPage() {
 	const { t } = useI18n();
+	const online = useOnline();
 	const queue = useEngine("/point-adjustments");
 	const create = useEngineMutation("/point-adjustments/create");
 	const approve = useEngineMutation("/point-adjustments/:id/approve");
@@ -117,6 +119,9 @@ export default function AdjustmentsPage() {
 					{t("adjustmentsTitle")}
 				</h1>
 				<p className="text-lg text-fg">{t("adjustmentsLead")}</p>
+				{online ? null : (
+					<p className="text-lg text-fg">{t("offlineDecision")}</p>
+				)}
 			</div>
 			<form
 				className="flex flex-col gap-4"
@@ -161,7 +166,7 @@ export default function AdjustmentsPage() {
 				<Button
 					type="submit"
 					variant="sticker"
-					disabled={busy}
+					disabled={!online || busy}
 					className="w-fit"
 				>
 					{t("adjustmentsAsk")}
@@ -194,7 +199,7 @@ export default function AdjustmentsPage() {
 											type="button"
 											variant="quiet"
 											className="w-fit"
-											disabled={busy}
+											disabled={!online || busy}
 											onClick={() => void onApprove(row.id)}
 										>
 											{t("adjustmentsApprove")}
@@ -222,7 +227,7 @@ export default function AdjustmentsPage() {
 											type="button"
 											variant="quiet"
 											className="w-fit"
-											disabled={busy}
+											disabled={!online || busy}
 											onClick={() => void onReject(row.id)}
 										>
 											{t("adjustmentsReject")}

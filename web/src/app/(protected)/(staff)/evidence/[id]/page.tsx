@@ -11,6 +11,7 @@ import {
 } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { useOnline } from "@/lib/offline/use-online";
 
 type WaitingStatus = "pending" | "in_review";
 
@@ -168,6 +169,7 @@ export default function EvidenceReviewPage() {
 	const { id = "" } = useParams();
 	const navigate = useNavigate();
 	const { locale, t } = useI18n();
+	const online = useOnline();
 	const [left, setLeft] = useState(false);
 	const [kind, setKind] = useState<SendBackKind>("needs_revision");
 	const [reason, setReason] = useState<RejectReason>("not_the_task");
@@ -405,13 +407,16 @@ export default function EvidenceReviewPage() {
 					)}
 				</section>
 			</div>
+			{online ? null : (
+				<p className="font-sans text-lg text-fg">{t("offlineDecision")}</p>
+			)}
 			<Card variant="ink" className="flex flex-col gap-4">
 				<p className="font-sans text-lg text-ink-fg">{t("approveLater")}</p>
 				<Button
 					type="button"
 					variant="ink"
 					className="w-fit"
-					disabled={decide.isPending}
+					disabled={!online || decide.isPending}
 					onClick={() => void onApprove()}
 				>
 					{t("approveEvidence")}
@@ -424,6 +429,7 @@ export default function EvidenceReviewPage() {
 					type="button"
 					variant="quiet"
 					className="w-fit text-ink-fg"
+					disabled={!online}
 					onClick={openSheet}
 				>
 					{t("sendBackEvidence")}

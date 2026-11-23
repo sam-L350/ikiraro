@@ -298,6 +298,13 @@ export const en = {
 		"This photo looks dark and blurry. Take another, or send this one.",
 	sendThisPhoto: "Send this one",
 	uploadWaiting: "{count} items waiting to upload.",
+	uploadCapped: "This device is full. Send what is waiting before adding more.",
+	serverWins: "The server already has a decision, so this copy was not sent.",
+	draftAsk: "This draft differs from the copy on the server.",
+	draftKeepMine: "Keep this one",
+	draftKeepServer: "Keep the server copy",
+	offlineDecision:
+		"This needs the network. The review and the points stay as they are on the server.",
 	submissionHistory: "What you sent",
 	attemptLabel: "Attempt {count}",
 	withdrawSubmission: "Take this back",
@@ -849,6 +856,14 @@ export const rw: Record<MessageKey, string> = {
 		"Iyi foto isa n'iyijimye kandi itagaragara neza. Fata indi, cyangwa ohereze iyi.",
 	sendThisPhoto: "Ohereza iyi",
 	uploadWaiting: "Ibyo wohereje {count} birategereje interineti.",
+	uploadCapped:
+		"Iki gikoresho cyuzuye. Ohereza ibitegereje mbere yo kongeraho.",
+	serverWins: "Seriveri isanzwe ifite icyemezo, iyo kopi ntiyoherejwe.",
+	draftAsk: "Iyi nyandiko itandukanye n'iyanditswe kuri seriveri.",
+	draftKeepMine: "Gumana iyi",
+	draftKeepServer: "Gumana iya seriveri",
+	offlineDecision:
+		"Ibi bisaba interineti. Isuzuma n'amanota biguma nk'uko biri kuri seriveri.",
 	submissionHistory: "Ibyo wohereje",
 	attemptLabel: "Igerageza {count}",
 	withdrawSubmission: "Kuramo ibyo wohereje",

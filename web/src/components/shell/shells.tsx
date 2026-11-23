@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { api, invalidateEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import { UploadQueueNotice } from "@/lib/offline/upload-notice";
 import { useSharedIdleLogout } from "@/lib/offline/use-shared-idle";
 
 export function PublicShell({ children }: { children: ReactNode }) {
@@ -115,6 +116,7 @@ export function ProductShell({
 							Switching role…
 						</p>
 					) : null}
+					<UploadQueueNotice />
 					{children}
 				</main>
 			</div>

@@ -25,9 +25,10 @@ import {
 	readDataSaver,
 	writeDataSaver,
 } from "@/lib/offline/data-saver";
-import { deliverSubmission } from "@/lib/offline/deliver";
+import { deliverQueued, deliverSubmission } from "@/lib/offline/deliver";
 import {
 	classifyFailure,
+	enqueueProgress,
 	enqueueSubmission,
 	flushQueue,
 	isQueued,
@@ -43,7 +44,8 @@ type StoredNotice =
 	| "closed"
 	| "limit"
 	| "too_large"
-	| "failed";
+	| "failed"
+	| "capped";
 type HeldPhoto = {
 	bytes: Blob;
 	contentType: string;
@@ -206,6 +208,21 @@ export default function TaskPage() {
 			if (kind === "note") note.current?.focus();
 			else file.current?.click();
 		} catch (caught) {
+			if (
+				!navigator.onLine ||
+				(isApiClientError(caught) && caught.status === 0)
+			) {
+				enqueueProgress({
+					kind: "progress",
+					id: crypto.randomUUID(),
+					enrollmentId,
+					taskId,
+				});
+				setOpened(true);
+				if (kind === "note") note.current?.focus();
+				else file.current?.click();
+				return;
+			}
 			if (isApiClientError(caught)) return;
 			throw caught;
 		}
@@ -222,6 +239,10 @@ export default function TaskPage() {
 		setStored(null);
 		try {
 			const result = await sendOrQueue({ evidenceType: "note", note: text });
+			if (result === "capped") {
+				setStored("capped");
+				return;
+			}
 			if (result === "sent") {
 				setStored("note");
 				if (note.current) note.current.value = "";
@@ -268,6 +289,7 @@ export default function TaskPage() {
 				contentType: prepared.contentType,
 				sha256: prepared.sha256,
 			});
+			if (result === "capped") setStored("capped");
 			if (result === "sent") setStored(kind === "photo" ? "photo" : "file");
 		} catch (caught) {
 			setStored(noticeFor(caught));
@@ -288,6 +310,7 @@ export default function TaskPage() {
 				sha256: held.sha256,
 			});
 			setHeld(null);
+			if (result === "capped") setStored("capped");
 			if (result === "sent") setStored("photo");
 		} catch (caught) {
 			setStored(noticeFor(caught));
@@ -302,7 +325,7 @@ export default function TaskPage() {
 		contentType?: string;
 		sha256?: string;
 		note?: string;
-	}): Promise<"sent" | "queued"> {
+	}): Promise<"sent" | "queued" | "capped"> {
 		const online = navigator.onLine;
 		const geo = online ? await readGeo() : null;
 		const payload: SubmissionQueuePayload = {
@@ -321,16 +344,15 @@ export default function TaskPage() {
 			submit: true,
 		};
 		if (!online) {
-			enqueueSubmission(payload);
-			return "queued";
+			return enqueueSubmission(payload) === "capped" ? "capped" : "queued";
 		}
 		try {
 			await deliverSubmission(payload);
 			return "sent";
 		} catch (caught) {
 			if (classifyFailure(caught) !== "retry") throw caught;
-			enqueueSubmission(payload);
-			await flushQueue(deliverSubmission);
+			if (enqueueSubmission(payload) === "capped") return "capped";
+			await flushQueue(deliverQueued);
 			return isQueued(payload.id) ? "queued" : "sent";
 		}
 	}
@@ -740,7 +762,8 @@ function storedCopy(
 			| "evidenceClosed"
 			| "meetTrainer"
 			| "evidenceTooLarge"
-			| "evidenceUploadFailed",
+			| "evidenceUploadFailed"
+			| "uploadCapped",
 	) => string,
 ): string {
 	switch (state) {
@@ -760,6 +783,8 @@ function storedCopy(
 			return t("evidenceTooLarge");
 		case "failed":
 			return t("evidenceUploadFailed");
+		case "capped":
+			return t("uploadCapped");
 		default: {
 			const unreachable: never = state;
 			return unreachable;

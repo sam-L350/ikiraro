@@ -1,3 +1,5 @@
+import { readCourse, saveCourse } from "../offline/durable";
+import { isCourseRead } from "../offline/policy";
 import { API_BASE_URL } from "./config";
 import { ApiClientError } from "./error";
 
@@ -146,6 +148,8 @@ export async function apiRequest<TResponse>(
 		);
 	}
 
+	const courseKey = `${url.pathname}${url.search}`;
+	const courseRead = method === "GET" && isCourseRead(url.pathname);
 	let response: Response;
 	try {
 		response = await fetch(url, {
@@ -157,6 +161,14 @@ export async function apiRequest<TResponse>(
 			signal: controller?.signal ?? options.signal,
 		});
 	} catch (error) {
+		if (courseRead) {
+			try {
+				const cached = await readCourse<TResponse>(courseKey);
+				if (cached !== null) return cached;
+			} catch {
+				// A sealed course row that cannot be opened falls through to the error.
+			}
+		}
 		throw new ApiClientError({
 			status: 0,
 			code:
@@ -190,5 +202,10 @@ export async function apiRequest<TResponse>(
 		});
 	}
 
+	if (courseRead) {
+		void saveCourse(courseKey, envelope.data).catch(() => {
+			// The screen still shows the response from the network.
+		});
+	}
 	return envelope.data;
 }

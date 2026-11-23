@@ -88,7 +88,9 @@ function ProfileEditor({
 		profile.economicSector ?? "",
 	);
 	const [guardian, setGuardian] = useState(profile.guardianContact ?? "");
-	const [locale, setLocale] = useState(profile.locale === "en" ? "en" : "rw");
+	const [locale, setLocale] = useState<"rw" | "en">(
+		profile.locale === "en" ? "en" : "rw",
+	);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const save = useEngineMutation("/profile/update");
 	const consent = useEngineMutation("/consents");

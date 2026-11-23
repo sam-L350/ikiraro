@@ -5,8 +5,12 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { queryClient } from "./lib/api/query-client";
+import { readDataSaver } from "./lib/offline/data-saver";
+import { registerOfflineShell } from "./lib/offline/register";
 import { createFileRoutes } from "./router/create-file-router";
 import "./index.css";
+
+registerOfflineShell(readDataSaver());
 
 const router = createBrowserRouter(createFileRoutes());
 
