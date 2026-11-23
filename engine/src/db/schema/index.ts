@@ -65,6 +65,7 @@ export {
 export { smsCharges } from "./sms";
 export { taskSubmissions } from "./submissions";
 export {
+	secondReviews,
 	submissionVerifications,
 	verificationRevocations,
 	verificationScores,

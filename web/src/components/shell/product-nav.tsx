@@ -94,7 +94,11 @@ function useProductNavItems(): NavItem[] {
 		items.push({ to: "/reviews", label: "reviewsNav" });
 	}
 	if (canReviewEvidence) {
-		items.push({ to: "/evidence", label: "evidenceQueueTitle" });
+		items.push(
+			{ to: "/evidence", label: "evidenceQueueTitle" },
+			{ to: "/second-reviews", label: "secondReviewsNav" },
+			{ to: "/quality", label: "qualityNav" },
+		);
 	}
 	const canAnnounce =
 		user?.roles.some(
@@ -111,6 +115,7 @@ function useProductNavItems(): NavItem[] {
 	if (canAdjustPoints) {
 		items.push(
 			{ to: "/adjustments", label: "adjustmentsNav" },
+			{ to: "/quality", label: "qualityNav" },
 			{ to: "/notification-templates", label: "templatesNav" },
 			{ to: "/privacy-tools", label: "privacyToolsNav" },
 			{ to: "/settings", label: "settingsNav" },

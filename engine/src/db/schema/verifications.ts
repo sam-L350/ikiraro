@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
+	index,
 	integer,
 	pgTable,
 	text,
@@ -111,6 +112,61 @@ export const verificationRevocations = pgTable(
 		check(
 			"verification_revocations_reason",
 			sql`char_length(btrim(${table.reason})) > 0`,
+		),
+	],
+);
+
+/**
+ * A second reading of an approval. The verification it points at is never
+ * edited, and a disagreement does not take the points back.
+ */
+export const secondReviews = pgTable(
+	"second_reviews",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		verificationId: uuid("verification_id")
+			.notNull()
+			.references(() => submissionVerifications.id),
+		submissionId: uuid("submission_id")
+			.notNull()
+			.references(() => taskSubmissions.id),
+		firstReviewerUserId: integer("first_reviewer_user_id")
+			.notNull()
+			.references(() => users.id),
+		secondReviewerUserId: integer("second_reviewer_user_id").references(
+			() => users.id,
+		),
+		status: text("status").notNull().default("open"),
+		note: text("note"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		decidedAt: timestamp("decided_at", { withTimezone: true }),
+	},
+	(table) => [
+		uniqueIndex("second_reviews_verification").on(table.verificationId),
+		index("second_reviews_waiting")
+			.on(table.createdAt)
+			.where(sql`${table.status} = 'open'`),
+		check(
+			"second_reviews_status",
+			sql`${table.status} in ('open', 'agreed', 'disagreed')`,
+		),
+		check(
+			"second_reviews_shape",
+			sql`(
+				${table.status} = 'open'
+				and ${table.secondReviewerUserId} is null
+				and ${table.note} is null
+				and ${table.decidedAt} is null
+			) or (
+				${table.status} in ('agreed', 'disagreed')
+				and ${table.secondReviewerUserId} is not null
+				and ${table.secondReviewerUserId} <> ${table.firstReviewerUserId}
+				and ${table.note} is not null
+				and char_length(btrim(${table.note})) between 1 and 500
+				and ${table.decidedAt} is not null
+			)`,
 		),
 	],
 );

@@ -12,6 +12,7 @@ import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { awardSubmission } from "./award";
 import { reviewCenters } from "./review-queue";
+import { openSecondReviewIfSampled } from "./second-review";
 
 export const REJECT_REASONS = [
 	"not_the_task",
@@ -293,6 +294,12 @@ export async function createVerification(
 			note,
 			scores,
 			idempotencyKey: key,
+			ip: input.ip,
+		});
+		await openSecondReviewIfSampled(database, {
+			verificationId: awarded.id,
+			submissionId: awarded.submissionId,
+			reviewerId: input.reviewerId,
 			ip: input.ip,
 		});
 		return awarded;

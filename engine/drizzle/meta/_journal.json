@@ -197,6 +197,13 @@
       "when": 1795452000000,
       "tag": "0027_phase7_review_sla",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795453000000,
+      "tag": "0028_phase7_second_reviews",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,26 @@ import { errors } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { SHARED_IDLE_KEY } from "../auth/shared-idle";
 import {
+	FAST_AMOUNT_KEY,
+	FAST_AMOUNT_MAX,
+	FAST_AMOUNT_MIN,
+	FAST_DAYS_KEY,
+	FAST_DAYS_MAX,
+	FAST_DAYS_MIN,
+	NEW_TRAINER_APPROVALS_KEY,
+	NEW_TRAINER_MAX,
+	NEW_TRAINER_MIN,
+	SECOND_EVERY_KEY,
+	SECOND_EVERY_MAX,
+	SECOND_EVERY_MIN,
+	SECOND_NEW_EVERY_KEY,
+	SECOND_NEW_EVERY_MAX,
+	SECOND_NEW_EVERY_MIN,
+	SINGLE_REVIEWER_KEY,
+	SINGLE_REVIEWER_MAX,
+	SINGLE_REVIEWER_MIN,
+} from "../learning/second-review";
+import {
 	MAX_REVIEW_SLA_MS,
 	MIN_REVIEW_SLA_MS,
 	REVIEW_SLA_KEY,
@@ -28,7 +48,13 @@ type KnownKey =
 	| typeof SHARED_IDLE_KEY
 	| typeof MEDIA_MAX_KEY
 	| typeof SMS_DAILY_CAP_KEY
-	| typeof REVIEW_SLA_KEY;
+	| typeof REVIEW_SLA_KEY
+	| typeof SECOND_EVERY_KEY
+	| typeof SECOND_NEW_EVERY_KEY
+	| typeof NEW_TRAINER_APPROVALS_KEY
+	| typeof FAST_DAYS_KEY
+	| typeof FAST_AMOUNT_KEY
+	| typeof SINGLE_REVIEWER_KEY;
 
 function isKnownKey(key: string): key is KnownKey {
 	switch (key) {
@@ -36,6 +62,12 @@ function isKnownKey(key: string): key is KnownKey {
 		case MEDIA_MAX_KEY:
 		case SMS_DAILY_CAP_KEY:
 		case REVIEW_SLA_KEY:
+		case SECOND_EVERY_KEY:
+		case SECOND_NEW_EVERY_KEY:
+		case NEW_TRAINER_APPROVALS_KEY:
+		case FAST_DAYS_KEY:
+		case FAST_AMOUNT_KEY:
+		case SINGLE_REVIEWER_KEY:
 			return true;
 		default:
 			return false;
@@ -67,6 +99,18 @@ export function acceptedConfigValue(key: string, value: number): number {
 			return inRange(value, 0, 100);
 		case REVIEW_SLA_KEY:
 			return inRange(value, MIN_REVIEW_SLA_MS, MAX_REVIEW_SLA_MS);
+		case SECOND_EVERY_KEY:
+			return inRange(value, SECOND_EVERY_MIN, SECOND_EVERY_MAX);
+		case SECOND_NEW_EVERY_KEY:
+			return inRange(value, SECOND_NEW_EVERY_MIN, SECOND_NEW_EVERY_MAX);
+		case NEW_TRAINER_APPROVALS_KEY:
+			return inRange(value, NEW_TRAINER_MIN, NEW_TRAINER_MAX);
+		case FAST_DAYS_KEY:
+			return inRange(value, FAST_DAYS_MIN, FAST_DAYS_MAX);
+		case FAST_AMOUNT_KEY:
+			return inRange(value, FAST_AMOUNT_MIN, FAST_AMOUNT_MAX);
+		case SINGLE_REVIEWER_KEY:
+			return inRange(value, SINGLE_REVIEWER_MIN, SINGLE_REVIEWER_MAX);
 		default: {
 			const unreachable: never = key;
 			return unreachable;

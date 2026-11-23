@@ -102,10 +102,16 @@
 			"name": "profile"
 		},
 		{
+			"name": "quality"
+		},
+		{
 			"name": "registrations"
 		},
 		{
 			"name": "reviews"
+		},
+		{
+			"name": "second-reviews"
 		},
 		{
 			"name": "staff"
@@ -15535,6 +15541,225 @@
 				}
 			}
 		},
+		"/api/v1/quality": {
+			"get": {
+				"operationId": "getQuality",
+				"summary": "Trainer quality for the centers this person covers, or their own decisions.",
+				"tags": [
+					"quality"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"trainers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"userId": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string"
+															},
+															"decisions": {
+																"type": "number"
+															},
+															"approvalRate": {
+																"type": "number",
+																"nullable": true
+															},
+															"reworkRate": {
+																"type": "number",
+																"nullable": true
+															},
+															"medianReviewMinutes": {
+																"type": "number",
+																"nullable": true
+															},
+															"disagreementRate": {
+																"type": "number",
+																"nullable": true
+															},
+															"rejectionReasons": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"reason": {
+																			"type": "string",
+																			"enum": [
+																				"not_the_task",
+																				"not_the_learner",
+																				"unreadable",
+																				"incomplete"
+																			]
+																		},
+																		"count": {
+																			"type": "number"
+																		}
+																	},
+																	"required": [
+																		"reason",
+																		"count"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"userId",
+															"name",
+															"decisions",
+															"approvalRate",
+															"reworkRate",
+															"medianReviewMinutes",
+															"disagreementRate",
+															"rejectionReasons"
+														],
+														"additionalProperties": false
+													}
+												},
+												"anomalies": {
+													"type": "array",
+													"items": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "points_fast",
+																		"type": "string"
+																	},
+																	"userId": {
+																		"type": "number"
+																	},
+																	"name": {
+																		"type": "string"
+																	},
+																	"amount": {
+																		"type": "number"
+																	},
+																	"days": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"userId",
+																	"name",
+																	"amount",
+																	"days"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "single_reviewer",
+																		"type": "string"
+																	},
+																	"userId": {
+																		"type": "number"
+																	},
+																	"name": {
+																		"type": "string"
+																	},
+																	"reviewerName": {
+																		"type": "string"
+																	},
+																	"approvals": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"userId",
+																	"name",
+																	"reviewerName",
+																	"approvals"
+																],
+																"additionalProperties": false
+															}
+														]
+													},
+													"nullable": true
+												}
+											},
+											"required": [
+												"trainers",
+												"anomalies"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/registrations/activation": {
 			"post": {
 				"operationId": "createRegistrationActivation",
@@ -18232,6 +18457,414 @@
 												"waiting",
 												"published",
 												"retired"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/second-reviews/{id}/close": {
+			"post": {
+				"operationId": "createSecondReviewClose",
+				"summary": "Record agreement or disagreement. The first approval is left as it was.",
+				"tags": [
+					"second-reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"outcome": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"outcome",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"agreed",
+														"disagreed"
+													]
+												}
+											},
+											"required": [
+												"id",
+												"status"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/second-reviews/{id}": {
+			"get": {
+				"operationId": "getSecondReview",
+				"summary": "One second reading, for someone other than the trainer who approved it.",
+				"tags": [
+					"second-reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"createdAt": {
+													"type": "string"
+												},
+												"learnerName": {
+													"type": "string"
+												},
+												"centerName": {
+													"type": "string"
+												},
+												"taskTitleRw": {
+													"type": "string"
+												},
+												"taskTitleEn": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"open",
+														"agreed",
+														"disagreed"
+													]
+												},
+												"note": {
+													"type": "string",
+													"nullable": true
+												},
+												"instructionsRw": {
+													"type": "string"
+												},
+												"instructionsEn": {
+													"type": "string"
+												},
+												"learnerNote": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"createdAt",
+												"learnerName",
+												"centerName",
+												"taskTitleRw",
+												"taskTitleEn",
+												"status",
+												"note",
+												"instructionsRw",
+												"instructionsEn",
+												"learnerNote"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/second-reviews": {
+			"get": {
+				"operationId": "getSecondReviews",
+				"summary": "Open second readings at the centers this person reviews.",
+				"tags": [
+					"second-reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"createdAt": {
+																"type": "string"
+															},
+															"learnerName": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"taskTitleRw": {
+																"type": "string"
+															},
+															"taskTitleEn": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"createdAt",
+															"learnerName",
+															"centerName",
+															"taskTitleRw",
+															"taskTitleEn"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
 											],
 											"additionalProperties": false
 										},

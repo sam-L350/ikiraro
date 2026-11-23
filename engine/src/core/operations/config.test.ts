@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { isApiError } from "../api/error";
 import { SHARED_IDLE_KEY } from "../auth/shared-idle";
+import { SECOND_EVERY_KEY } from "../learning/second-review";
 import { REVIEW_SLA_KEY } from "../learning/sla";
 import { SMS_DAILY_CAP_KEY } from "../sms/cap";
 import { MEDIA_MAX_KEY } from "../storage/limits";
@@ -44,6 +45,12 @@ describe("config values", () => {
 		expect(statusOf(() => acceptedConfigValue(REVIEW_SLA_KEY, 60_000))).toBe(
 			400,
 		);
+	});
+
+	test("a second-review window stays between one and twenty approvals", () => {
+		expect(acceptedConfigValue(SECOND_EVERY_KEY, 5)).toBe(5);
+		expect(statusOf(() => acceptedConfigValue(SECOND_EVERY_KEY, 0))).toBe(400);
+		expect(statusOf(() => acceptedConfigValue(SECOND_EVERY_KEY, 21))).toBe(400);
 	});
 
 	test("a key this screen does not know is refused", () => {
