@@ -93,7 +93,19 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/adjustments", label: "adjustmentsNav" },
 			{ to: "/notification-templates", label: "templatesNav" },
+			{ to: "/privacy-tools", label: "privacyToolsNav" },
 		);
+	}
+	const canReadAudit =
+		user?.roles.some(
+			(role) =>
+				role.code === "auditor" ||
+				role.code === "platform_admin" ||
+				role.code === "center_manager" ||
+				role.code === "district_coordinator",
+		) ?? false;
+	if (canReadAudit) {
+		items.push({ to: "/audit", label: "auditNav" });
 	}
 	return items;
 }

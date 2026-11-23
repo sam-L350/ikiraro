@@ -73,7 +73,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/6.1-notification-outbox`
   - [x] `phase/6.2-sms-production`
   - [x] `phase/6.3-offline-pwa`
-  - [ ] `phase/6.4-audit-and-privacy-tools`
+  - [x] `phase/6.4-audit-and-privacy-tools`
   - [ ] `phase/6.5-misconduct-reports`
   - [ ] `phase/6.6-pilot-operations`
 - [ ] Phase 7 — Fairness and hardware (`phase/7-fairness-and-hardware`)

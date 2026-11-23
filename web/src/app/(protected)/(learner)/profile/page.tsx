@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { PrivacyActions } from "@/components/auth/privacy-actions";
 import { SessionList } from "@/components/auth/session-list";
+import { SubjectTools } from "@/components/auth/subject-tools";
 import { Spinner } from "@/components/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -291,6 +292,7 @@ function ProfileEditor({
 					})}
 				</ul>
 			</section>
+			<SubjectTools />
 			<PrivacyActions />
 			<SessionList />
 		</div>

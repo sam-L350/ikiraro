@@ -176,6 +176,13 @@
       "when": 1795448307775,
       "tag": "0024_phase6_sms_production",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795450000000,
+      "tag": "0025_phase6_audit_privacy",
+      "breakpoints": true
     }
   ]
 }

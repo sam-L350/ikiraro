@@ -8,7 +8,12 @@ import {
 	expandCenterAssignments,
 } from "../geography/centers";
 import { isRoleCode, type PermissionCode } from "./catalog";
-import { decideAccess, type Resource, type ScopeType } from "./decide";
+import {
+	type Assignment,
+	decideAccess,
+	type Resource,
+	type ScopeType,
+} from "./decide";
 
 function isScopeType(value: string): value is ScopeType {
 	return (
@@ -23,11 +28,8 @@ function isScopeType(value: string): value is ScopeType {
  * Enforces a permission for the signed-in user. Call this at the start of
  * every handler that is not explicitly public.
  */
-export async function authorize(input: {
-	permission: PermissionCode;
-	resource?: Resource;
-}): Promise<void> {
-	const user = await requireAuth();
+/** Roles currently granted to this person, with center coverage expanded. */
+export async function loadAssignments(userId: number): Promise<Assignment[]> {
 	const rows = await db
 		.select({
 			code: roles.code,
@@ -36,7 +38,7 @@ export async function authorize(input: {
 		})
 		.from(userRoles)
 		.innerJoin(roles, eq(userRoles.roleId, roles.id))
-		.where(and(eq(userRoles.userId, user.id), isNull(userRoles.suspendedAt)));
+		.where(and(eq(userRoles.userId, userId), isNull(userRoles.suspendedAt)));
 
 	const stored = rows.flatMap((row) => {
 		if (!isRoleCode(row.code) || !isScopeType(row.scopeType)) return [];
@@ -48,14 +50,17 @@ export async function authorize(input: {
 			},
 		];
 	});
-	const assignments = expandCenterAssignments(
-		stored,
-		await centerStaffByRole(db, user.id),
-	);
+	return expandCenterAssignments(stored, await centerStaffByRole(db, userId));
+}
 
+export async function authorize(input: {
+	permission: PermissionCode;
+	resource?: Resource;
+}): Promise<void> {
+	const user = await requireAuth();
 	const decision = decideAccess({
 		actorId: String(user.id),
-		assignments,
+		assignments: await loadAssignments(user.id),
 		permission: input.permission,
 		resource: input.resource ?? { ownerId: String(user.id) },
 	});

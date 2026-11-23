@@ -33,6 +33,7 @@ export const PERMISSION_CODES = [
 	"hardware.manage",
 	"grant.decide",
 	"report.read",
+	"audit.read",
 	"admin.manage",
 	"mentor.connect",
 ] as const;
@@ -78,12 +79,14 @@ export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
 		"learning.read",
 		"learning.enroll",
 		"learning.progress",
+		"audit.read",
 	],
 	district_coordinator: [
 		"profile.read.self",
 		"profile.write.self",
 		"district.manage",
 		"submission.review",
+		"audit.read",
 	],
 	content_author: ["profile.read.self", "profile.write.self", "content.write"],
 	content_reviewer: [
@@ -97,8 +100,18 @@ export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
 		"hardware.manage",
 	],
 	committee_member: ["profile.read.self", "profile.write.self", "grant.decide"],
-	auditor: ["profile.read.self", "profile.write.self", "report.read"],
-	platform_admin: ["profile.read.self", "profile.write.self", "admin.manage"],
+	auditor: [
+		"profile.read.self",
+		"profile.write.self",
+		"report.read",
+		"audit.read",
+	],
+	platform_admin: [
+		"profile.read.self",
+		"profile.write.self",
+		"admin.manage",
+		"audit.read",
+	],
 	mentor: ["profile.read.self", "profile.write.self", "mentor.connect"],
 	public_verifier: ["profile.read.self", "profile.write.self"],
 };
@@ -117,6 +130,7 @@ export const PERMISSION_DESCRIPTIONS: Record<PermissionCode, string> = {
 	"hardware.manage": "Manage equipment inventory",
 	"grant.decide": "Vote on an allocation round",
 	"report.read": "Read aggregated reports",
+	"audit.read": "Search the audit log inside the viewer's scope",
 	"admin.manage": "Manage users, roles, and configuration",
 	"mentor.connect": "Request contact with an opted-in learner",
 };

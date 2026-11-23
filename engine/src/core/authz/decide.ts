@@ -62,6 +62,10 @@ export function decideAccess(input: {
 	if (holders.length === 0) {
 		return { ok: false, reason: "You do not have this permission" };
 	}
+	// The log is opened here. The query then drops rows outside the viewer's centers.
+	if (input.permission === "audit.read") {
+		return { ok: true };
+	}
 	// The published catalog is the same shelf for every center. Scope applies when enrolling.
 	if (input.permission === "learning.read") {
 		return { ok: true };

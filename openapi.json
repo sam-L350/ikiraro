@@ -21,6 +21,9 @@
 			"name": "announcements"
 		},
 		{
+			"name": "audit"
+		},
+		{
 			"name": "auth"
 		},
 		{
@@ -391,6 +394,265 @@
 												"id"
 											],
 											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/audit/export": {
+			"get": {
+				"operationId": "getAuditExport",
+				"summary": "CSV of the same rows the viewer can search. The download itself is audited.",
+				"tags": [
+					"audit"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "action",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "targetType",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"csv": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"csv"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/audit": {
+			"get": {
+				"operationId": "searchAudit",
+				"summary": "Audit rows inside the viewer's centers, or the whole log for a global role.",
+				"tags": [
+					"audit"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "action",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "targetType",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"action": {
+														"type": "string"
+													},
+													"actorId": {
+														"type": "number",
+														"nullable": true
+													},
+													"actorName": {
+														"type": "string",
+														"nullable": true
+													},
+													"targetType": {
+														"type": "string",
+														"nullable": true
+													},
+													"targetId": {
+														"type": "string",
+														"nullable": true
+													},
+													"createdAt": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"id",
+													"action",
+													"actorId",
+													"actorName",
+													"targetType",
+													"targetId",
+													"createdAt"
+												],
+												"additionalProperties": false
+											}
 										},
 										"meta": {
 											"type": "object",
@@ -13028,6 +13290,315 @@
 				}
 			}
 		},
+		"/api/v1/privacy/anonymization": {
+			"get": {
+				"operationId": "getPrivacyAnonymization",
+				"summary": "How many deletion requests are still waiting for the removal job.",
+				"tags": [
+					"privacy"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"queued": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"queued"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/privacy/anonymization/run": {
+			"post": {
+				"operationId": "createPrivacyAnonymization",
+				"summary": "Clears personal details on queued deletions.",
+				"description": "Verification rows and ledger rows stay attached to the same user id.",
+				"tags": [
+					"privacy"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"completed": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"completed"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/privacy/correction": {
+			"post": {
+				"operationId": "createPrivacyCorrection",
+				"summary": "Writes one profile detail and keeps the previous value on the audit row.",
+				"description": "A removed account cannot be corrected.",
+				"tags": [
+					"privacy"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"field": {
+										"type": "string"
+									},
+									"value": {
+										"type": "string"
+									},
+									"userId": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"field",
+									"value"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"field": {
+													"type": "string",
+													"enum": [
+														"district",
+														"name",
+														"sector",
+														"village",
+														"economicSector",
+														"guardianContact"
+													]
+												},
+												"value": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"field",
+												"value"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/privacy/deletion": {
 			"post": {
 				"operationId": "createPrivacyDeletion",
@@ -13093,6 +13664,305 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/privacy/export": {
+			"get": {
+				"operationId": "getPrivacyExport",
+				"summary": "The signed-in person's record, or another person's when an admin asks.",
+				"tags": [
+					"privacy"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "userId",
+						"required": false,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"profile": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "number"
+														},
+														"name": {
+															"type": "string",
+															"nullable": true
+														},
+														"email": {
+															"type": "string"
+														},
+														"phone": {
+															"type": "string",
+															"nullable": true
+														},
+														"district": {
+															"type": "string",
+															"nullable": true
+														},
+														"sector": {
+															"type": "string",
+															"nullable": true
+														},
+														"village": {
+															"type": "string",
+															"nullable": true
+														},
+														"economicSector": {
+															"type": "string",
+															"nullable": true
+														},
+														"locale": {
+															"type": "string"
+														},
+														"guardianContact": {
+															"type": "string",
+															"nullable": true
+														}
+													},
+													"required": [
+														"id",
+														"name",
+														"email",
+														"phone",
+														"district",
+														"sector",
+														"village",
+														"economicSector",
+														"locale",
+														"guardianContact"
+													],
+													"additionalProperties": false
+												},
+												"consents": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"purpose": {
+																"type": "string"
+															},
+															"granted": {
+																"type": "boolean"
+															},
+															"version": {
+																"type": "string"
+															},
+															"grantedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"purpose",
+															"granted",
+															"version",
+															"grantedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"submissions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string"
+															},
+															"evidenceType": {
+																"type": "string"
+															},
+															"note": {
+																"type": "string",
+																"nullable": true
+															},
+															"submittedAt": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"evidenceType",
+															"note",
+															"submittedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"passport": {
+													"type": "object",
+													"properties": {
+														"verifiedMinutes": {
+															"type": "number"
+														},
+														"shared": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"verifiedMinutes",
+														"shared"
+													],
+													"additionalProperties": false
+												},
+												"ledger": {
+													"type": "object",
+													"properties": {
+														"count": {
+															"type": "number"
+														},
+														"total": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"count",
+														"total"
+													],
+													"additionalProperties": false
+												},
+												"requests": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"kind": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string"
+															},
+															"createdAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"kind",
+															"status",
+															"createdAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"relationships": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"kind": {
+																"type": "string"
+															},
+															"contact": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"kind",
+															"contact"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"profile",
+												"consents",
+												"submissions",
+												"passport",
+												"ledger",
+												"requests",
+												"relationships"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}

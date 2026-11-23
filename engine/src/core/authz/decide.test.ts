@@ -26,6 +26,27 @@ describe("decideAccess", () => {
 		expect(decision).toEqual({ ok: true });
 	});
 
+	test("a center manager can open the audit log, and a trainer cannot", () => {
+		const manager = decideAccess({
+			actorId: "4",
+			permission: "audit.read",
+			assignments: [
+				{ role: "center_manager", scopeType: "center", scopeId: "center-a" },
+			],
+			resource: { ownerId: "4" },
+		});
+		const trainer = decideAccess({
+			actorId: "7",
+			permission: "audit.read",
+			assignments: [
+				{ role: "trainer", scopeType: "center", scopeId: "center-a" },
+			],
+			resource: { ownerId: "7" },
+		});
+		expect(manager).toEqual({ ok: true });
+		expect(trainer.ok).toBe(false);
+	});
+
 	test("a global admin passes a center-scoped resource", () => {
 		const decision = decideAccess({
 			actorId: "1",
