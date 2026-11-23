@@ -57,6 +57,9 @@
 			"name": "passports"
 		},
 		{
+			"name": "point-adjustments"
+		},
+		{
 			"name": "point-caps"
 		},
 		{
@@ -10829,6 +10832,610 @@
 				}
 			}
 		},
+		"/api/v1/point-adjustments/{id}/approve": {
+			"post": {
+				"operationId": "createPointAdjustmentApproval",
+				"summary": "A different admin writes the one ledger row for this request.",
+				"tags": [
+					"point-adjustments"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"learnerName": {
+													"type": "string"
+												},
+												"learnerEmail": {
+													"type": "string"
+												},
+												"amount": {
+													"type": "number"
+												},
+												"reason": {
+													"type": "string"
+												},
+												"requestedByName": {
+													"type": "string"
+												},
+												"mine": {
+													"type": "boolean"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"pending",
+														"approved",
+														"rejected"
+													]
+												},
+												"createdAt": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"learnerName",
+												"learnerEmail",
+												"amount",
+												"reason",
+												"requestedByName",
+												"mine",
+												"status",
+												"createdAt"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/point-adjustments/{id}/reject": {
+			"post": {
+				"operationId": "createPointAdjustmentRejection",
+				"summary": "Turn the request down. No ledger row is written.",
+				"tags": [
+					"point-adjustments"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"reason": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"reason"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"learnerName": {
+													"type": "string"
+												},
+												"learnerEmail": {
+													"type": "string"
+												},
+												"amount": {
+													"type": "number"
+												},
+												"reason": {
+													"type": "string"
+												},
+												"requestedByName": {
+													"type": "string"
+												},
+												"mine": {
+													"type": "boolean"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"pending",
+														"approved",
+														"rejected"
+													]
+												},
+												"createdAt": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"learnerName",
+												"learnerEmail",
+												"amount",
+												"reason",
+												"requestedByName",
+												"mine",
+												"status",
+												"createdAt"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/point-adjustments/create": {
+			"post": {
+				"operationId": "createPointAdjustment",
+				"summary": "Ask a second admin to add or remove points. The ledger is unchanged.",
+				"tags": [
+					"point-adjustments"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"amount": {
+										"type": "number"
+									},
+									"reason": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email",
+									"amount",
+									"reason"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"learnerName": {
+													"type": "string"
+												},
+												"learnerEmail": {
+													"type": "string"
+												},
+												"amount": {
+													"type": "number"
+												},
+												"reason": {
+													"type": "string"
+												},
+												"requestedByName": {
+													"type": "string"
+												},
+												"mine": {
+													"type": "boolean"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"pending",
+														"approved",
+														"rejected"
+													]
+												},
+												"createdAt": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"learnerName",
+												"learnerEmail",
+												"amount",
+												"reason",
+												"requestedByName",
+												"mine",
+												"status",
+												"createdAt"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/point-adjustments": {
+			"get": {
+				"operationId": "listPointAdjustmentsQueue",
+				"summary": "Adjustment requests waiting for a second admin, then the latest decisions.",
+				"tags": [
+					"point-adjustments"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"learnerName": {
+														"type": "string"
+													},
+													"learnerEmail": {
+														"type": "string"
+													},
+													"amount": {
+														"type": "number"
+													},
+													"reason": {
+														"type": "string"
+													},
+													"requestedByName": {
+														"type": "string"
+													},
+													"mine": {
+														"type": "boolean"
+													},
+													"status": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"approved",
+															"rejected"
+														]
+													},
+													"createdAt": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"id",
+													"learnerName",
+													"learnerEmail",
+													"amount",
+													"reason",
+													"requestedByName",
+													"mine",
+													"status",
+													"createdAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/point-caps/create": {
 			"post": {
 				"operationId": "createPointCap",
@@ -11193,6 +11800,10 @@
 															},
 															"referenceId": {
 																"type": "string"
+															},
+															"reason": {
+																"type": "string",
+																"nullable": true
 															}
 														},
 														"required": [
@@ -11202,7 +11813,8 @@
 															"uncappedAmount",
 															"kind",
 															"referenceType",
-															"referenceId"
+															"referenceId",
+															"reason"
 														],
 														"additionalProperties": false
 													}

@@ -1,6 +1,7 @@
 export { permissions, rolePermissions, roles, userRoles } from "./authz";
 export {
 	earnedBadges,
+	pointAdjustments,
 	pointCaps,
 	pointRules,
 	pointTransactions,

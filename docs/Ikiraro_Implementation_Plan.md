@@ -68,7 +68,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/5.2-eligibility-engine`
   - [x] `phase/5.3-learner-passport`
   - [x] `phase/5.4-public-verification`
-  - [ ] `phase/5.5-manual-adjustments`
+  - [x] `phase/5.5-manual-adjustments`
 - [ ] Phase 6 — Pilot readiness (`phase/6-pilot-readiness`)
   - [ ] `phase/6.1-notification-outbox`
   - [ ] `phase/6.2-sms-production`

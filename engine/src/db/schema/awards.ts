@@ -116,6 +116,8 @@ export const pointTransactions = pgTable(
 		ruleId: uuid("rule_id").references(() => pointRules.id),
 		/** The amount before a daily or type cap reduced it. */
 		uncappedAmount: integer("uncapped_amount"),
+		/** The second admin who approved a manual adjustment. */
+		approvedByUserId: integer("approved_by").references(() => users.id),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
@@ -125,7 +127,7 @@ export const pointTransactions = pgTable(
 		check("point_transactions_kind", sql`${table.kind} in (${pointKindSql})`),
 		check(
 			"point_transactions_amount",
-			sql`${table.kind} = 'reversal' or ${table.amount} >= 0`,
+			sql`${table.kind} in ('reversal', 'manual_adjustment') or ${table.amount} >= 0`,
 		),
 		check(
 			"point_transactions_reference",
@@ -134,6 +136,68 @@ export const pointTransactions = pgTable(
 		check(
 			"point_transactions_uncapped",
 			sql`${table.uncappedAmount} is null or ${table.uncappedAmount} >= 0`,
+		),
+	],
+);
+
+const adjustmentStatusSql = sql`'pending', 'approved', 'rejected'`;
+
+/**
+ * A request to change a learner's points. The ledger row is written only
+ * when a different admin approves it.
+ */
+export const pointAdjustments = pgTable(
+	"point_adjustments",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		learnerUserId: integer("learner_user_id")
+			.notNull()
+			.references(() => users.id),
+		amount: integer("amount").notNull(),
+		reason: text("reason").notNull(),
+		requestedByUserId: integer("requested_by_user_id")
+			.notNull()
+			.references(() => users.id),
+		status: text("status").notNull().default("pending"),
+		decidedByUserId: integer("decided_by_user_id").references(() => users.id),
+		decisionNote: text("decision_note"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		decidedAt: timestamp("decided_at", { withTimezone: true }),
+	},
+	(table) => [
+		check(
+			"point_adjustments_amount",
+			sql`${table.amount} <> 0 and ${table.amount} between -1000000 and 1000000`,
+		),
+		check(
+			"point_adjustments_reason",
+			sql`char_length(btrim(${table.reason})) > 0 and char_length(${table.reason}) <= 500`,
+		),
+		check(
+			"point_adjustments_status",
+			sql`${table.status} in (${adjustmentStatusSql})`,
+		),
+		check(
+			"point_adjustments_decision",
+			sql`(
+				${table.status} = 'pending'
+				and ${table.decidedByUserId} is null
+				and ${table.decidedAt} is null
+			) or (
+				${table.status} <> 'pending'
+				and ${table.decidedByUserId} is not null
+				and ${table.decidedAt} is not null
+				and ${table.decidedByUserId} <> ${table.requestedByUserId}
+			)`,
+		),
+		check(
+			"point_adjustments_reject_note",
+			sql`${table.status} <> 'rejected' or (
+				${table.decisionNote} is not null
+				and char_length(btrim(${table.decisionNote})) > 0
+			)`,
 		),
 	],
 );

@@ -76,6 +76,11 @@ function useProductNavItems(): NavItem[] {
 	if (canReviewEvidence) {
 		items.push({ to: "/evidence", label: "evidenceQueueTitle" });
 	}
+	const canAdjustPoints =
+		user?.roles.some((role) => role.code === "platform_admin") ?? false;
+	if (canAdjustPoints) {
+		items.push({ to: "/adjustments", label: "adjustmentsNav" });
+	}
 	return items;
 }
 

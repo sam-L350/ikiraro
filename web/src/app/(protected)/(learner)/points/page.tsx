@@ -20,6 +20,7 @@ type PointEntry = {
 	amount: number;
 	uncappedAmount: number | null;
 	kind: string;
+	reason: string | null;
 };
 
 export default function PointsPage() {
@@ -81,6 +82,9 @@ export default function PointsPage() {
 								<p className="text-lg text-fg-muted">
 									{when(entry.createdAt, locale)}
 								</p>
+								{entry.reason ? (
+									<p className="text-lg text-fg">{entry.reason}</p>
+								) : null}
 								{entry.uncappedAmount !== null &&
 								entry.uncappedAmount > entry.amount ? (
 									<p className="text-lg text-fg">

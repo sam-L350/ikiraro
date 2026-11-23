@@ -1,8 +1,9 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import type { Database } from "../../db";
 import {
 	courses,
 	modules,
+	pointAdjustments,
 	pointCaps,
 	pointRules,
 	pointTransactions,
@@ -55,6 +56,7 @@ export type PointEntry = {
 	kind: PointKind;
 	referenceType: string;
 	referenceId: string;
+	reason: string | null;
 };
 
 export type PointStatement = {
@@ -286,7 +288,29 @@ export async function listPointStatement(
 			kind: row.kind,
 			referenceType: row.referenceType,
 			referenceId: row.referenceId,
+			reason: null,
 		});
+	}
+	const adjustmentIds = entries.flatMap((entry) =>
+		entry.kind === "manual_adjustment" &&
+		entry.referenceType === "adjustment" &&
+		isUuid(entry.referenceId)
+			? [entry.referenceId]
+			: [],
+	);
+	if (adjustmentIds.length > 0) {
+		const reasons = await database
+			.select({
+				id: pointAdjustments.id,
+				reason: pointAdjustments.reason,
+			})
+			.from(pointAdjustments)
+			.where(inArray(pointAdjustments.id, adjustmentIds));
+		const byId = new Map(reasons.map((row) => [row.id, row.reason]));
+		for (const entry of entries) {
+			const reason = byId.get(entry.referenceId);
+			if (reason) entry.reason = reason;
+		}
 	}
 	return { balance, entries };
 }
