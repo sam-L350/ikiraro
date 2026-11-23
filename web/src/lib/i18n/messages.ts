@@ -366,7 +366,10 @@ export const en = {
 	evidencePhotoAlt: "The photo the learner sent",
 	evidenceLeftQueue: "This attempt is no longer waiting.",
 	approveEvidence: "Approve",
-	approveLater: "Approval records the pass. That step opens next.",
+	approveLater:
+		"Approve when the work meets the rubric. Points and hours are recorded with the pass.",
+	approvedNote: "Approved.",
+	scoreBelow: "The score is below the pass mark.",
 	sendBackEvidence: "Send back",
 	sendBackSentence:
 		"Send it back when the work needs another try, or reject it.",
@@ -794,7 +797,10 @@ export const rw: Record<MessageKey, string> = {
 	evidencePhotoAlt: "Ifoto umunyeshuri yohereje",
 	evidenceLeftQueue: "Iki gerageza ntikigitegereje.",
 	approveEvidence: "Emeza",
-	approveLater: "Kwemera bibika ko byatsinze. Icyo gikorwa kizafunguka nyuma.",
+	approveLater:
+		"Emeza iyo ibyo yakoze bujuje isuzuma. Amanota n'amasaha bibikwa hamwe no kwemera.",
+	approvedNote: "Byemejwe.",
+	scoreBelow: "Amanota ari munsi y'akarango ko gutsinda.",
 	sendBackEvidence: "Garura",
 	sendBackSentence:
 		"Bigarure iyo bikwiye kongera kugeragezwa, cyangwa ubyange.",

@@ -22,7 +22,6 @@ import {
 	rubricCriteria,
 	sectors,
 	submissionVerifications,
-	taskSubmissions,
 	tasks,
 	userRoles,
 } from "../../db/schema";
@@ -315,26 +314,6 @@ describe("verification decisions", () => {
 			relatedUserId: trainer.userId,
 			kind: "relative",
 		});
-
-		try {
-			await createVerification(database, {
-				reviewerId: trainer.userId,
-				submissionId: waiting.id,
-				decision: "approved",
-				note: "Pass.",
-				scores: [{ criterionId: criterion.id, score: 100 }],
-				ip: "127.0.0.1",
-			});
-			throw new Error("expected approval to wait for the award");
-		} catch (error) {
-			expect(isApiError(error) && error.details).toEqual({ reason: "award" });
-		}
-		const [stillWaiting] = await database
-			.select({ status: taskSubmissions.status })
-			.from(taskSubmissions)
-			.where(eq(taskSubmissions.id, waiting.id))
-			.limit(1);
-		expect(stillWaiting?.status).toBe("pending");
 
 		const decided = await createVerification(database, {
 			reviewerId: trainer.userId,

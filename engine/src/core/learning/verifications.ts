@@ -10,6 +10,7 @@ import {
 } from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
+import { awardSubmission } from "./award";
 import { reviewCenters } from "./review-queue";
 
 export const REJECT_REASONS = [
@@ -27,7 +28,7 @@ const NOTE_LIMIT = 2_000;
 
 type VerificationDb = Pick<
 	Database,
-	"insert" | "select" | "transaction" | "update"
+	"execute" | "insert" | "select" | "transaction" | "update"
 >;
 
 export type ScoreInput = {
@@ -165,9 +166,19 @@ export async function feedbackForSubmissions(
 	return notes;
 }
 
+export type VerificationResult = {
+	id: string;
+	submissionId: string;
+	decision: VerificationDecision;
+	scoreTotal: number | null;
+	points: number;
+	verifiedMinutes: number;
+	badgeId: string | null;
+};
+
 /**
- * Record needs-revision or rejected. Approval waits for the award in phase 4.6,
- * so this function refuses it instead of marking the attempt passed.
+ * Record a decision. Approval calls `award_submission` once, so the
+ * verification, points, hours, and badge commit together.
  */
 export async function createVerification(
 	database: VerificationDb,
@@ -178,14 +189,10 @@ export async function createVerification(
 		note?: string;
 		reasonCode?: string;
 		scores?: ScoreInput[];
+		idempotencyKey?: string;
 		ip: string;
 	},
-): Promise<{
-	id: string;
-	submissionId: string;
-	decision: "needs_revision" | "rejected";
-	scoreTotal: number | null;
-}> {
+): Promise<VerificationResult> {
 	if (!isVerificationDecision(input.decision)) {
 		throw errors.badRequest("That decision is not one of the choices.", {
 			reason: "decision",
@@ -240,12 +247,11 @@ export async function createVerification(
 			reason: "relative",
 		});
 	}
-	if (input.decision === "approved") {
-		throw errors.conflict("Approval is recorded with the award.", {
-			reason: "award",
-		});
-	}
-	if (row.status !== "pending" && row.status !== "in_review") {
+	if (
+		input.decision !== "approved" &&
+		row.status !== "pending" &&
+		row.status !== "in_review"
+	) {
 		throw errors.conflict("This attempt is no longer waiting.", {
 			reason: "closed",
 		});
@@ -274,6 +280,23 @@ export async function createVerification(
 		.where(eq(rubricCriteria.taskId, row.taskId));
 	const scoreTotal = weightedScore(criteria, input.scores ?? []);
 	const scores = input.scores ?? [];
+	if (decision === "approved") {
+		const key = input.idempotencyKey?.trim() ?? "";
+		if (!key) {
+			throw errors.badRequest("This approval needs an idempotency key.", {
+				reason: "key",
+			});
+		}
+		const awarded = await awardSubmission(database, {
+			reviewerId: input.reviewerId,
+			submissionId: row.id,
+			note,
+			scores,
+			idempotencyKey: key,
+			ip: input.ip,
+		});
+		return awarded;
+	}
 
 	return database.transaction(async (tx) => {
 		const [updated] = await tx
@@ -341,6 +364,9 @@ export async function createVerification(
 			submissionId: row.id,
 			decision,
 			scoreTotal,
+			points: 0,
+			verifiedMinutes: 0,
+			badgeId: null,
 		};
 	});
 }

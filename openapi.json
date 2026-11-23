@@ -14942,7 +14942,7 @@
 		"/api/v1/verifications/create": {
 			"post": {
 				"operationId": "createVerification",
-				"summary": "Record needs-revision or rejected. Approval is stored with the award.",
+				"summary": "Record a decision. Approval runs the award function once.",
 				"tags": [
 					"verifications"
 				],
@@ -14988,6 +14988,9 @@
 											],
 											"additionalProperties": false
 										}
+									},
+									"idempotencyKey": {
+										"type": "string"
 									}
 								},
 								"required": [
@@ -15023,6 +15026,7 @@
 												"decision": {
 													"type": "string",
 													"enum": [
+														"approved",
 														"needs_revision",
 														"rejected"
 													]
@@ -15030,13 +15034,26 @@
 												"scoreTotal": {
 													"type": "number",
 													"nullable": true
+												},
+												"points": {
+													"type": "number"
+												},
+												"verifiedMinutes": {
+													"type": "number"
+												},
+												"badgeId": {
+													"type": "string",
+													"nullable": true
 												}
 											},
 											"required": [
 												"id",
 												"submissionId",
 												"decision",
-												"scoreTotal"
+												"scoreTotal",
+												"points",
+												"verifiedMinutes",
+												"badgeId"
 											],
 											"additionalProperties": false
 										},

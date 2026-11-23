@@ -140,6 +140,8 @@ function decisionError(
 			return t("rejectReasonRequired");
 		case "score":
 			return t("scoreInvalid");
+		case "threshold":
+			return t("scoreBelow");
 		case "closed":
 			return t("evidenceLeftQueue");
 		default:
@@ -174,6 +176,7 @@ export default function EvidenceReviewPage() {
 	const [formError, setFormError] = useState<string | null>(null);
 	const claimed = useRef(false);
 	const sheet = useRef<HTMLDialogElement>(null);
+	const approveKey = useRef(crypto.randomUUID());
 	const review = useEngine(
 		"/evidence-queue/:id",
 		{ query: { id } },
@@ -237,6 +240,30 @@ export default function EvidenceReviewPage() {
 		(item.evidenceContentType ?? "").startsWith("image/");
 	const file =
 		item.evidenceUrl !== null && item.evidenceContentType === "application/pdf";
+
+	async function onApprove() {
+		const parsed = parsedScores(item.criteria, scores);
+		if (parsed === "invalid") {
+			setFormError(t("scoreInvalid"));
+			return;
+		}
+		setFormError(null);
+		try {
+			await decide.mutateAsync({
+				body: {
+					submissionId: id,
+					decision: "approved",
+					note: t("approvedNote"),
+					idempotencyKey: approveKey.current,
+					...(parsed.length > 0 ? { scores: parsed } : {}),
+				},
+			});
+			await invalidateEngine("/evidence-queue");
+			navigate("/evidence");
+		} catch (caught) {
+			setFormError(decisionError(caught, t));
+		}
+	}
 
 	function openSheet() {
 		setFormError(null);
@@ -380,9 +407,18 @@ export default function EvidenceReviewPage() {
 			</div>
 			<Card variant="ink" className="flex flex-col gap-4">
 				<p className="font-sans text-lg text-ink-fg">{t("approveLater")}</p>
-				<Button type="button" variant="ink" className="w-fit" disabled>
+				<Button
+					type="button"
+					variant="ink"
+					className="w-fit"
+					disabled={decide.isPending}
+					onClick={() => void onApprove()}
+				>
 					{t("approveEvidence")}
 				</Button>
+				{formError ? (
+					<p className="font-sans text-lg text-danger">{formError}</p>
+				) : null}
 				<p className="font-sans text-lg text-ink-fg">{t("sendBackSentence")}</p>
 				<Button
 					type="button"

@@ -1,5 +1,7 @@
+import { sql } from "drizzle-orm";
 import {
 	boolean,
+	check,
 	integer,
 	pgTable,
 	text,
@@ -52,13 +54,21 @@ export const declaredRelationships = pgTable("declared_relationships", {
 });
 
 /** Empty shell. One passport is created in the same transaction as its user. */
-export const digitalPassports = pgTable("digital_passports", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	userId: integer("user_id")
-		.notNull()
-		.unique()
-		.references(() => users.id, { onDelete: "cascade" }),
-	createdAt: timestamp("created_at", { withTimezone: true })
-		.notNull()
-		.defaultNow(),
-});
+export const digitalPassports = pgTable(
+	"digital_passports",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: integer("user_id")
+			.notNull()
+			.unique()
+			.references(() => users.id, { onDelete: "cascade" }),
+		/** Verified time, in minutes. Hours on the passport are this total. */
+		verifiedMinutes: integer("verified_minutes").notNull().default(0),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		check("digital_passports_minutes", sql`${table.verifiedMinutes} >= 0`),
+	],
+);

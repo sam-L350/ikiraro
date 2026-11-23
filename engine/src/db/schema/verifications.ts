@@ -16,8 +16,8 @@ const decisionSql = sql`'approved', 'needs_revision', 'rejected'`;
 const reasonSql = sql`'not_the_task', 'not_the_learner', 'unreadable', 'incomplete'`;
 
 /**
- * One decision for one attempt. The row is never edited. Approval is written
- * with the award in phase 4.6, so this phase only inserts the other two.
+ * One decision for one attempt. The row is never edited. Approval is inserted
+ * by `award_submission`, in the same database call as the points and the badge.
  */
 export const submissionVerifications = pgTable(
 	"submission_verifications",

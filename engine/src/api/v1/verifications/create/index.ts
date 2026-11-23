@@ -9,18 +9,22 @@ import {
 } from "../../../../core/learning/verifications";
 import { db } from "../../../../db";
 
-/** Record needs-revision or rejected. Approval is stored with the award. */
+/** Record a decision. Approval runs the award function once. */
 export async function createVerification(input: {
 	submissionId: string;
 	decision: string;
 	note?: string;
 	reasonCode?: string;
 	scores?: ScoreInput[];
+	idempotencyKey?: string;
 }): Promise<{
 	id: string;
 	submissionId: string;
-	decision: "needs_revision" | "rejected";
+	decision: "approved" | "needs_revision" | "rejected";
 	scoreTotal: number | null;
+	points: number;
+	verifiedMinutes: number;
+	badgeId: string | null;
 }> {
 	const user = await requireAuth();
 	const centers = await reviewCenters(db, user.id);
@@ -43,6 +47,7 @@ export async function createVerification(input: {
 		note: input.note,
 		reasonCode: input.reasonCode,
 		scores: input.scores,
+		idempotencyKey: input.idempotencyKey,
 		ip: clientIp(),
 	});
 }
