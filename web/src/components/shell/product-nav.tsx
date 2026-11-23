@@ -97,6 +97,8 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/evidence", label: "evidenceQueueTitle" },
 			{ to: "/second-reviews", label: "secondReviewsNav" },
+			{ to: "/appeals", label: "appealsNav" },
+			{ to: "/feedback", label: "feedbackNav" },
 			{ to: "/quality", label: "qualityNav" },
 		);
 	}
@@ -116,6 +118,11 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/adjustments", label: "adjustmentsNav" },
 			{ to: "/quality", label: "qualityNav" },
+		);
+		if (!canReviewEvidence) {
+			items.push({ to: "/feedback", label: "feedbackNav" });
+		}
+		items.push(
 			{ to: "/notification-templates", label: "templatesNav" },
 			{ to: "/privacy-tools", label: "privacyToolsNav" },
 			{ to: "/settings", label: "settingsNav" },

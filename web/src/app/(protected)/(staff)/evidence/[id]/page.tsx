@@ -188,6 +188,7 @@ export default function EvidenceReviewPage() {
 	);
 	const start = useEngineMutation("/evidence-queue/:id/start");
 	const decide = useEngineMutation("/verifications/create");
+	const snippets = useEngine("/feedback-snippets");
 
 	useEffect(() => {
 		if (!id || review.data?.status !== "pending" || claimed.current) return;
@@ -232,6 +233,13 @@ export default function EvidenceReviewPage() {
 	}
 
 	const item = review.data as EvidenceReview;
+	const savedLines = (snippets.data?.items ?? []) as {
+		id: string;
+		locale: "rw" | "en";
+		body: string;
+	}[];
+	const inLocale = savedLines.filter((line) => line.locale === locale);
+	const snippetLines = inLocale.length > 0 ? inLocale : savedLines;
 	const title = textFor(locale, item.taskTitleRw, item.taskTitleEn);
 	const instructions = textFor(
 		locale,
@@ -509,6 +517,34 @@ export default function EvidenceReviewPage() {
 								{REJECT_REASONS.map((itemReason) => (
 									<option key={itemReason} value={itemReason}>
 										{t(reasonKey(itemReason))}
+									</option>
+								))}
+							</select>
+						</label>
+					) : null}
+					{snippetLines.length > 0 ? (
+						<label className="flex flex-col gap-2" htmlFor="saved-line">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+								{t("feedbackInsert")}
+							</span>
+							<select
+								id="saved-line"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value=""
+								onChange={(event) => {
+									const body = snippetLines.find(
+										(item) => item.id === event.target.value,
+									)?.body;
+									if (!body) return;
+									setNote((current) =>
+										current.trim() ? `${current.trim()}\n${body}` : body,
+									);
+								}}
+							>
+								<option value="">{t("feedbackInsertNone")}</option>
+								{snippetLines.map((item) => (
+									<option key={item.id} value={item.id}>
+										{item.body}
 									</option>
 								))}
 							</select>

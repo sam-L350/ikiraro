@@ -21,6 +21,9 @@
 			"name": "announcements"
 		},
 		{
+			"name": "appeals"
+		},
+		{
 			"name": "audit"
 		},
 		{
@@ -55,6 +58,9 @@
 		},
 		{
 			"name": "examples"
+		},
+		{
+			"name": "feedback-snippets"
 		},
 		{
 			"name": "media"
@@ -443,6 +449,546 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/appeals/{id}/close": {
+			"post": {
+				"operationId": "createAppealClose",
+				"summary": "Uphold the rejection or let the learner try again. The rejection stays stored.",
+				"tags": [
+					"appeals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"outcome": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"outcome",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"upheld",
+														"overturned"
+													]
+												}
+											},
+											"required": [
+												"id",
+												"status"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/appeals/{id}": {
+			"get": {
+				"operationId": "getAppeal",
+				"summary": "One appeal, for a reviewer who did not write the rejection.",
+				"tags": [
+					"appeals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"createdAt": {
+													"type": "string"
+												},
+												"learnerName": {
+													"type": "string"
+												},
+												"centerName": {
+													"type": "string"
+												},
+												"taskTitleRw": {
+													"type": "string"
+												},
+												"taskTitleEn": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"upheld",
+														"overturned",
+														"open"
+													]
+												},
+												"note": {
+													"type": "string"
+												},
+												"decisionNote": {
+													"type": "string",
+													"nullable": true
+												},
+												"rejectionNote": {
+													"type": "string"
+												},
+												"reasonCode": {
+													"type": "string",
+													"nullable": true
+												},
+												"instructionsRw": {
+													"type": "string"
+												},
+												"instructionsEn": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"createdAt",
+												"learnerName",
+												"centerName",
+												"taskTitleRw",
+												"taskTitleEn",
+												"status",
+												"note",
+												"decisionNote",
+												"rejectionNote",
+												"reasonCode",
+												"instructionsRw",
+												"instructionsEn"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/appeals/create": {
+			"post": {
+				"operationId": "createAppeal",
+				"summary": "Ask once for a different person to read a rejection.",
+				"tags": [
+					"appeals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"submissionId": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"submissionId",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"const": "open",
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"status"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/appeals": {
+			"get": {
+				"operationId": "getAppeals",
+				"summary": "Open appeals at the centers this person reviews, except their own rejections.",
+				"tags": [
+					"appeals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"createdAt": {
+																"type": "string"
+															},
+															"learnerName": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"taskTitleRw": {
+																"type": "string"
+															},
+															"taskTitleEn": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"createdAt",
+															"learnerName",
+															"centerName",
+															"taskTitleRw",
+															"taskTitleEn"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}
@@ -7898,6 +8444,29 @@
 															},
 															"revoked": {
 																"type": "boolean"
+															},
+															"appeal": {
+																"type": "object",
+																"properties": {
+																	"status": {
+																		"type": "string",
+																		"enum": [
+																			"upheld",
+																			"overturned",
+																			"open"
+																		]
+																	},
+																	"decisionNote": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																},
+																"required": [
+																	"status",
+																	"decisionNote"
+																],
+																"additionalProperties": false,
+																"nullable": true
 															}
 														},
 														"required": [
@@ -7910,7 +8479,8 @@
 															"submittedAt",
 															"note",
 															"feedback",
-															"revoked"
+															"revoked",
+															"appeal"
 														],
 														"additionalProperties": false
 													}
@@ -9219,6 +9789,388 @@
 				}
 			}
 		},
+		"/api/v1/feedback-snippets/{id}/update": {
+			"put": {
+				"operationId": "updateFeedbackSnippetRecord",
+				"summary": "Change a saved line. The trainer can still edit it again after inserting it.",
+				"tags": [
+					"feedback-snippets"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"locale": {
+										"type": "string"
+									},
+									"body": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"locale",
+									"body"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"locale": {
+													"type": "string",
+													"enum": [
+														"rw",
+														"en"
+													]
+												},
+												"body": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"locale",
+												"body"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/feedback-snippets/create": {
+			"post": {
+				"operationId": "createFeedbackSnippetRecord",
+				"summary": "Add a line a trainer can insert into feedback.",
+				"tags": [
+					"feedback-snippets"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"locale": {
+										"type": "string"
+									},
+									"body": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"locale",
+									"body"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"locale": {
+													"type": "string",
+													"enum": [
+														"rw",
+														"en"
+													]
+												},
+												"body": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"locale",
+												"body"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/feedback-snippets": {
+			"get": {
+				"operationId": "getFeedbackSnippets",
+				"summary": "Saved feedback lines in Kinyarwanda and English.",
+				"tags": [
+					"feedback-snippets"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"locale": {
+																"type": "string",
+																"enum": [
+																	"rw",
+																	"en"
+																]
+															},
+															"body": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"locale",
+															"body"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/media/{id}/finalize": {
 			"post": {
 				"operationId": "createMediaFinalize",
@@ -9805,8 +10757,8 @@
 												"status": {
 													"type": "string",
 													"enum": [
-														"closed",
-														"open"
+														"open",
+														"closed"
 													]
 												},
 												"createdAt": {
@@ -10069,8 +11021,8 @@
 													"status": {
 														"type": "string",
 														"enum": [
-															"closed",
-															"open"
+															"open",
+															"closed"
 														]
 													},
 													"createdAt": {
@@ -19727,6 +20679,29 @@
 												},
 												"revoked": {
 													"type": "boolean"
+												},
+												"appeal": {
+													"type": "object",
+													"properties": {
+														"status": {
+															"type": "string",
+															"enum": [
+																"upheld",
+																"overturned",
+																"open"
+															]
+														},
+														"decisionNote": {
+															"type": "string",
+															"nullable": true
+														}
+													},
+													"required": [
+														"status",
+														"decisionNote"
+													],
+													"additionalProperties": false,
+													"nullable": true
 												}
 											},
 											"required": [
@@ -19739,7 +20714,8 @@
 												"submittedAt",
 												"note",
 												"feedback",
-												"revoked"
+												"revoked",
+												"appeal"
 											],
 											"additionalProperties": false
 										},
@@ -19900,6 +20876,29 @@
 												},
 												"revoked": {
 													"type": "boolean"
+												},
+												"appeal": {
+													"type": "object",
+													"properties": {
+														"status": {
+															"type": "string",
+															"enum": [
+																"upheld",
+																"overturned",
+																"open"
+															]
+														},
+														"decisionNote": {
+															"type": "string",
+															"nullable": true
+														}
+													},
+													"required": [
+														"status",
+														"decisionNote"
+													],
+													"additionalProperties": false,
+													"nullable": true
 												}
 											},
 											"required": [
@@ -19912,7 +20911,8 @@
 												"submittedAt",
 												"note",
 												"feedback",
-												"revoked"
+												"revoked",
+												"appeal"
 											],
 											"additionalProperties": false
 										},
@@ -20096,6 +21096,29 @@
 												},
 												"revoked": {
 													"type": "boolean"
+												},
+												"appeal": {
+													"type": "object",
+													"properties": {
+														"status": {
+															"type": "string",
+															"enum": [
+																"upheld",
+																"overturned",
+																"open"
+															]
+														},
+														"decisionNote": {
+															"type": "string",
+															"nullable": true
+														}
+													},
+													"required": [
+														"status",
+														"decisionNote"
+													],
+													"additionalProperties": false,
+													"nullable": true
 												}
 											},
 											"required": [
@@ -20108,7 +21131,8 @@
 												"submittedAt",
 												"note",
 												"feedback",
-												"revoked"
+												"revoked",
+												"appeal"
 											],
 											"additionalProperties": false
 										},

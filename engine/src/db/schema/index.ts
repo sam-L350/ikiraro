@@ -1,3 +1,4 @@
+export { appeals, feedbackSnippets } from "./appeals";
 export { permissions, rolePermissions, roles, userRoles } from "./authz";
 export {
 	earnedBadges,

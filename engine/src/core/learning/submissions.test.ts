@@ -28,6 +28,7 @@ import {
 	createSubmission,
 	listSubmissions,
 	nextAttempt,
+	nextAttemptStatuses,
 	withdrawSubmission,
 } from "./submissions";
 
@@ -49,6 +50,20 @@ describe("submission rules", () => {
 			]),
 		).toBe("limit");
 		expect(createBlock(["rejected"])).toBe("closed");
+		expect(
+			createBlock(
+				nextAttemptStatuses([
+					{ status: "rejected", revoked: false, overturned: true },
+				]),
+			),
+		).toBe("ok");
+		expect(
+			createBlock(
+				nextAttemptStatuses([
+					{ status: "rejected", revoked: false, overturned: false },
+				]),
+			),
+		).toBe("closed");
 		expect(createBlock(["escalated"])).toBe("closed");
 		expect(nextAttempt([])).toBe(1);
 		expect(nextAttempt([1, 3])).toBe(4);

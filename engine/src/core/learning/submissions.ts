@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import type { Database } from "../../db";
 import {
+	appeals,
 	mediaObjects,
 	submissionVerifications,
 	taskSubmissions,
@@ -43,6 +44,11 @@ export type SubmissionView = {
 	feedback: string | null;
 	/** True when an approval was reversed and no longer stands. */
 	revoked: boolean;
+	/** The learner's one ask about a rejection, when they have sent it. */
+	appeal: {
+		status: "open" | "upheld" | "overturned";
+		decisionNote: string | null;
+	} | null;
 };
 
 type SubmissionDb = Pick<
@@ -114,6 +120,23 @@ export function createBlock(
 	return "ok";
 }
 
+/**
+ * A reversed approval and an overturned rejection no longer keep the task closed.
+ */
+export function nextAttemptStatuses(
+	rows: readonly {
+		status: SubmissionStatus;
+		revoked: boolean;
+		overturned: boolean;
+	}[],
+): SubmissionStatus[] {
+	return rows.flatMap((row) => {
+		if (row.status === "approved" && row.revoked) return [];
+		if (row.status === "rejected" && row.overturned) return [];
+		return [row.status];
+	});
+}
+
 /** Withdrawal is only allowed before a trainer starts the review. */
 export function canWithdraw(status: SubmissionStatus): boolean {
 	switch (status) {
@@ -146,6 +169,7 @@ function present(
 	row: StoredRow,
 	feedback: string | null = null,
 	revoked = false,
+	appeal: SubmissionView["appeal"] = null,
 ): SubmissionView {
 	if (!isSubmissionStatus(row.status) || !isEvidenceType(row.evidenceType)) {
 		throw errors.internal("That submission could not be read.");
@@ -163,6 +187,7 @@ function present(
 		note: row.note,
 		feedback,
 		revoked,
+		appeal,
 	};
 }
 
@@ -312,6 +337,7 @@ export async function createSubmission(
 					attempt: taskSubmissions.attempt,
 					status: taskSubmissions.status,
 					revoked: verificationRevocations.id,
+					appealStatus: appeals.status,
 				})
 				.from(taskSubmissions)
 				.leftJoin(
@@ -325,17 +351,25 @@ export async function createSubmission(
 						submissionVerifications.id,
 					),
 				)
+				.leftJoin(appeals, eq(appeals.submissionId, taskSubmissions.id))
 				.where(
 					and(
 						eq(taskSubmissions.enrollmentId, input.enrollmentId),
 						eq(taskSubmissions.taskId, input.taskId),
 					),
 				);
-			const statuses = earlier.flatMap((row) => {
-				if (!isSubmissionStatus(row.status)) return [];
-				if (row.status === "approved" && row.revoked !== null) return [];
-				return [row.status];
-			});
+			const statuses = nextAttemptStatuses(
+				earlier.flatMap((row) => {
+					if (!isSubmissionStatus(row.status)) return [];
+					return [
+						{
+							status: row.status,
+							revoked: row.revoked !== null,
+							overturned: row.appealStatus === "overturned",
+						},
+					];
+				}),
+			);
 			const block = createBlock(statuses);
 			switch (block) {
 				case "ok":
@@ -628,8 +662,46 @@ export async function listSubmissions(
 						),
 					);
 	const revokedIds = new Set(revokedRows.map((row) => row.submissionId));
+	const appealRows =
+		rows.length === 0
+			? []
+			: await database
+					.select({
+						submissionId: appeals.submissionId,
+						status: appeals.status,
+						decisionNote: appeals.decisionNote,
+					})
+					.from(appeals)
+					.where(
+						inArray(
+							appeals.submissionId,
+							rows.map((row) => row.id),
+						),
+					);
+	const appealBySubmission = new Map(
+		appealRows.flatMap((row) => {
+			if (
+				row.status !== "open" &&
+				row.status !== "upheld" &&
+				row.status !== "overturned"
+			) {
+				return [];
+			}
+			return [
+				[
+					row.submissionId,
+					{ status: row.status, decisionNote: row.decisionNote },
+				] as const,
+			];
+		}),
+	);
 	return rows.map((row) =>
-		present(row, notes.get(row.id) ?? null, revokedIds.has(row.id)),
+		present(
+			row,
+			notes.get(row.id) ?? null,
+			revokedIds.has(row.id),
+			appealBySubmission.get(row.id) ?? null,
+		),
 	);
 }
 

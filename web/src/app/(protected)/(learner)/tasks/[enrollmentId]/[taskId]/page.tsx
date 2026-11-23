@@ -1,6 +1,7 @@
 import { Camera, File, FileText, Image, PenLine, Volume2 } from "lucide-react";
 import {
 	type ChangeEvent,
+	type FormEvent,
 	type ReactNode,
 	useEffect,
 	useRef,
@@ -16,6 +17,7 @@ import {
 	useEngineMutation,
 } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import type { MessageKey } from "@/lib/i18n/messages";
 import { deviceType, readGeo } from "@/lib/media/device";
 import { prepareEvidenceFile } from "@/lib/media/prepare";
 import { type PhotoWarning, readPhotoWarning } from "@/lib/media/quality";
@@ -125,6 +127,9 @@ export default function TaskPage() {
 		{ enabled: enrollmentId.length > 0 },
 	);
 	const withdraw = useEngineMutation("/submissions/:id/withdraw");
+	const appeal = useEngineMutation("/appeals/create");
+	const [appealNote, setAppealNote] = useState("");
+	const [appealError, setAppealError] = useState<MessageKey | null>(null);
 
 	useEffect(() => {
 		document.documentElement.lang = locale === "rw" ? "rw" : "en";
@@ -357,6 +362,21 @@ export default function TaskPage() {
 		}
 	}
 
+	async function sendAppeal(
+		submissionId: string,
+		event: FormEvent<HTMLFormElement>,
+	) {
+		event.preventDefault();
+		setAppealError(null);
+		try {
+			await appeal.mutateAsync({ body: { submissionId, note: appealNote } });
+			setAppealNote("");
+			await invalidateEngine("/enrollments/:id/submissions");
+		} catch {
+			setAppealError("tryAgain");
+		}
+	}
+
 	async function takeBack(id: string) {
 		setSending(true);
 		try {
@@ -400,8 +420,11 @@ export default function TaskPage() {
 	const standingDecision = attempts.some(
 		(item) =>
 			(item.status === "approved" && !item.revoked) ||
-			item.status === "rejected" ||
-			item.status === "escalated",
+			item.status === "escalated" ||
+			(item.status === "rejected" && item.appeal?.status !== "overturned"),
+	);
+	const appealable = attempts.find(
+		(item) => item.status === "rejected" && !item.appeal,
 	);
 	const revisions = attempts.filter(
 		(item) => item.status === "needs_revision",
@@ -567,6 +590,7 @@ export default function TaskPage() {
 					) : (
 						<Button
 							type="button"
+							variant={blocked ? "quiet" : "sticker"}
 							className="w-fit"
 							disabled={start.isPending || sending || blocked}
 							onClick={() => void openEvidence()}
@@ -616,6 +640,59 @@ export default function TaskPage() {
 										</div>
 										{item.feedback ? (
 											<p className="text-lg text-fg">{item.feedback}</p>
+										) : null}
+										{item.appeal?.status === "open" ? (
+											<p className="text-lg text-fg">{t("appealWaiting")}</p>
+										) : null}
+										{item.appeal?.status === "upheld" ? (
+											<p className="text-lg text-fg">
+												{t("appealStands")}
+												{item.appeal.decisionNote
+													? ` ${item.appeal.decisionNote}`
+													: ""}
+											</p>
+										) : null}
+										{item.appeal?.status === "overturned" ? (
+											<p className="text-lg text-fg">{t("appealAgain")}</p>
+										) : null}
+										{blocked && appealable?.id === item.id ? (
+											<form
+												className="flex flex-col gap-3"
+												onSubmit={(event) => void sendAppeal(item.id, event)}
+											>
+												<label
+													className="flex flex-col gap-2"
+													htmlFor="appeal-reason"
+												>
+													<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+														{t("appealReason")}
+													</span>
+													<textarea
+														id="appeal-reason"
+														className="min-h-24 rounded-md border border-line bg-card px-3 py-3 font-sans text-lg text-fg"
+														value={appealNote}
+														disabled={appeal.isPending}
+														onChange={(event) =>
+															setAppealNote(event.target.value)
+														}
+													/>
+												</label>
+												{appealError ? (
+													<p className="text-lg text-danger">
+														{t(appealError)}
+													</p>
+												) : null}
+												<Button
+													type="submit"
+													variant="sticker"
+													className="w-fit"
+													disabled={
+														appeal.isPending || appealNote.trim().length === 0
+													}
+												>
+													{t("appealSend")}
+												</Button>
+											</form>
 										) : null}
 									</li>
 								))}

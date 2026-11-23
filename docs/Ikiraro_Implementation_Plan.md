@@ -79,7 +79,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
 - [ ] Phase 7 — Fairness and hardware (`phase/7-fairness-and-hardware`)
   - [x] `phase/7.1-review-sla`
   - [x] `phase/7.2-second-review-and-quality`
-  - [ ] `phase/7.3-appeals-and-feedback-library`
+  - [x] `phase/7.3-appeals-and-feedback-library`
   - [ ] `phase/7.4-evidence-integrity`
   - [ ] `phase/7.5-sessions-and-attendance`
   - [ ] `phase/7.6-center-devices-and-directory`
