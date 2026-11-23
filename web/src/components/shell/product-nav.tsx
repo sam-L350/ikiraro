@@ -67,6 +67,18 @@ function useProductNavItems(): NavItem[] {
 	if (canFileConcern) {
 		items.push({ to: "/report", label: "reportNav" });
 	}
+	const canSeeOperations =
+		user?.roles.some(
+			(role) =>
+				role.code === "learner" ||
+				role.code === "trainer" ||
+				role.code === "center_manager" ||
+				role.code === "district_coordinator" ||
+				role.code === "platform_admin",
+		) ?? false;
+	if (canSeeOperations) {
+		items.push({ to: "/operations", label: "operationsNav" });
+	}
 	if (!isStaff) return items;
 	items.push(
 		{ to: "/staff", label: "staffTitle", end: true },
@@ -101,6 +113,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/adjustments", label: "adjustmentsNav" },
 			{ to: "/notification-templates", label: "templatesNav" },
 			{ to: "/privacy-tools", label: "privacyToolsNav" },
+			{ to: "/settings", label: "settingsNav" },
 		);
 	}
 	const canReadAudit =

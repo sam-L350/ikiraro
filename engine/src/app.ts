@@ -29,9 +29,10 @@ export function createApp() {
 			},
 		],
 		onError(error, context) {
-			// e.g. Sentry.captureException(error, { extra: { requestId: context.requestId } });
-			void error;
-			void context;
+			context.logger.error("request failed", {
+				error,
+				path: context.url.pathname,
+			});
 		},
 	});
 }

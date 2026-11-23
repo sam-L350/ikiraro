@@ -33,6 +33,9 @@
 			"name": "centers"
 		},
 		{
+			"name": "config"
+		},
+		{
 			"name": "consents"
 		},
 		{
@@ -70,6 +73,9 @@
 		},
 		{
 			"name": "notifications"
+		},
+		{
+			"name": "operations"
 		},
 		{
 			"name": "passport"
@@ -2719,6 +2725,252 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/config": {
+			"get": {
+				"operationId": "listConfig",
+				"summary": "Newest stored value for each configuration key.",
+				"tags": [
+					"config"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"key": {
+														"type": "string"
+													},
+													"version": {
+														"type": "number"
+													},
+													"value": {
+														"oneOf": [
+															{
+																"type": "string"
+															},
+															{
+																"type": "number"
+															}
+														]
+													},
+													"editable": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"key",
+													"version",
+													"value",
+													"editable"
+												],
+												"additionalProperties": false
+											}
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/config/update": {
+			"post": {
+				"operationId": "createConfigUpdate",
+				"summary": "Store the next version of a setting that is already on record.",
+				"tags": [
+					"config"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"key": {
+										"type": "string"
+									},
+									"value": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"key",
+									"value"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"key": {
+													"type": "string"
+												},
+												"version": {
+													"type": "number"
+												},
+												"value": {
+													"oneOf": [
+														{
+															"type": "string"
+														},
+														{
+															"type": "number"
+														}
+													]
+												},
+												"editable": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"key",
+												"version",
+												"value",
+												"editable"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}
@@ -11649,6 +11901,187 @@
 												],
 												"additionalProperties": false
 											}
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/operations": {
+			"get": {
+				"operationId": "getOperations",
+				"summary": "The operational numbers for this person's roles.",
+				"tags": [
+					"operations"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"includesNext": {
+													"type": "boolean"
+												},
+												"next": {
+													"type": "object",
+													"properties": {
+														"enrollmentId": {
+															"type": "string"
+														},
+														"taskId": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														},
+														"courseTitleEn": {
+															"type": "string"
+														},
+														"courseTitleRw": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"enrollmentId",
+														"taskId",
+														"titleEn",
+														"titleRw",
+														"courseTitleEn",
+														"courseTitleRw"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"queueDepth": {
+													"type": "number",
+													"nullable": true
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"activeLearners": {
+																"type": "number"
+															},
+															"waitingSubmissions": {
+																"type": "number"
+															},
+															"medianReviewMinutes": {
+																"type": "number",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"activeLearners",
+															"waitingSubmissions",
+															"medianReviewMinutes"
+														],
+														"additionalProperties": false
+													},
+													"nullable": true
+												},
+												"system": {
+													"type": "object",
+													"properties": {
+														"outboxDepth": {
+															"type": "number"
+														},
+														"failedNotifications": {
+															"type": "number"
+														},
+														"storageErrors": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"outboxDepth",
+														"failedNotifications",
+														"storageErrors"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												}
+											},
+											"required": [
+												"includesNext",
+												"next",
+												"queueDepth",
+												"centers",
+												"system"
+											],
+											"additionalProperties": false
 										},
 										"meta": {
 											"type": "object",
