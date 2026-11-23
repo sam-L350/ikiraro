@@ -48,6 +48,9 @@
 			"name": "registrations"
 		},
 		{
+			"name": "reviews"
+		},
+		{
 			"name": "staff"
 		},
 		{
@@ -1772,6 +1775,12 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -1921,6 +1930,8 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false
@@ -2077,294 +2088,10 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
-												"modules": {
-													"type": "array",
-													"items": {
-														"type": "object",
-														"properties": {
-															"id": {
-																"type": "string"
-															},
-															"position": {
-																"type": "number"
-															},
-															"status": {
-																"type": "string",
-																"enum": [
-																	"draft",
-																	"in_review",
-																	"published",
-																	"retired"
-																]
-															},
-															"titleEn": {
-																"type": "string"
-															},
-															"titleRw": {
-																"type": "string"
-															},
-															"summaryEn": {
-																"type": "string"
-															},
-															"summaryRw": {
-																"type": "string"
-															},
-															"missingKinyarwanda": {
-																"type": "boolean"
-															},
-															"tasks": {
-																"type": "array",
-																"items": {
-																	"type": "object",
-																	"properties": {
-																		"id": {
-																			"type": "string"
-																		},
-																		"position": {
-																			"type": "number"
-																		},
-																		"status": {
-																			"type": "string",
-																			"enum": [
-																				"draft",
-																				"in_review",
-																				"published",
-																				"retired"
-																			]
-																		},
-																		"evidenceType": {
-																			"type": "string",
-																			"nullable": true
-																		},
-																		"titleEn": {
-																			"type": "string"
-																		},
-																		"titleRw": {
-																			"type": "string"
-																		},
-																		"instructionsEn": {
-																			"type": "string"
-																		},
-																		"instructionsRw": {
-																			"type": "string"
-																		},
-																		"missingKinyarwanda": {
-																			"type": "boolean"
-																		},
-																		"criteria": {
-																			"type": "array",
-																			"items": {
-																				"type": "object",
-																				"properties": {
-																					"id": {
-																						"type": "string"
-																					},
-																					"position": {
-																						"type": "number"
-																					},
-																					"weight": {
-																						"type": "number"
-																					},
-																					"promptEn": {
-																						"type": "string"
-																					},
-																					"promptRw": {
-																						"type": "string"
-																					},
-																					"missingKinyarwanda": {
-																						"type": "boolean"
-																					}
-																				},
-																				"required": [
-																					"id",
-																					"position",
-																					"weight",
-																					"promptEn",
-																					"promptRw",
-																					"missingKinyarwanda"
-																				],
-																				"additionalProperties": false
-																			}
-																		}
-																	},
-																	"required": [
-																		"id",
-																		"position",
-																		"status",
-																		"evidenceType",
-																		"titleEn",
-																		"titleRw",
-																		"instructionsEn",
-																		"instructionsRw",
-																		"missingKinyarwanda",
-																		"criteria"
-																	],
-																	"additionalProperties": false
-																}
-															}
-														},
-														"required": [
-															"id",
-															"position",
-															"status",
-															"titleEn",
-															"titleRw",
-															"summaryEn",
-															"summaryRw",
-															"missingKinyarwanda",
-															"tasks"
-														],
-														"additionalProperties": false
-													}
-												}
-											},
-											"required": [
-												"id",
-												"status",
-												"titleEn",
-												"titleRw",
-												"summaryEn",
-												"summaryRw",
-												"missingKinyarwanda",
-												"modules"
-											],
-											"additionalProperties": false
-										},
-										"meta": {
-											"type": "object",
-											"properties": {
-												"requestId": {
+												"reviewNote": {
 													"type": "string"
 												},
-												"timestamp": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"requestId",
-												"timestamp"
-											],
-											"additionalProperties": false
-										}
-									},
-									"required": [
-										"ok",
-										"data",
-										"meta"
-									],
-									"additionalProperties": false
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Validation failed",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication required",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/courses/{id}/review": {
-			"post": {
-				"operationId": "createCourseReview",
-				"summary": "Send a complete draft to review. Evidence type and a rubric are required.",
-				"tags": [
-					"courses"
-				],
-				"security": [
-					{
-						"cookieAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {},
-								"required": [],
-								"additionalProperties": false
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Successful response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"ok": {
-											"const": true,
-											"type": "boolean"
-										},
-										"data": {
-											"type": "object",
-											"properties": {
-												"id": {
-													"type": "string"
-												},
-												"status": {
-													"type": "string",
-													"enum": [
-														"draft",
-														"in_review",
-														"published",
-														"retired"
-													]
-												},
-												"titleEn": {
-													"type": "string"
-												},
-												"titleRw": {
-													"type": "string"
-												},
-												"summaryEn": {
-													"type": "string"
-												},
-												"summaryRw": {
-													"type": "string"
-												},
-												"missingKinyarwanda": {
+												"approved": {
 													"type": "boolean"
 												},
 												"modules": {
@@ -2516,6 +2243,306 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses/{id}/review": {
+			"post": {
+				"operationId": "createCourseReview",
+				"summary": "Send a complete draft to review. Evidence type and a rubric are required.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false
@@ -2672,299 +2699,10 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
-												"modules": {
-													"type": "array",
-													"items": {
-														"type": "object",
-														"properties": {
-															"id": {
-																"type": "string"
-															},
-															"position": {
-																"type": "number"
-															},
-															"status": {
-																"type": "string",
-																"enum": [
-																	"draft",
-																	"in_review",
-																	"published",
-																	"retired"
-																]
-															},
-															"titleEn": {
-																"type": "string"
-															},
-															"titleRw": {
-																"type": "string"
-															},
-															"summaryEn": {
-																"type": "string"
-															},
-															"summaryRw": {
-																"type": "string"
-															},
-															"missingKinyarwanda": {
-																"type": "boolean"
-															},
-															"tasks": {
-																"type": "array",
-																"items": {
-																	"type": "object",
-																	"properties": {
-																		"id": {
-																			"type": "string"
-																		},
-																		"position": {
-																			"type": "number"
-																		},
-																		"status": {
-																			"type": "string",
-																			"enum": [
-																				"draft",
-																				"in_review",
-																				"published",
-																				"retired"
-																			]
-																		},
-																		"evidenceType": {
-																			"type": "string",
-																			"nullable": true
-																		},
-																		"titleEn": {
-																			"type": "string"
-																		},
-																		"titleRw": {
-																			"type": "string"
-																		},
-																		"instructionsEn": {
-																			"type": "string"
-																		},
-																		"instructionsRw": {
-																			"type": "string"
-																		},
-																		"missingKinyarwanda": {
-																			"type": "boolean"
-																		},
-																		"criteria": {
-																			"type": "array",
-																			"items": {
-																				"type": "object",
-																				"properties": {
-																					"id": {
-																						"type": "string"
-																					},
-																					"position": {
-																						"type": "number"
-																					},
-																					"weight": {
-																						"type": "number"
-																					},
-																					"promptEn": {
-																						"type": "string"
-																					},
-																					"promptRw": {
-																						"type": "string"
-																					},
-																					"missingKinyarwanda": {
-																						"type": "boolean"
-																					}
-																				},
-																				"required": [
-																					"id",
-																					"position",
-																					"weight",
-																					"promptEn",
-																					"promptRw",
-																					"missingKinyarwanda"
-																				],
-																				"additionalProperties": false
-																			}
-																		}
-																	},
-																	"required": [
-																		"id",
-																		"position",
-																		"status",
-																		"evidenceType",
-																		"titleEn",
-																		"titleRw",
-																		"instructionsEn",
-																		"instructionsRw",
-																		"missingKinyarwanda",
-																		"criteria"
-																	],
-																	"additionalProperties": false
-																}
-															}
-														},
-														"required": [
-															"id",
-															"position",
-															"status",
-															"titleEn",
-															"titleRw",
-															"summaryEn",
-															"summaryRw",
-															"missingKinyarwanda",
-															"tasks"
-														],
-														"additionalProperties": false
-													}
-												}
-											},
-											"required": [
-												"id",
-												"status",
-												"titleEn",
-												"titleRw",
-												"summaryEn",
-												"summaryRw",
-												"missingKinyarwanda",
-												"modules"
-											],
-											"additionalProperties": false
-										},
-										"meta": {
-											"type": "object",
-											"properties": {
-												"requestId": {
+												"reviewNote": {
 													"type": "string"
 												},
-												"timestamp": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"requestId",
-												"timestamp"
-											],
-											"additionalProperties": false
-										}
-									},
-									"required": [
-										"ok",
-										"data",
-										"meta"
-									],
-									"additionalProperties": false
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Validation failed",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication required",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorEnvelope"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/courses/create": {
-			"post": {
-				"operationId": "createCourseDraft",
-				"summary": "Start a draft course in English and, when it is written, Kinyarwanda.",
-				"tags": [
-					"courses"
-				],
-				"security": [
-					{
-						"cookieAuth": []
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"titleEn": {
-										"type": "string"
-									},
-									"titleRw": {
-										"type": "string"
-									},
-									"summaryEn": {
-										"type": "string"
-									},
-									"summaryRw": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"titleEn"
-								],
-								"additionalProperties": false
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Successful response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"ok": {
-											"const": true,
-											"type": "boolean"
-										},
-										"data": {
-											"type": "object",
-											"properties": {
-												"id": {
-													"type": "string"
-												},
-												"status": {
-													"type": "string",
-													"enum": [
-														"draft",
-														"in_review",
-														"published",
-														"retired"
-													]
-												},
-												"titleEn": {
-													"type": "string"
-												},
-												"titleRw": {
-													"type": "string"
-												},
-												"summaryEn": {
-													"type": "string"
-												},
-												"summaryRw": {
-													"type": "string"
-												},
-												"missingKinyarwanda": {
+												"approved": {
 													"type": "boolean"
 												},
 												"modules": {
@@ -3116,6 +2854,311 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"modules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/courses/create": {
+			"post": {
+				"operationId": "createCourseDraft",
+				"summary": "Start a draft course in English and, when it is written, Kinyarwanda.",
+				"tags": [
+					"courses"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"summaryEn": {
+										"type": "string"
+									},
+									"summaryRw": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false
@@ -3386,6 +3429,12 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -3535,6 +3584,8 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false
@@ -4204,6 +4255,12 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -4353,6 +4410,8 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false
@@ -4509,6 +4568,12 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -4658,6 +4723,8 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false
@@ -5766,6 +5833,1705 @@
 				}
 			}
 		},
+		"/api/v1/reviews/{id}/approve": {
+			"post": {
+				"operationId": "createReviewApproval",
+				"summary": "Record a reviewer's approval. Publishing is a separate step.",
+				"tags": [
+					"reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												},
+												"ownCourse": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"modules",
+												"ownCourse"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/reviews/{id}": {
+			"get": {
+				"operationId": "getReview",
+				"summary": "Read a course in the review queue, including one that has been retired.",
+				"tags": [
+					"reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												},
+												"ownCourse": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"modules",
+												"ownCourse"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/reviews/{id}/publish": {
+			"post": {
+				"operationId": "createReviewPublication",
+				"summary": "Publish a course after a reviewer other than the author has approved it.",
+				"tags": [
+					"reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												},
+												"ownCourse": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"modules",
+												"ownCourse"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/reviews/{id}/retire": {
+			"post": {
+				"operationId": "createReviewRetirement",
+				"summary": "Retire a published course. The rows stay, so the course can still be read.",
+				"tags": [
+					"reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												},
+												"ownCourse": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"modules",
+												"ownCourse"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/reviews/{id}/return": {
+			"post": {
+				"operationId": "createReviewReturn",
+				"summary": "Send a course back to its author, with a reason.",
+				"tags": [
+					"reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"published",
+														"retired"
+													]
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"missingKinyarwanda": {
+													"type": "boolean"
+												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"draft",
+																				"in_review",
+																				"published",
+																				"retired"
+																			]
+																		},
+																		"evidenceType": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"instructionsEn": {
+																			"type": "string"
+																		},
+																		"instructionsRw": {
+																			"type": "string"
+																		},
+																		"missingKinyarwanda": {
+																			"type": "boolean"
+																		},
+																		"criteria": {
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"id": {
+																						"type": "string"
+																					},
+																					"position": {
+																						"type": "number"
+																					},
+																					"weight": {
+																						"type": "number"
+																					},
+																					"promptEn": {
+																						"type": "string"
+																					},
+																					"promptRw": {
+																						"type": "string"
+																					},
+																					"missingKinyarwanda": {
+																						"type": "boolean"
+																					}
+																				},
+																				"required": [
+																					"id",
+																					"position",
+																					"weight",
+																					"promptEn",
+																					"promptRw",
+																					"missingKinyarwanda"
+																				],
+																				"additionalProperties": false
+																			}
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"status",
+																		"evidenceType",
+																		"titleEn",
+																		"titleRw",
+																		"instructionsEn",
+																		"instructionsRw",
+																		"missingKinyarwanda",
+																		"criteria"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"status",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"missingKinyarwanda",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
+												},
+												"ownCourse": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"status",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
+												"modules",
+												"ownCourse"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/reviews": {
+			"get": {
+				"operationId": "getReviews",
+				"summary": "Courses a reviewer can approve, publish, or retire.",
+				"tags": [
+					"reviews"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"waiting": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"title": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"approved": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"title",
+															"missingKinyarwanda",
+															"approved"
+														],
+														"additionalProperties": false
+													}
+												},
+												"published": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"title": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"approved": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"title",
+															"missingKinyarwanda",
+															"approved"
+														],
+														"additionalProperties": false
+													}
+												},
+												"retired": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"published",
+																	"retired"
+																]
+															},
+															"title": {
+																"type": "string"
+															},
+															"missingKinyarwanda": {
+																"type": "boolean"
+															},
+															"approved": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"title",
+															"missingKinyarwanda",
+															"approved"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"waiting",
+												"published",
+												"retired"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/staff/{id}/deactivation": {
 			"post": {
 				"operationId": "createStaffDeactivation",
@@ -6814,6 +8580,12 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -6963,6 +8735,8 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false
@@ -7122,6 +8896,12 @@
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
+												"reviewNote": {
+													"type": "string"
+												},
+												"approved": {
+													"type": "boolean"
+												},
 												"modules": {
 													"type": "array",
 													"items": {
@@ -7271,6 +9051,8 @@
 												"summaryEn",
 												"summaryRw",
 												"missingKinyarwanda",
+												"reviewNote",
+												"approved",
 												"modules"
 											],
 											"additionalProperties": false

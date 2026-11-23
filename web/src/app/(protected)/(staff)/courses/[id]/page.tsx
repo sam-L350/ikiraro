@@ -158,9 +158,24 @@ export default function CourseEditorPage() {
 					<Badge variant="pending">{t("englishFallback")}</Badge>
 				) : null}
 			</div>
+			{draft.reviewNote ? (
+				<p className="mt-4 font-sans text-lg font-medium text-fg">
+					{t("reviewReturnedNote")} {draft.reviewNote}
+				</p>
+			) : null}
 			{draft.status === "in_review" ? (
 				<p className="mt-4 font-sans text-lg font-medium text-fg">
 					{t("courseInReview")}
+				</p>
+			) : null}
+			{draft.status === "published" ? (
+				<p className="mt-4 font-sans text-lg font-medium text-fg">
+					{t("coursePublishedSentence")}
+				</p>
+			) : null}
+			{draft.status === "retired" ? (
+				<p className="mt-4 font-sans text-lg font-medium text-fg">
+					{t("courseRetiredSentence")}
 				</p>
 			) : null}
 			<div className="mt-8 flex flex-col gap-10">

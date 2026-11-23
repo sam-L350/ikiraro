@@ -34,6 +34,12 @@ export const courses = pgTable(
 		id: uuid("id").primaryKey().defaultRandom(),
 		status: text("status").notNull().default("draft"),
 		createdByUserId: integer("created_by_user_id").references(() => users.id),
+		reviewedByUserId: integer("reviewed_by_user_id").references(() => users.id),
+		reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+		reviewNote: text("review_note"),
+		publishedByUserId: integer("published_by_user_id").references(
+			() => users.id,
+		),
 		publishedAt: timestamp("published_at", { withTimezone: true }),
 		retiredAt: timestamp("retired_at", { withTimezone: true }),
 		createdAt: timestamp("created_at", { withTimezone: true })

@@ -19,6 +19,8 @@ function useProductNavItems(): NavItem[] {
 	const isStaff = user?.roles.some((role) => role.code !== "learner") ?? false;
 	const canWriteCourses =
 		user?.roles.some((role) => role.code === "content_author") ?? false;
+	const canReviewCourses =
+		user?.roles.some((role) => role.code === "content_reviewer") ?? false;
 	const context = useEngine("/staff/context", undefined, { enabled: isStaff });
 	const mode = context.data?.mode;
 	const canAddStaff = mode === "admin" || mode === "center";
@@ -37,6 +39,9 @@ function useProductNavItems(): NavItem[] {
 	}
 	if (canWriteCourses) {
 		items.push({ to: "/courses", label: "coursesNav" });
+	}
+	if (canReviewCourses) {
+		items.push({ to: "/reviews", label: "reviewsNav" });
 	}
 	return items;
 }

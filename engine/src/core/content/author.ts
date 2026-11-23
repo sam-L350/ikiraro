@@ -68,6 +68,8 @@ export type CourseView = {
 	summaryEn: string;
 	summaryRw: string;
 	missingKinyarwanda: boolean;
+	reviewNote: string;
+	approved: boolean;
 	modules: ModuleView[];
 };
 
@@ -232,6 +234,8 @@ export async function readCourse(
 			title: courseTranslations.title,
 			summary: courseTranslations.summary,
 			status: courses.status,
+			reviewNote: courses.reviewNote,
+			reviewedByUserId: courses.reviewedByUserId,
 		})
 		.from(courses)
 		.leftJoin(courseTranslations, eq(courseTranslations.courseId, courses.id))
@@ -382,6 +386,8 @@ export async function readCourse(
 			gap(courseText.titleEn, courseText.titleRw) ||
 			gap(courseText.summaryEn, courseText.summaryRw) ||
 			builtModules.some((module) => module.missingKinyarwanda),
+		reviewNote: courseRows[0]?.reviewNote ?? "",
+		approved: courseRows[0]?.reviewedByUserId != null,
 		modules: builtModules,
 	};
 }
@@ -765,7 +771,12 @@ export async function submitCourseForReview(
 	await database.transaction(async (tx) => {
 		await tx
 			.update(courses)
-			.set({ status: "in_review" })
+			.set({
+				status: "in_review",
+				reviewedByUserId: null,
+				reviewedAt: null,
+				reviewNote: null,
+			})
 			.where(eq(courses.id, input.courseId));
 		await tx
 			.update(modules)
