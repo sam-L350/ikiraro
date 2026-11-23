@@ -114,6 +114,8 @@ describe("next task", () => {
 							instructionsEn: "Photograph the page.",
 							instructionsRw: "Fata ifoto y'urupapuro.",
 							evidenceType: "photo",
+							imageKey: "courses/ledger/page.jpg",
+							audioKey: "courses/ledger/page.mp3",
 							criteria: [
 								{ id: "criterion-a", promptEn: "The page is readable." },
 							],
@@ -126,6 +128,9 @@ describe("next task", () => {
 		expect(task?.instructionsEn).toBe("Photograph the page.");
 		expect(task?.instructionsRw).toBe("Fata ifoto y'urupapuro.");
 		expect(task?.evidenceType).toBe("photo");
+		expect(task?.imageKey).toBe("courses/ledger/page.jpg");
+		expect(task?.audioKey).toBe("courses/ledger/page.mp3");
+		expect(task?.jobAidKey).toBeNull();
 		expect(task?.criteria[0]?.promptEn).toBe("The page is readable.");
 	});
 

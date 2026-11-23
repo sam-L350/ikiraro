@@ -92,3 +92,30 @@ export const taskProgress = pgTable(
 		check("task_progress_status", sql`${table.status} in (${progressSql})`),
 	],
 );
+
+const claritySql = sql`'clear', 'hard'`;
+
+/** A learner's clarity rating on one pinned task. Authors see the counts. */
+export const taskClarity = pgTable(
+	"task_clarity",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		enrollmentId: uuid("enrollment_id")
+			.notNull()
+			.references(() => enrollments.id),
+		taskId: uuid("task_id")
+			.notNull()
+			.references(() => tasks.id),
+		rating: text("rating").notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		uniqueIndex("task_clarity_enrollment_task").on(
+			table.enrollmentId,
+			table.taskId,
+		),
+		check("task_clarity_rating", sql`${table.rating} in (${claritySql})`),
+	],
+);

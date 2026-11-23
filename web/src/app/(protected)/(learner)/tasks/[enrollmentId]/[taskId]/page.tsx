@@ -1,5 +1,5 @@
-import { Camera, File, PenLine } from "lucide-react";
-import { useRef, useState } from "react";
+import { Camera, File, FileText, Image, PenLine, Volume2 } from "lucide-react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +9,15 @@ import {
 	useEngineMutation,
 } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import {
+	mediaShouldLoad,
+	readDataSaver,
+	writeDataSaver,
+} from "@/lib/offline/data-saver";
 
 type EvidenceKind = "photo" | "file" | "note";
+type ClarityRating = "clear" | "hard";
+type MediaKind = "picture" | "narration" | "jobAid";
 
 type TaskView = {
 	enrollmentId: string;
@@ -26,6 +33,10 @@ type TaskView = {
 			instructionsEn: string;
 			instructionsRw: string;
 			evidenceType: string | null;
+			imageKey: string | null;
+			audioKey: string | null;
+			jobAidKey: string | null;
+			outboundUrl: string | null;
 			criteria: { id: string; promptEn: string; promptRw: string }[];
 		}[];
 	}[];
@@ -37,12 +48,37 @@ export default function TaskPage() {
 	const note = useRef<HTMLTextAreaElement>(null);
 	const file = useRef<HTMLInputElement>(null);
 	const [opened, setOpened] = useState(false);
+	const [reading, setReading] = useState(false);
+	const [speakError, setSpeakError] = useState(false);
+	const [dataSaver, setDataSaver] = useState(readDataSaver);
+	const [asked, setAsked] = useState<Record<MediaKind, boolean>>({
+		picture: false,
+		narration: false,
+		jobAid: false,
+	});
+	const [chosen, setChosen] = useState<ClarityRating | null | undefined>(
+		undefined,
+	);
 	const enrollment = useEngine(
 		"/enrollments/:id",
 		{ query: { id: enrollmentId } },
 		{ enabled: enrollmentId.length > 0 },
 	);
+	const clarity = useEngine(
+		"/enrollments/:id/clarity",
+		{ query: { id: enrollmentId } },
+		{ enabled: enrollmentId.length > 0 },
+	);
 	const start = useEngineMutation("/enrollments/:id/start");
+	const saveClarity = useEngineMutation("/enrollments/:id/clarity/update");
+
+	useEffect(() => {
+		document.documentElement.lang = locale === "rw" ? "rw" : "en";
+		setReading(false);
+		return () => {
+			window.speechSynthesis?.cancel();
+		};
+	}, [locale]);
 
 	if (enrollment.isPending) {
 		return (
@@ -80,6 +116,28 @@ export default function TaskPage() {
 		.map((item) => textFor(locale, item.promptRw, item.promptEn))
 		.filter((prompt) => prompt.length > 0);
 	const locked = module.status === "locked";
+	const saved = clarity.data?.ratings.find((item) => item.taskId === taskId);
+	const rating = chosen === undefined ? (saved?.rating ?? null) : chosen;
+	const practice = practiceHref(task.outboundUrl);
+
+	function readAloud() {
+		if (!("speechSynthesis" in window)) {
+			setSpeakError(true);
+			return;
+		}
+		if (reading) {
+			window.speechSynthesis.cancel();
+			setReading(false);
+			return;
+		}
+		const utterance = new SpeechSynthesisUtterance(instructions.join("\n"));
+		utterance.lang = locale === "rw" ? "rw" : "en";
+		utterance.onend = () => setReading(false);
+		window.speechSynthesis.cancel();
+		window.speechSynthesis.speak(utterance);
+		setReading(true);
+		setSpeakError(false);
+	}
 
 	async function openEvidence() {
 		try {
@@ -97,6 +155,24 @@ export default function TaskPage() {
 		}
 	}
 
+	async function rate(next: ClarityRating) {
+		setChosen(next);
+		try {
+			await saveClarity.mutateAsync({
+				body: { id: enrollmentId, taskId, rating: next },
+			});
+			await invalidateEngine("/enrollments/:id/clarity");
+		} catch (caught) {
+			setChosen(undefined);
+			if (isApiClientError(caught)) return;
+			throw caught;
+		}
+	}
+
+	function ask(kindToLoad: MediaKind) {
+		setAsked((current) => ({ ...current, [kindToLoad]: true }));
+	}
+
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
 			<p className="text-lg text-fg-muted">
@@ -110,6 +186,76 @@ export default function TaskPage() {
 					{paragraph}
 				</p>
 			))}
+			{instructions.length > 0 ? (
+				<div className="flex flex-col gap-2">
+					<Button
+						type="button"
+						variant="quiet"
+						className="w-fit"
+						aria-pressed={reading}
+						onClick={readAloud}
+					>
+						<Volume2 aria-hidden="true" />
+						{reading ? t("stopReading") : t("readAloud")}
+					</Button>
+					{speakError ? (
+						<p className="text-lg text-fg">{t("cannotReadAloud")}</p>
+					) : null}
+				</div>
+			) : null}
+			<div className="flex flex-col gap-2">
+				<label
+					className="flex min-h-11 items-center gap-3"
+					htmlFor="data-saver"
+				>
+					<input
+						id="data-saver"
+						type="checkbox"
+						className="size-5 accent-ink"
+						checked={dataSaver}
+						onChange={(event) => {
+							setDataSaver(event.target.checked);
+							writeDataSaver(event.target.checked);
+						}}
+					/>
+					<span className="text-lg text-fg">{t("dataSaver")}</span>
+				</label>
+				<p className="text-lg text-fg">{t("dataSaverHint")}</p>
+				<MediaRow
+					label={t("loadPicture")}
+					present={task.imageKey !== null}
+					show={mediaShouldLoad(dataSaver, asked.picture)}
+					held={t("mediaHeld")}
+					onAsk={() => ask("picture")}
+					icon={<Image aria-hidden="true" />}
+				/>
+				<MediaRow
+					label={t("loadNarration")}
+					present={task.audioKey !== null}
+					show={mediaShouldLoad(dataSaver, asked.narration)}
+					held={t("mediaHeld")}
+					onAsk={() => ask("narration")}
+					icon={<Volume2 aria-hidden="true" />}
+				/>
+				<MediaRow
+					label={t("loadJobAid")}
+					present={task.jobAidKey !== null}
+					show={mediaShouldLoad(dataSaver, asked.jobAid)}
+					held={t("mediaHeld")}
+					onAsk={() => ask("jobAid")}
+					icon={<FileText aria-hidden="true" />}
+				/>
+				{practice ? (
+					<a
+						href={practice}
+						target="_blank"
+						rel="noreferrer"
+						className="inline-flex min-h-11 items-center text-lg text-fg"
+					>
+						{t("practiceLink")}
+					</a>
+				) : null}
+			</div>
 			{criteria.length > 0 ? (
 				<section className="flex flex-col gap-2 border-t border-line pt-4">
 					<h2 className="font-meta text-xs uppercase text-fg-muted">
@@ -127,6 +273,26 @@ export default function TaskPage() {
 					</ul>
 				</section>
 			) : null}
+			<div className="flex flex-wrap gap-3">
+				<Button
+					type="button"
+					variant="quiet"
+					aria-pressed={rating === "clear"}
+					disabled={saveClarity.isPending}
+					onClick={() => void rate("clear")}
+				>
+					{t("clearEnough")}
+				</Button>
+				<Button
+					type="button"
+					variant="quiet"
+					aria-pressed={rating === "hard"}
+					disabled={saveClarity.isPending}
+					onClick={() => void rate("hard")}
+				>
+					{t("tooHard")}
+				</Button>
+			</div>
 			{locked ? (
 				<>
 					<p className="text-lg text-fg">{t("finishEarlier")}</p>
@@ -167,6 +333,33 @@ export default function TaskPage() {
 			)}
 		</div>
 	);
+}
+
+function MediaRow({
+	label,
+	present,
+	show,
+	held,
+	onAsk,
+	icon,
+}: {
+	label: string;
+	present: boolean;
+	show: boolean;
+	held: string;
+	onAsk: () => void;
+	icon: ReactNode;
+}) {
+	if (!present) return null;
+	if (!show) {
+		return (
+			<Button type="button" variant="quiet" className="w-fit" onClick={onAsk}>
+				{icon}
+				{label}
+			</Button>
+		);
+	}
+	return <p className="text-lg text-fg">{held}</p>;
 }
 
 function EvidenceIcon({ kind }: { kind: EvidenceKind }) {
@@ -244,4 +437,10 @@ function paragraphs(value: string): string[] {
 		.split(/\n+/)
 		.map((part) => part.trim())
 		.filter((part) => part.length > 0);
+}
+
+function practiceHref(value: string | null): string | null {
+	if (!value) return null;
+	if (value.startsWith("https://") || value.startsWith("http://")) return value;
+	return null;
 }

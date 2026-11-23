@@ -154,6 +154,11 @@ export default function CourseEditorPage() {
 		{ query: { id } },
 		{ enabled: id.length > 0 },
 	);
+	const clarity = useEngine(
+		"/courses/:id/clarity",
+		{ query: { id } },
+		{ enabled: id.length > 0 },
+	);
 	const review = useEngineMutation("/courses/:id/review");
 	const nextDraft = useEngineMutation("/courses/:id/draft");
 	const [dirty, setDirty] = useState<Record<string, boolean>>({});
@@ -175,6 +180,9 @@ export default function CourseEditorPage() {
 	}
 
 	const draft = course.data;
+	const clarityCounts = new Map(
+		(clarity.data?.tasks ?? []).map((row) => [row.taskId, row]),
+	);
 	const editable = draft.status === "draft";
 	const unsaved = Object.values(dirty).some(Boolean);
 
@@ -252,6 +260,7 @@ export default function CourseEditorPage() {
 							title: item.titleEn || item.titleRw,
 						}))}
 						editable={editable}
+						clarity={clarityCounts}
 						onDirty={mark}
 						onSaved={() => course.invalidate()}
 					/>
@@ -449,12 +458,14 @@ function ModuleFields({
 	module,
 	earlier,
 	editable,
+	clarity,
 	onDirty,
 	onSaved,
 }: {
 	module: Module;
 	earlier: { id: string; title: string }[];
 	editable: boolean;
+	clarity: Map<string, { clear: number; hard: number }>;
 	onDirty: (key: string, dirty: boolean) => void;
 	onSaved: () => Promise<void>;
 }) {
@@ -582,6 +593,7 @@ function ModuleFields({
 						key={task.id}
 						task={task}
 						editable={editable}
+						clarity={clarity.get(task.id)}
 						onDirty={onDirty}
 						onSaved={onSaved}
 					/>
@@ -742,11 +754,13 @@ function BadgeFields({
 function TaskFields({
 	task,
 	editable,
+	clarity,
 	onDirty,
 	onSaved,
 }: {
 	task: Task;
 	editable: boolean;
+	clarity: { clear: number; hard: number } | undefined;
 	onDirty: (key: string, dirty: boolean) => void;
 	onSaved: () => Promise<void>;
 }) {
@@ -813,6 +827,16 @@ function TaskFields({
 			<h3 className="font-sans text-xl font-semibold text-fg">
 				{t("taskLabel")}
 			</h3>
+			{clarity && clarity.hard > 0 ? (
+				<p className="mt-2 font-sans text-lg text-fg">
+					{t("learnersSaidHard", { count: String(clarity.hard) })}
+				</p>
+			) : null}
+			{clarity && clarity.clear > 0 ? (
+				<p className="mt-2 font-sans text-lg text-fg">
+					{t("learnersSaidClear", { count: String(clarity.clear) })}
+				</p>
+			) : null}
 			<form className="mt-4 flex flex-col gap-4" onSubmit={onSubmit}>
 				<Field
 					id={`${task.id}-title-en`}

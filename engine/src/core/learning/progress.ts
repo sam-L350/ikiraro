@@ -37,6 +37,10 @@ export type ProgressTask = {
 	instructionsEn: string;
 	instructionsRw: string;
 	evidenceType: string | null;
+	imageKey: string | null;
+	audioKey: string | null;
+	jobAidKey: string | null;
+	outboundUrl: string | null;
 	criteria: ProgressCriterion[];
 	status: TaskProgressStatus;
 };
@@ -93,6 +97,10 @@ type SnapshotTask = {
 	instructionsEn: string;
 	instructionsRw: string;
 	evidenceType: string | null;
+	imageKey: string | null;
+	audioKey: string | null;
+	jobAidKey: string | null;
+	outboundUrl: string | null;
 	criteria: ProgressCriterion[];
 };
 
@@ -142,6 +150,13 @@ function evidenceOf(record: Record<string, JsonValue>): string | null {
 	return typeof value === "string" && value.length > 0 ? value : null;
 }
 
+function keyOf(record: Record<string, JsonValue>, key: string): string | null {
+	const value = record[key];
+	return typeof value === "string" && value.trim().length > 0
+		? value.trim()
+		: null;
+}
+
 function taskOf(value: JsonValue): SnapshotTask | null {
 	const record = asRecord(value);
 	if (!record || typeof record.id !== "string") return null;
@@ -154,6 +169,10 @@ function taskOf(value: JsonValue): SnapshotTask | null {
 		instructionsEn: textOf(record, "instructionsEn"),
 		instructionsRw: textOf(record, "instructionsRw"),
 		evidenceType: evidenceOf(record),
+		imageKey: keyOf(record, "imageKey"),
+		audioKey: keyOf(record, "audioKey"),
+		jobAidKey: keyOf(record, "jobAidKey"),
+		outboundUrl: keyOf(record, "outboundUrl"),
 		criteria: criteriaOf(record),
 	};
 }

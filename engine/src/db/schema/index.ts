@@ -36,7 +36,12 @@ export type {
 	User,
 } from "./identity";
 export { accounts, sessions, users } from "./identity";
-export { enrollments, moduleProgress, taskProgress } from "./learning";
+export {
+	enrollments,
+	moduleProgress,
+	taskClarity,
+	taskProgress,
+} from "./learning";
 export {
 	consents,
 	declaredRelationships,
