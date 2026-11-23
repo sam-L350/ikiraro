@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import { PassportShare } from "./share";
 
 type PassportBadge = {
 	id: string;
@@ -120,6 +121,7 @@ export default function PassportPage() {
 					</ul>
 				)}
 			</section>
+			<PassportShare />
 		</div>
 	);
 }

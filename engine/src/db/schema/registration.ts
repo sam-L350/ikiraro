@@ -3,11 +3,13 @@ import {
 	boolean,
 	check,
 	integer,
+	jsonb,
 	pgTable,
 	text,
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
+import type { JsonValue } from "./compliance";
 import { users } from "./identity";
 
 /** Hashed one-time code. The plaintext code is never stored. */
@@ -53,7 +55,7 @@ export const declaredRelationships = pgTable("declared_relationships", {
 		.defaultNow(),
 });
 
-/** Empty shell. One passport is created in the same transaction as its user. */
+/** One passport is created in the same transaction as its user. */
 export const digitalPassports = pgTable(
 	"digital_passports",
 	{
@@ -64,6 +66,13 @@ export const digitalPassports = pgTable(
 			.references(() => users.id, { onDelete: "cascade" }),
 		/** Verified time, in minutes. Hours on the passport are this total. */
 		verifiedMinutes: integer("verified_minutes").notNull().default(0),
+		/** The only live share token. Replacing it kills the previous link. */
+		publicShareToken: text("public_share_token").unique(),
+		/** Which items a stranger may see. Phone, village, and evidence stay off. */
+		visibility: jsonb("visibility")
+			.$type<JsonValue>()
+			.notNull()
+			.default(sql`'{}'::jsonb`),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),

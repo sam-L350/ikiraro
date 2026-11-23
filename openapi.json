@@ -54,6 +54,9 @@
 			"name": "passport"
 		},
 		{
+			"name": "passports"
+		},
+		{
 			"name": "point-caps"
 		},
 		{
@@ -9788,6 +9791,1023 @@
 					},
 					"401": {
 						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passport/share": {
+			"get": {
+				"operationId": "getPassportShare",
+				"summary": "The signed-in learner's share link and which items a stranger may see.",
+				"tags": [
+					"passport"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"block": {
+													"type": "string",
+													"enum": [
+														"ok",
+														"minor",
+														"birth",
+														"consent"
+													]
+												},
+												"token": {
+													"type": "string",
+													"nullable": true
+												},
+												"photo": {
+													"type": "boolean"
+												},
+												"center": {
+													"type": "boolean"
+												},
+												"hours": {
+													"type": "boolean"
+												},
+												"points": {
+													"type": "boolean"
+												},
+												"level": {
+													"type": "boolean"
+												},
+												"phone": {
+													"type": "boolean"
+												},
+												"village": {
+													"type": "boolean"
+												},
+												"badges": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"shown": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"shown"
+														],
+														"additionalProperties": false
+													}
+												},
+												"tasks": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"shown": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"shown"
+														],
+														"additionalProperties": false
+													}
+												},
+												"evidence": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"contentType": {
+																"type": "string"
+															},
+															"shown": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"contentType",
+															"shown"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"block",
+												"token",
+												"photo",
+												"center",
+												"hours",
+												"points",
+												"level",
+												"phone",
+												"village",
+												"badges",
+												"tasks",
+												"evidence"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passport/share/revoke": {
+			"post": {
+				"operationId": "createPassportShareRevocation",
+				"summary": "Turn the public link off. The current token dies.",
+				"tags": [
+					"passport"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"token": {
+													"const": null
+												}
+											},
+											"required": [
+												"token"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passport/share/rotate": {
+			"post": {
+				"operationId": "createPassportShareLink",
+				"summary": "Issue a new share token. The previous link stops working.",
+				"tags": [
+					"passport"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"token": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"token"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passport/share/update": {
+			"put": {
+				"operationId": "updatePassportShare",
+				"summary": "Save which passport items a stranger with the link may see.",
+				"tags": [
+					"passport"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"photo": {
+										"type": "boolean"
+									},
+									"center": {
+										"type": "boolean"
+									},
+									"hours": {
+										"type": "boolean"
+									},
+									"points": {
+										"type": "boolean"
+									},
+									"level": {
+										"type": "boolean"
+									},
+									"phone": {
+										"type": "boolean"
+									},
+									"village": {
+										"type": "boolean"
+									},
+									"hiddenBadges": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"hiddenTasks": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"publicEvidence": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"block": {
+													"type": "string",
+													"enum": [
+														"ok",
+														"minor",
+														"birth",
+														"consent"
+													]
+												},
+												"token": {
+													"type": "string",
+													"nullable": true
+												},
+												"photo": {
+													"type": "boolean"
+												},
+												"center": {
+													"type": "boolean"
+												},
+												"hours": {
+													"type": "boolean"
+												},
+												"points": {
+													"type": "boolean"
+												},
+												"level": {
+													"type": "boolean"
+												},
+												"phone": {
+													"type": "boolean"
+												},
+												"village": {
+													"type": "boolean"
+												},
+												"badges": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"shown": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"shown"
+														],
+														"additionalProperties": false
+													}
+												},
+												"tasks": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"shown": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"shown"
+														],
+														"additionalProperties": false
+													}
+												},
+												"evidence": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"contentType": {
+																"type": "string"
+															},
+															"shown": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"contentType",
+															"shown"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"block",
+												"token",
+												"photo",
+												"center",
+												"hours",
+												"points",
+												"level",
+												"phone",
+												"village",
+												"badges",
+												"tasks",
+												"evidence"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passports/{token}/card": {
+			"get": {
+				"operationId": "getPublicPassportCard",
+				"summary": "A printable card for the live link, as a PDF and an image.",
+				"tags": [
+					"passports"
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "token",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "locale",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"rw",
+								"en"
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"pdfBase64": {
+													"type": "string"
+												},
+												"imageSvg": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"pdfBase64",
+												"imageSvg"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passports/{token}": {
+			"get": {
+				"operationId": "getPublicPassport",
+				"summary": "A stranger's view of one passport. An old or blocked link is not found.",
+				"tags": [
+					"passports"
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "token",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"name": {
+													"type": "string"
+												},
+												"photoUrl": {
+													"type": "string",
+													"nullable": true
+												},
+												"centerName": {
+													"type": "string",
+													"nullable": true
+												},
+												"hours": {
+													"type": "number",
+													"nullable": true
+												},
+												"verifiedMinutes": {
+													"type": "number",
+													"nullable": true
+												},
+												"points": {
+													"type": "number",
+													"nullable": true
+												},
+												"level": {
+													"type": "number",
+													"nullable": true
+												},
+												"phone": {
+													"type": "string",
+													"nullable": true
+												},
+												"village": {
+													"type": "string",
+													"nullable": true
+												},
+												"badges": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"skillEn": {
+																"type": "string"
+															},
+															"skillRw": {
+																"type": "string"
+															},
+															"awardedAt": {
+																"type": "string"
+															},
+															"verifierName": {
+																"type": "string"
+															},
+															"authorityRole": {
+																"type": "string",
+																"enum": [
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"reviewer"
+																]
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"verifiedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"skillEn",
+															"skillRw",
+															"awardedAt",
+															"verifierName",
+															"authorityRole",
+															"centerName",
+															"verifiedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"tasks": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"completedAt": {
+																"type": "string",
+																"nullable": true
+															},
+															"verifierName": {
+																"type": "string"
+															},
+															"authorityRole": {
+																"type": "string",
+																"enum": [
+																	"trainer",
+																	"center_manager",
+																	"district_coordinator",
+																	"reviewer"
+																]
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"verifiedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"completedAt",
+															"verifierName",
+															"authorityRole",
+															"centerName",
+															"verifiedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"evidence": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"contentType": {
+																"type": "string"
+															},
+															"url": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"contentType",
+															"url"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"name",
+												"photoUrl",
+												"centerName",
+												"hours",
+												"verifiedMinutes",
+												"points",
+												"level",
+												"phone",
+												"village",
+												"badges",
+												"tasks",
+												"evidence"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
 						"content": {
 							"application/json": {
 								"schema": {
