@@ -7,6 +7,7 @@ import {
 	useState,
 } from "react";
 import { Link, useParams } from "react-router";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	invalidateEngine,
@@ -15,6 +16,7 @@ import {
 	useEngineMutation,
 } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import { deviceType, readGeo } from "@/lib/media/device";
 import { prepareEvidenceFile } from "@/lib/media/prepare";
 import {
 	mediaShouldLoad,
@@ -23,6 +25,23 @@ import {
 } from "@/lib/offline/data-saver";
 
 type EvidenceKind = "photo" | "file" | "note";
+type StoredNotice =
+	| "photo"
+	| "file"
+	| "note"
+	| "empty"
+	| "closed"
+	| "too_large"
+	| "failed";
+type SubmissionStatus =
+	| "draft"
+	| "pending"
+	| "in_review"
+	| "approved"
+	| "needs_revision"
+	| "rejected"
+	| "escalated"
+	| "withdrawn";
 type ClarityRating = "clear" | "hard";
 type MediaKind = "picture" | "narration" | "jobAid";
 
@@ -67,9 +86,7 @@ export default function TaskPage() {
 		undefined,
 	);
 	const [sending, setSending] = useState(false);
-	const [stored, setStored] = useState<
-		"photo" | "file" | "too_large" | "failed" | null
-	>(null);
+	const [stored, setStored] = useState<StoredNotice | null>(null);
 	const enrollment = useEngine(
 		"/enrollments/:id",
 		{ query: { id: enrollmentId } },
@@ -82,8 +99,15 @@ export default function TaskPage() {
 	);
 	const start = useEngineMutation("/enrollments/:id/start");
 	const saveClarity = useEngineMutation("/enrollments/:id/clarity/update");
+	const history = useEngine(
+		"/enrollments/:id/submissions",
+		{ query: { id: enrollmentId } },
+		{ enabled: enrollmentId.length > 0 },
+	);
 	const intent = useEngineMutation("/media/upload-intent");
 	const finalize = useEngineMutation("/media/:id/finalize");
+	const submit = useEngineMutation("/submissions/create");
+	const withdraw = useEngineMutation("/submissions/:id/withdraw");
 
 	useEffect(() => {
 		document.documentElement.lang = locale === "rw" ? "rw" : "en";
@@ -153,6 +177,10 @@ export default function TaskPage() {
 	}
 
 	async function openEvidence() {
+		if (kind === "note" && opened) {
+			await sendNote();
+			return;
+		}
 		try {
 			await start.mutateAsync({
 				body: { id: enrollmentId, taskId },
@@ -165,6 +193,26 @@ export default function TaskPage() {
 		} catch (caught) {
 			if (isApiClientError(caught)) return;
 			throw caught;
+		}
+	}
+
+	async function sendNote() {
+		const text = note.current?.value.trim() ?? "";
+		if (!text) {
+			setStored("empty");
+			note.current?.focus();
+			return;
+		}
+		setSending(true);
+		setStored(null);
+		try {
+			await recordAttempt({ note: text });
+			setStored("note");
+			if (note.current) note.current.value = "";
+		} catch (caught) {
+			setStored(noticeFor(caught));
+		} finally {
+			setSending(false);
 		}
 	}
 
@@ -200,19 +248,43 @@ export default function TaskPage() {
 				setStored("failed");
 				return;
 			}
-			await finalize.mutateAsync({
+			const finalized = await finalize.mutateAsync({
 				body: { id: started.id, sha256: prepared.sha256 },
 			});
+			await recordAttempt({ mediaId: finalized.id });
 			setStored(kind === "photo" ? "photo" : "file");
 		} catch (caught) {
-			const details = isApiClientError(caught) ? caught.details : undefined;
-			const reason =
-				details && typeof details === "object" && "reason" in details
-					? details.reason
-					: undefined;
-			setStored(
-				reason === "too_large" || reason === "size" ? "too_large" : "failed",
-			);
+			setStored(noticeFor(caught));
+		} finally {
+			setSending(false);
+		}
+	}
+
+	async function recordAttempt(input: { mediaId?: string; note?: string }) {
+		const geo = await readGeo();
+		await submit.mutateAsync({
+			body: {
+				id: crypto.randomUUID(),
+				enrollmentId,
+				taskId,
+				submit: true,
+				deviceInfo: deviceType(),
+				...(input.mediaId ? { mediaId: input.mediaId } : {}),
+				...(input.note ? { note: input.note } : {}),
+				...(geo ?? {}),
+			},
+		});
+		await invalidateEngine("/enrollments/:id/submissions");
+	}
+
+	async function takeBack(id: string) {
+		setSending(true);
+		try {
+			await withdraw.mutateAsync({ body: { id } });
+			await invalidateEngine("/enrollments/:id/submissions");
+			setStored(null);
+		} catch (caught) {
+			setStored(noticeFor(caught));
 		} finally {
 			setSending(false);
 		}
@@ -235,6 +307,14 @@ export default function TaskPage() {
 	function ask(kindToLoad: MediaKind) {
 		setAsked((current) => ({ ...current, [kindToLoad]: true }));
 	}
+
+	const attempts = (history.data?.submissions ?? []).filter(
+		(item) => item.taskId === taskId,
+	);
+	const blocked = attempts.some((item) => item.status !== "withdrawn");
+	const waiting = attempts.find(
+		(item) => item.status === "draft" || item.status === "pending",
+	);
 
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
@@ -377,7 +457,8 @@ export default function TaskPage() {
 						<input
 							ref={file}
 							type="file"
-							accept={kind === "photo" ? "image/*" : undefined}
+							accept={kind === "photo" ? "image/*" : "application/pdf"}
+							capture={kind === "photo" ? "environment" : undefined}
 							className="sr-only"
 							aria-hidden="true"
 							tabIndex={-1}
@@ -387,7 +468,7 @@ export default function TaskPage() {
 					<Button
 						type="button"
 						className="w-fit"
-						disabled={start.isPending || sending}
+						disabled={start.isPending || sending || blocked}
 						onClick={() => void openEvidence()}
 					>
 						<EvidenceIcon kind={kind} />
@@ -395,6 +476,44 @@ export default function TaskPage() {
 					</Button>
 					{stored ? (
 						<p className="text-lg text-fg">{storedCopy(stored, t)}</p>
+					) : null}
+					{attempts.length > 0 ? (
+						<section className="flex flex-col gap-2 border-t border-line pt-4">
+							<h2 className="font-meta text-xs uppercase text-fg-muted">
+								{t("submissionHistory")}
+							</h2>
+							<ul className="flex flex-col">
+								{attempts.map((item) => (
+									<li
+										key={item.id}
+										className="flex flex-col gap-2 border-b border-line py-3"
+									>
+										<div className="flex min-h-11 items-center justify-between gap-3">
+											<span className="text-lg text-fg">
+												{t("attemptLabel", { count: String(item.attempt) })}
+											</span>
+											<Badge variant={pillFor(item.status)}>
+												{statusLabel(item.status, t)}
+											</Badge>
+										</div>
+										{item.feedback ? (
+											<p className="text-lg text-fg">{item.feedback}</p>
+										) : null}
+									</li>
+								))}
+							</ul>
+							{waiting ? (
+								<Button
+									type="button"
+									variant="quiet"
+									className="w-fit"
+									disabled={sending}
+									onClick={() => void takeBack(waiting.id)}
+								>
+									{t("withdrawSubmission")}
+								</Button>
+							) : null}
+						</section>
 					) : null}
 				</div>
 			)}
@@ -482,12 +601,28 @@ function evidenceCopy(
 	}
 }
 
+function noticeFor(caught: unknown): StoredNotice {
+	const details = isApiClientError(caught) ? caught.details : undefined;
+	const reason =
+		details && typeof details === "object" && "reason" in details
+			? details.reason
+			: undefined;
+	if (reason === "too_large" || reason === "size") return "too_large";
+	if (reason === "closed" || reason === "open" || reason === "review_started") {
+		return "closed";
+	}
+	return "failed";
+}
+
 function storedCopy(
-	state: "photo" | "file" | "too_large" | "failed",
+	state: StoredNotice,
 	t: (
 		key:
 			| "evidenceStoredPhoto"
 			| "evidenceStoredFile"
+			| "evidenceStoredNote"
+			| "evidenceNoteEmpty"
+			| "evidenceClosed"
 			| "evidenceTooLarge"
 			| "evidenceUploadFailed",
 	) => string,
@@ -497,12 +632,78 @@ function storedCopy(
 			return t("evidenceStoredPhoto");
 		case "file":
 			return t("evidenceStoredFile");
+		case "note":
+			return t("evidenceStoredNote");
+		case "empty":
+			return t("evidenceNoteEmpty");
+		case "closed":
+			return t("evidenceClosed");
 		case "too_large":
 			return t("evidenceTooLarge");
 		case "failed":
 			return t("evidenceUploadFailed");
 		default: {
 			const unreachable: never = state;
+			return unreachable;
+		}
+	}
+}
+
+function pillFor(status: SubmissionStatus) {
+	switch (status) {
+		case "draft":
+		case "withdrawn":
+			return "neutral" as const;
+		case "pending":
+		case "needs_revision":
+			return "pending" as const;
+		case "in_review":
+		case "escalated":
+			return "info" as const;
+		case "approved":
+			return "verified" as const;
+		case "rejected":
+			return "rejected" as const;
+		default: {
+			const unreachable: never = status;
+			return unreachable;
+		}
+	}
+}
+
+function statusLabel(
+	status: SubmissionStatus,
+	t: (
+		key:
+			| "submissionDraft"
+			| "submissionPending"
+			| "submissionInReview"
+			| "submissionApproved"
+			| "submissionNeedsRevision"
+			| "submissionRejected"
+			| "submissionEscalated"
+			| "submissionWithdrawn",
+	) => string,
+): string {
+	switch (status) {
+		case "draft":
+			return t("submissionDraft");
+		case "pending":
+			return t("submissionPending");
+		case "in_review":
+			return t("submissionInReview");
+		case "approved":
+			return t("submissionApproved");
+		case "needs_revision":
+			return t("submissionNeedsRevision");
+		case "rejected":
+			return t("submissionRejected");
+		case "escalated":
+			return t("submissionEscalated");
+		case "withdrawn":
+			return t("submissionWithdrawn");
+		default: {
+			const unreachable: never = status;
 			return unreachable;
 		}
 	}

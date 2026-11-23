@@ -49,3 +49,4 @@ export {
 	digitalPassports,
 	otpChallenges,
 } from "./registration";
+export { taskSubmissions } from "./submissions";

@@ -63,6 +63,9 @@
 			"name": "staff"
 		},
 		{
+			"name": "submissions"
+		},
+		{
 			"name": "system"
 		},
 		{
@@ -6921,6 +6924,169 @@
 				}
 			}
 		},
+		"/api/v1/enrollments/{id}/submissions": {
+			"get": {
+				"operationId": "getEnrollmentSubmissions",
+				"summary": "The learner's attempts on this enrollment, newest first.",
+				"tags": [
+					"enrollments"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"submissions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"enrollmentId": {
+																"type": "string"
+															},
+															"taskId": {
+																"type": "string"
+															},
+															"attempt": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"in_review",
+																	"pending",
+																	"approved",
+																	"needs_revision",
+																	"rejected",
+																	"escalated",
+																	"withdrawn"
+																]
+															},
+															"evidenceType": {
+																"type": "string",
+																"enum": [
+																	"photo",
+																	"file",
+																	"note"
+																]
+															},
+															"submittedAt": {
+																"type": "string",
+																"nullable": true
+															},
+															"feedback": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"enrollmentId",
+															"taskId",
+															"attempt",
+															"status",
+															"evidenceType",
+															"submittedAt",
+															"feedback"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"submissions"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/enrollments": {
 			"get": {
 				"operationId": "getEnrollments",
@@ -12754,6 +12920,357 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/submissions/{id}/withdraw": {
+			"post": {
+				"operationId": "createSubmissionWithdraw",
+				"summary": "Take an attempt back before a trainer starts the review.",
+				"tags": [
+					"submissions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"enrollmentId": {
+													"type": "string"
+												},
+												"taskId": {
+													"type": "string"
+												},
+												"attempt": {
+													"type": "number"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"pending",
+														"approved",
+														"needs_revision",
+														"rejected",
+														"escalated",
+														"withdrawn"
+													]
+												},
+												"evidenceType": {
+													"type": "string",
+													"enum": [
+														"photo",
+														"file",
+														"note"
+													]
+												},
+												"submittedAt": {
+													"type": "string",
+													"nullable": true
+												},
+												"feedback": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"enrollmentId",
+												"taskId",
+												"attempt",
+												"status",
+												"evidenceType",
+												"submittedAt",
+												"feedback"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/submissions/create": {
+			"post": {
+				"operationId": "createTaskSubmission",
+				"summary": "Store one attempt at a pinned task. The same client id is the same attempt.",
+				"tags": [
+					"submissions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string"
+									},
+									"enrollmentId": {
+										"type": "string"
+									},
+									"taskId": {
+										"type": "string"
+									},
+									"mediaId": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									},
+									"deviceInfo": {
+										"type": "string"
+									},
+									"geoLat": {
+										"type": "number"
+									},
+									"geoLng": {
+										"type": "number"
+									},
+									"submit": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"id",
+									"enrollmentId",
+									"taskId",
+									"submit"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"enrollmentId": {
+													"type": "string"
+												},
+												"taskId": {
+													"type": "string"
+												},
+												"attempt": {
+													"type": "number"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"draft",
+														"in_review",
+														"pending",
+														"approved",
+														"needs_revision",
+														"rejected",
+														"escalated",
+														"withdrawn"
+													]
+												},
+												"evidenceType": {
+													"type": "string",
+													"enum": [
+														"photo",
+														"file",
+														"note"
+													]
+												},
+												"submittedAt": {
+													"type": "string",
+													"nullable": true
+												},
+												"feedback": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"enrollmentId",
+												"taskId",
+												"attempt",
+												"status",
+												"evidenceType",
+												"submittedAt",
+												"feedback"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}
