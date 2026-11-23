@@ -1,6 +1,7 @@
 import { endpoints } from "../.generated/endpoints";
 import { createRuntime } from "./core/api/runtime";
 import { googleAuthRoutes } from "./core/auth/google";
+import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
 
 /**
  * Assembles the HTTP application:
@@ -14,21 +15,15 @@ export function createApp() {
 		endpoints,
 		rawRoutes: [
 			...googleAuthRoutes,
-			// Example escape hatch: multipart upload. Replace or remove.
 			{
-				method: "POST",
-				path: "/api/upload",
-				async handler(context) {
-					const form = await context.request.formData();
-					const file = form.get("file");
-					return Response.json({
-						ok: true,
-						data: {
-							received: file instanceof File ? file.name : null,
-							requestId: context.requestId,
-						},
-					});
-				},
+				method: "PUT",
+				path: "/api/media/upload",
+				handler: putPrivateMedia,
+			},
+			{
+				method: "GET",
+				path: "/api/media/file",
+				handler: getPrivateMedia,
 			},
 		],
 		onError(error, context) {

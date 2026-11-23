@@ -1,5 +1,5 @@
 import { errors } from "../api/error";
-import { objectStore } from "../storage/object-store";
+import { getObjectStore } from "../storage/object-store";
 
 const MEDIA_KEY = /^[a-z0-9][a-z0-9/_.-]{0,199}$/i;
 
@@ -19,7 +19,7 @@ export async function storeMediaKey(
 			reason: "invalid_media_key",
 		});
 	}
-	const reserved = await objectStore.reserve({ key, contentType });
+	const reserved = await getObjectStore().reserve({ key, contentType });
 	return reserved.key;
 }
 

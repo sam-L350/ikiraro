@@ -1,5 +1,11 @@
 import { Camera, File, FileText, Image, PenLine, Volume2 } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+	type ChangeEvent,
+	type ReactNode,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { Link, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +15,7 @@ import {
 	useEngineMutation,
 } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import { prepareEvidenceFile } from "@/lib/media/prepare";
 import {
 	mediaShouldLoad,
 	readDataSaver,
@@ -59,6 +66,10 @@ export default function TaskPage() {
 	const [chosen, setChosen] = useState<ClarityRating | null | undefined>(
 		undefined,
 	);
+	const [sending, setSending] = useState(false);
+	const [stored, setStored] = useState<
+		"photo" | "file" | "too_large" | "failed" | null
+	>(null);
 	const enrollment = useEngine(
 		"/enrollments/:id",
 		{ query: { id: enrollmentId } },
@@ -71,6 +82,8 @@ export default function TaskPage() {
 	);
 	const start = useEngineMutation("/enrollments/:id/start");
 	const saveClarity = useEngineMutation("/enrollments/:id/clarity/update");
+	const intent = useEngineMutation("/media/upload-intent");
+	const finalize = useEngineMutation("/media/:id/finalize");
 
 	useEffect(() => {
 		document.documentElement.lang = locale === "rw" ? "rw" : "en";
@@ -152,6 +165,56 @@ export default function TaskPage() {
 		} catch (caught) {
 			if (isApiClientError(caught)) return;
 			throw caught;
+		}
+	}
+
+	async function onFile(event: ChangeEvent<HTMLInputElement>) {
+		const chosenFile = event.target.files?.[0];
+		event.target.value = "";
+		if (!chosenFile) return;
+		setSending(true);
+		setStored(null);
+		try {
+			const prepared = await prepareEvidenceFile(chosenFile);
+			if (prepared === "too_large") {
+				setStored("too_large");
+				return;
+			}
+			if (prepared === "type") {
+				setStored("failed");
+				return;
+			}
+			const started = await intent.mutateAsync({
+				body: {
+					contentType: prepared.contentType,
+					byteSize: prepared.bytes.size,
+				},
+			});
+			const put = await fetch(started.uploadUrl, {
+				method: "PUT",
+				headers: { "content-type": started.contentType },
+				body: prepared.bytes,
+				credentials: "omit",
+			});
+			if (!put.ok) {
+				setStored("failed");
+				return;
+			}
+			await finalize.mutateAsync({
+				body: { id: started.id, sha256: prepared.sha256 },
+			});
+			setStored(kind === "photo" ? "photo" : "file");
+		} catch (caught) {
+			const details = isApiClientError(caught) ? caught.details : undefined;
+			const reason =
+				details && typeof details === "object" && "reason" in details
+					? details.reason
+					: undefined;
+			setStored(
+				reason === "too_large" || reason === "size" ? "too_large" : "failed",
+			);
+		} finally {
+			setSending(false);
 		}
 	}
 
@@ -318,17 +381,21 @@ export default function TaskPage() {
 							className="sr-only"
 							aria-hidden="true"
 							tabIndex={-1}
+							onChange={(event) => void onFile(event)}
 						/>
 					) : null}
 					<Button
 						type="button"
 						className="w-fit"
-						disabled={start.isPending}
+						disabled={start.isPending || sending}
 						onClick={() => void openEvidence()}
 					>
 						<EvidenceIcon kind={kind} />
 						{evidenceLabel(kind, t)}
 					</Button>
+					{stored ? (
+						<p className="text-lg text-fg">{storedCopy(stored, t)}</p>
+					) : null}
 				</div>
 			)}
 		</div>
@@ -410,6 +477,32 @@ function evidenceCopy(
 			return t("evidenceAsksNote");
 		default: {
 			const unreachable: never = kind;
+			return unreachable;
+		}
+	}
+}
+
+function storedCopy(
+	state: "photo" | "file" | "too_large" | "failed",
+	t: (
+		key:
+			| "evidenceStoredPhoto"
+			| "evidenceStoredFile"
+			| "evidenceTooLarge"
+			| "evidenceUploadFailed",
+	) => string,
+): string {
+	switch (state) {
+		case "photo":
+			return t("evidenceStoredPhoto");
+		case "file":
+			return t("evidenceStoredFile");
+		case "too_large":
+			return t("evidenceTooLarge");
+		case "failed":
+			return t("evidenceUploadFailed");
+		default: {
+			const unreachable: never = state;
 			return unreachable;
 		}
 	}

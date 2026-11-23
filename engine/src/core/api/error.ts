@@ -42,6 +42,8 @@ export const errors = {
 		new ApiError(409, "CONFLICT", message, details),
 	tooManyRequests: (message = "Too many requests") =>
 		new ApiError(429, "TOO_MANY_REQUESTS", message),
+	unavailable: (message = "That service is not available") =>
+		new ApiError(503, "UNAVAILABLE", message),
 	internal: (message = "Unexpected server error") =>
 		new ApiError(500, "INTERNAL_SERVER_ERROR", message),
 };

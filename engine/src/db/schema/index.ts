@@ -42,6 +42,7 @@ export {
 	taskClarity,
 	taskProgress,
 } from "./learning";
+export { mediaObjects } from "./media";
 export {
 	consents,
 	declaredRelationships,

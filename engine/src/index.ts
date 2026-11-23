@@ -15,7 +15,7 @@ const server = Bun.serve({
 	port: env.port,
 	hostname: env.hostname,
 	development: !env.isProduction,
-	maxRequestBodySize: env.maxBodyBytes * 4,
+	maxRequestBodySize: Math.max(env.maxBodyBytes * 4, 11 * 1024 * 1024),
 	fetch: app.fetch,
 	error: app.error,
 });
