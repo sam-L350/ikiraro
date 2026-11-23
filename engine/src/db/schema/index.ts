@@ -1,5 +1,10 @@
 export { permissions, rolePermissions, roles, userRoles } from "./authz";
-export { earnedBadges, pointTransactions } from "./awards";
+export {
+	earnedBadges,
+	pointCaps,
+	pointRules,
+	pointTransactions,
+} from "./awards";
 export type { JsonValue } from "./compliance";
 export {
 	configSettings,

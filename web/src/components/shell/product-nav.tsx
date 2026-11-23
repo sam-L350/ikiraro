@@ -46,6 +46,16 @@ function useProductNavItems(): NavItem[] {
 	if (canUseCatalog) {
 		items.push({ to: "/catalog", label: "catalogNav" });
 	}
+	const canReadPoints =
+		user?.roles.some(
+			(role) =>
+				role.code === "learner" ||
+				role.code === "trainer" ||
+				role.code === "center_manager",
+		) ?? false;
+	if (canReadPoints) {
+		items.push({ to: "/points", label: "pointsNav" });
+	}
 	if (!isStaff) return items;
 	items.push(
 		{ to: "/staff", label: "staffTitle", end: true },

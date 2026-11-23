@@ -64,7 +64,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/4.6-atomic-award`
   - [x] `phase/4.7-resubmit-and-revoke`
 - [ ] Phase 5 — Passport and points (`phase/5-passport-and-points`)
-  - [ ] `phase/5.1-points-ledger`
+  - [x] `phase/5.1-points-ledger`
   - [ ] `phase/5.2-eligibility-engine`
   - [ ] `phase/5.3-learner-passport`
   - [ ] `phase/5.4-public-verification`

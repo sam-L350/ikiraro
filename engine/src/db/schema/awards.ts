@@ -15,6 +15,85 @@ import { enrollments } from "./learning";
 import { submissionVerifications } from "./verifications";
 
 const pointKindSql = sql`'task_approved', 'module_completed', 'course_completed', 'streak_bonus', 'community_contribution', 'manual_adjustment', 'reversal'`;
+const pointTargetSql = sql`'task', 'module', 'course'`;
+
+/**
+ * One published amount for a task, module, or course. A change inserts the
+ * next version and leaves this row.
+ */
+export const pointRules = pgTable(
+	"point_rules",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		targetType: text("target_type").notNull(),
+		targetId: uuid("target_id").notNull(),
+		version: integer("version").notNull(),
+		points: integer("points").notNull(),
+		weight: integer("weight").notNull(),
+		createdByUserId: integer("created_by_user_id")
+			.notNull()
+			.references(() => users.id),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		uniqueIndex("point_rules_target_version").on(
+			table.targetType,
+			table.targetId,
+			table.version,
+		),
+		check(
+			"point_rules_target",
+			sql`${table.targetType} in (${pointTargetSql})`,
+		),
+		check(
+			"point_rules_points",
+			sql`${table.points} >= 0 and ${table.points} <= 1000000`,
+		),
+		check(
+			"point_rules_weight",
+			sql`${table.weight} >= 1 and ${table.weight} <= 1000`,
+		),
+	],
+);
+
+/** The live caps are the highest version. An older version stays for the record. */
+export const pointCaps = pgTable(
+	"point_caps",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		version: integer("version").notNull().unique(),
+		dailyCap: integer("daily_cap").notNull(),
+		photoCap: integer("photo_cap").notNull(),
+		fileCap: integer("file_cap").notNull(),
+		noteCap: integer("note_cap").notNull(),
+		createdByUserId: integer("created_by_user_id")
+			.notNull()
+			.references(() => users.id),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		check(
+			"point_caps_daily",
+			sql`${table.dailyCap} >= 0 and ${table.dailyCap} <= 1000000`,
+		),
+		check(
+			"point_caps_photo",
+			sql`${table.photoCap} >= 0 and ${table.photoCap} <= 1000000`,
+		),
+		check(
+			"point_caps_file",
+			sql`${table.fileCap} >= 0 and ${table.fileCap} <= 1000000`,
+		),
+		check(
+			"point_caps_note",
+			sql`${table.noteCap} >= 0 and ${table.noteCap} <= 1000000`,
+		),
+	],
+);
 
 /**
  * One ledger line. The balance is the sum. A reversal is a later row, never
@@ -34,6 +113,9 @@ export const pointTransactions = pgTable(
 		verificationId: uuid("verification_id").references(
 			() => submissionVerifications.id,
 		),
+		ruleId: uuid("rule_id").references(() => pointRules.id),
+		/** The amount before a daily or type cap reduced it. */
+		uncappedAmount: integer("uncapped_amount"),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
@@ -48,6 +130,10 @@ export const pointTransactions = pgTable(
 		check(
 			"point_transactions_reference",
 			sql`${table.referenceType} in ('submission', 'module', 'course', 'badge', 'adjustment')`,
+		),
+		check(
+			"point_transactions_uncapped",
+			sql`${table.uncappedAmount} is null or ${table.uncappedAmount} >= 0`,
 		),
 	],
 );

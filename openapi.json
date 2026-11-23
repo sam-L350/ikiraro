@@ -51,6 +51,15 @@
 			"name": "modules"
 		},
 		{
+			"name": "point-caps"
+		},
+		{
+			"name": "point-rules"
+		},
+		{
+			"name": "points"
+		},
+		{
 			"name": "privacy"
 		},
 		{
@@ -9516,6 +9525,441 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/point-caps/create": {
+			"post": {
+				"operationId": "createPointCap",
+				"summary": "Publish the next daily and per-type caps.",
+				"tags": [
+					"point-caps"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"dailyCap": {
+										"type": "number"
+									},
+									"photoCap": {
+										"type": "number"
+									},
+									"fileCap": {
+										"type": "number"
+									},
+									"noteCap": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"dailyCap",
+									"photoCap",
+									"fileCap",
+									"noteCap"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"version": {
+													"type": "number"
+												},
+												"dailyCap": {
+													"type": "number"
+												},
+												"photoCap": {
+													"type": "number"
+												},
+												"fileCap": {
+													"type": "number"
+												},
+												"noteCap": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"id",
+												"version",
+												"dailyCap",
+												"photoCap",
+												"fileCap",
+												"noteCap"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/point-rules/create": {
+			"post": {
+				"operationId": "createPointRule",
+				"summary": "Publish the next point rule for a task, module, or course.",
+				"tags": [
+					"point-rules"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"targetType": {
+										"type": "string"
+									},
+									"targetId": {
+										"type": "string"
+									},
+									"points": {
+										"type": "number"
+									},
+									"weight": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"targetType",
+									"targetId",
+									"points",
+									"weight"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"targetType": {
+													"type": "string",
+													"enum": [
+														"task",
+														"module",
+														"course"
+													]
+												},
+												"targetId": {
+													"type": "string"
+												},
+												"version": {
+													"type": "number"
+												},
+												"points": {
+													"type": "number"
+												},
+												"weight": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"id",
+												"targetType",
+												"targetId",
+												"version",
+												"points",
+												"weight"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/points/statement": {
+			"get": {
+				"operationId": "getPointStatement",
+				"summary": "The signed-in person's ledger, and the sum of it.",
+				"tags": [
+					"points"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"balance": {
+													"type": "number"
+												},
+												"entries": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"createdAt": {
+																"type": "string"
+															},
+															"amount": {
+																"type": "number"
+															},
+															"uncappedAmount": {
+																"type": "number",
+																"nullable": true
+															},
+															"kind": {
+																"type": "string",
+																"enum": [
+																	"task_approved",
+																	"module_completed",
+																	"course_completed",
+																	"streak_bonus",
+																	"community_contribution",
+																	"manual_adjustment",
+																	"reversal"
+																]
+															},
+															"referenceType": {
+																"type": "string"
+															},
+															"referenceId": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"createdAt",
+															"amount",
+															"uncappedAmount",
+															"kind",
+															"referenceType",
+															"referenceId"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"balance",
+												"entries"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}

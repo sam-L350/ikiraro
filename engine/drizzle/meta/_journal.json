@@ -134,6 +134,13 @@
       "when": 1795443471627,
       "tag": "0018_phase4_resubmit_revoke",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795444227525,
+      "tag": "0019_phase5_points_ledger",
+      "breakpoints": true
     }
   ]
 }
