@@ -238,7 +238,7 @@ describe.serial("course review", () => {
 				.select({ id: contentVersions.id })
 				.from(contentVersions)
 				.where(eq(contentVersions.courseId, draft.id));
-			expect(versions).toHaveLength(0);
+			expect(versions).toHaveLength(1);
 
 			const retired = await retireCourse(database, {
 				actorId: reviewer,
@@ -253,6 +253,11 @@ describe.serial("course review", () => {
 				.from(tasks)
 				.where(eq(tasks.id, taskId));
 			expect(stillThere).toHaveLength(1);
+			const pinned = await database
+				.select({ id: contentVersions.id })
+				.from(contentVersions)
+				.where(eq(contentVersions.courseId, draft.id));
+			expect(pinned).toHaveLength(1);
 		},
 		90_000,
 	);

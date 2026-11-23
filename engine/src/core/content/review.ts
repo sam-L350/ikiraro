@@ -5,6 +5,7 @@ import type { ContentStatus } from "../../db/schema/content";
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { type CourseView, readCourse } from "./author";
+import { writePublishedVersion } from "./versions";
 
 type ReviewDb = Pick<Database, "insert" | "select" | "transaction" | "update">;
 
@@ -278,10 +279,17 @@ export async function publishCourse(
 			reason: "own_course",
 		});
 	}
+	const course = await readCourse(database, input.courseId);
+	const publishedAt = new Date();
 	await database.transaction(async (tx) => {
 		await setTreeStatus(tx, input.courseId, "published", {
 			publishedByUserId: input.actorId,
-			publishedAt: new Date(),
+			publishedAt,
+		});
+		const version = await writePublishedVersion(tx, {
+			course,
+			actorId: input.actorId,
+			publishedAt,
 		});
 		await writeAudit(tx, {
 			actorId: input.actorId,
@@ -289,10 +297,15 @@ export async function publishCourse(
 			targetType: "course",
 			targetId: input.courseId,
 			ipAddress: input.ip,
+			metadata: { versionId: version.id, versionNumber: version.versionNumber },
 		});
 		await writeEvent(tx, {
 			name: "content.published",
-			payload: { courseId: input.courseId },
+			payload: {
+				courseId: input.courseId,
+				versionId: version.id,
+				versionNumber: version.versionNumber,
+			},
 		});
 	});
 	return present(database, input.courseId, input.actorId);

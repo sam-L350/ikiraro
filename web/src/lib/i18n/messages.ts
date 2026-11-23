@@ -247,7 +247,10 @@ export const en = {
 	reasonRequired: "Write the reason for sending it back.",
 	ownCourse: "You wrote this course, so someone else publishes it.",
 	courseApproved: "This course is approved. It is waiting to be published.",
-	coursePublishedSentence: "This course is published.",
+	coursePublishedSentence:
+		"This course is published. The next draft does not change that version.",
+	startNextDraft: "Start the next draft",
+	nextDraftPublishedOnly: "Only a published course can start another draft.",
 	courseRetiredSentence: "This course is retired. It stays readable.",
 	notApproved: "Approve the course before publishing it.",
 	notInReview: "This course is not in review.",
@@ -516,7 +519,11 @@ export const rw: Record<MessageKey, string> = {
 	reasonRequired: "Andika impamvu yo kugarura.",
 	ownCourse: "Wakoze iri somo, ni uko undi muntu aricapisha.",
 	courseApproved: "Iri somo ryemejwe. Rikurinda gucapwa.",
-	coursePublishedSentence: "Iri somo ricapishijwe.",
+	coursePublishedSentence:
+		"Iri somo ricapishijwe. Inyandiko ikurikira ntizahindura iyo verisiyo.",
+	startNextDraft: "Tangira inyandiko ikurikira",
+	nextDraftPublishedOnly:
+		"Isomo ricapishijwe gusa ni ryo watangirira indi nyandiko.",
 	courseRetiredSentence: "Iri somo ryakuweho. Kiracyasomwa.",
 	notApproved: "Emeza isomo mbere yo kuricapisha.",
 	notInReview: "Iri somo ntirirasuzumwa.",

@@ -82,6 +82,8 @@ function reasonKey(error: unknown): MessageKey {
 			return "unknownEvidence";
 		case "weight_required":
 			return "weightRequired";
+		case "not_published":
+			return "nextDraftPublishedOnly";
 		default:
 			return "tryAgain";
 	}
@@ -115,6 +117,7 @@ export default function CourseEditorPage() {
 		{ enabled: id.length > 0 },
 	);
 	const review = useEngineMutation("/courses/:id/review");
+	const nextDraft = useEngineMutation("/courses/:id/draft");
 	const [dirty, setDirty] = useState<Record<string, boolean>>({});
 	const [error, setError] = useState<MessageKey | null>(null);
 	const mark = useCallback((key: string, value: boolean) => {
@@ -141,6 +144,16 @@ export default function CourseEditorPage() {
 		setError(null);
 		try {
 			await review.mutateAsync({ body: { id: draft.id } });
+			await course.invalidate();
+		} catch (caught) {
+			setError(reasonKey(caught));
+		}
+	}
+
+	async function onNextDraft() {
+		setError(null);
+		try {
+			await nextDraft.mutateAsync({ body: { id: draft.id } });
 			await course.invalidate();
 		} catch (caught) {
 			setError(reasonKey(caught));
@@ -198,6 +211,26 @@ export default function CourseEditorPage() {
 					<AddModule courseId={draft.id} onSaved={() => course.invalidate()} />
 				) : null}
 			</div>
+			{draft.status === "published" ? (
+				<div className="mt-10 flex flex-col items-start gap-3">
+					{error ? (
+						<p
+							className="font-sans text-sm font-medium text-danger"
+							role="alert"
+						>
+							{t(error)}
+						</p>
+					) : null}
+					<Button
+						type="button"
+						variant="sticker"
+						disabled={nextDraft.isPending}
+						onClick={() => void onNextDraft()}
+					>
+						{t("startNextDraft")}
+					</Button>
+				</div>
+			) : null}
 			{editable ? (
 				<div className="mt-10 flex flex-col items-start gap-3">
 					{unsaved ? (

@@ -803,3 +803,51 @@ export async function submitCourseForReview(
 	});
 	return readCourse(database, input.courseId);
 }
+
+/** Open a working draft from a published course. The pinned snapshot stays as it was. */
+export async function openNextDraft(
+	database: AuthorDb,
+	input: { courseId: string; actorId: number; ip: string },
+): Promise<CourseView> {
+	const course = await requireCourse(database, input.courseId);
+	if (course.status !== "published") {
+		throw errors.conflict("Only a published course can start another draft.", {
+			reason: "not_published",
+		});
+	}
+	const current = await readCourse(database, input.courseId);
+	await database.transaction(async (tx) => {
+		await tx
+			.update(courses)
+			.set({
+				status: "draft",
+				reviewedByUserId: null,
+				reviewedAt: null,
+				reviewNote: null,
+			})
+			.where(eq(courses.id, input.courseId));
+		await tx
+			.update(modules)
+			.set({ status: "draft", retiredAt: null })
+			.where(eq(modules.courseId, input.courseId));
+		const moduleIds = current.modules.map((module) => module.id);
+		if (moduleIds.length > 0) {
+			await tx
+				.update(tasks)
+				.set({ status: "draft", retiredAt: null })
+				.where(inArray(tasks.moduleId, moduleIds));
+		}
+		await writeAudit(tx, {
+			actorId: input.actorId,
+			action: "content.draft_opened",
+			targetType: "course",
+			targetId: input.courseId,
+			ipAddress: input.ip,
+		});
+		await writeEvent(tx, {
+			name: "content.next_draft",
+			payload: { courseId: input.courseId },
+		});
+	});
+	return readCourse(database, input.courseId);
+}
