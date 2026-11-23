@@ -27,6 +27,8 @@ export const PERMISSION_CODES = [
 	"district.manage",
 	"content.write",
 	"content.publish",
+	"learning.read",
+	"learning.enroll",
 	"hardware.manage",
 	"grant.decide",
 	"report.read",
@@ -52,13 +54,26 @@ export const ROLE_NAMES: Record<RoleCode, string> = {
 };
 
 export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
-	learner: ["profile.read.self", "profile.write.self"],
-	trainer: ["profile.read.self", "profile.write.self", "submission.review"],
+	learner: [
+		"profile.read.self",
+		"profile.write.self",
+		"learning.read",
+		"learning.enroll",
+	],
+	trainer: [
+		"profile.read.self",
+		"profile.write.self",
+		"submission.review",
+		"learning.read",
+		"learning.enroll",
+	],
 	center_manager: [
 		"profile.read.self",
 		"profile.write.self",
 		"center.manage",
 		"submission.review",
+		"learning.read",
+		"learning.enroll",
 	],
 	district_coordinator: [
 		"profile.read.self",
@@ -92,6 +107,8 @@ export const PERMISSION_DESCRIPTIONS: Record<PermissionCode, string> = {
 	"district.manage": "Manage centers in one district",
 	"content.write": "Write course drafts",
 	"content.publish": "Approve and publish content",
+	"learning.read": "Read the published course catalog",
+	"learning.enroll": "Enroll in a published course",
 	"hardware.manage": "Manage equipment inventory",
 	"grant.decide": "Vote on an allocation round",
 	"report.read": "Read aggregated reports",

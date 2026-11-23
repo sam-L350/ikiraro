@@ -96,6 +96,47 @@ describe("decideAccess", () => {
 		expect(decision).toEqual({ ok: true });
 	});
 
+	test("a learner can read the catalog and enroll themselves", () => {
+		const read = decideAccess({
+			actorId: "4",
+			permission: "learning.read",
+			assignments: [{ role: "learner", scopeType: "self", scopeId: null }],
+			resource: { ownerId: "4" },
+		});
+		const enroll = decideAccess({
+			actorId: "4",
+			permission: "learning.enroll",
+			assignments: [{ role: "learner", scopeType: "self", scopeId: null }],
+			resource: { ownerId: "4" },
+		});
+		expect(read).toEqual({ ok: true });
+		expect(enroll).toEqual({ ok: true });
+	});
+
+	test("a trainer at center A cannot enroll a learner at center B", () => {
+		const decision = decideAccess({
+			actorId: "7",
+			permission: "learning.enroll",
+			assignments: [
+				{ role: "trainer", scopeType: "center", scopeId: "center-a" },
+			],
+			resource: { ownerId: "9", centerId: "center-b" },
+		});
+		expect(decision.ok).toBe(false);
+	});
+
+	test("an author without learning.read cannot read the catalog", () => {
+		const decision = decideAccess({
+			actorId: "2",
+			permission: "learning.read",
+			assignments: [
+				{ role: "content_author", scopeType: "global", scopeId: null },
+			],
+			resource: {},
+		});
+		expect(decision.ok).toBe(false);
+	});
+
 	test("a role without the permission is rejected", () => {
 		const decision = decideAccess({
 			actorId: "4",

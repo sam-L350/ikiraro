@@ -14,6 +14,9 @@ export function publishedSnapshot(course: CourseView): JsonValue {
 		titleRw: course.titleRw,
 		summaryEn: course.summaryEn,
 		summaryRw: course.summaryRw,
+		category: course.category,
+		economicSector: course.economicSector,
+		level: course.level,
 		modules: course.modules.map((module) => ({
 			id: module.id,
 			position: module.position,

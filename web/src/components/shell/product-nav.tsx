@@ -21,6 +21,13 @@ function useProductNavItems(): NavItem[] {
 		user?.roles.some((role) => role.code === "content_author") ?? false;
 	const canReviewCourses =
 		user?.roles.some((role) => role.code === "content_reviewer") ?? false;
+	const canUseCatalog =
+		user?.roles.some(
+			(role) =>
+				role.code === "learner" ||
+				role.code === "trainer" ||
+				role.code === "center_manager",
+		) ?? false;
 	const context = useEngine("/staff/context", undefined, { enabled: isStaff });
 	const mode = context.data?.mode;
 	const canAddStaff = mode === "admin" || mode === "center";
@@ -29,6 +36,9 @@ function useProductNavItems(): NavItem[] {
 		{ to: "/home", label: "navHome", end: true },
 		{ to: "/profile", label: "yourProfile", end: true },
 	];
+	if (canUseCatalog) {
+		items.push({ to: "/catalog", label: "catalogNav" });
+	}
 	if (!isStaff) return items;
 	items.push(
 		{ to: "/staff", label: "staffTitle", end: true },

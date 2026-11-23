@@ -49,6 +49,14 @@ const SECURITY_HEADERS: Record<string, string> = {
 	"cache-control": "no-store",
 };
 
+function dynamicCount(path: string): number {
+	let count = 0;
+	for (const segment of path.split("/")) {
+		if (segment.startsWith(":")) count += 1;
+	}
+	return count;
+}
+
 function compilePath(path: string): CompiledPath {
 	const keys: string[] = [];
 	const escaped = path
@@ -326,11 +334,18 @@ function createRootResponse(context: RequestContext): Response {
 }
 
 export function createRuntime(appModule: AppModule) {
-	const rpcRoutes: RpcRoute[] = appModule.endpoints.map((endpoint) => ({
-		kind: "rpc",
-		endpoint,
-		compiled: compilePath(endpoint.path),
-	}));
+	const rpcRoutes: RpcRoute[] = appModule.endpoints
+		.map((endpoint) => ({
+			kind: "rpc" as const,
+			endpoint,
+			compiled: compilePath(endpoint.path),
+		}))
+		.sort((left, right) => {
+			const dynamics =
+				dynamicCount(left.endpoint.path) - dynamicCount(right.endpoint.path);
+			if (dynamics !== 0) return dynamics;
+			return right.endpoint.path.length - left.endpoint.path.length;
+		});
 	const rawRoutes: RawCompiledRoute[] = (appModule.rawRoutes ?? []).map(
 		(route) => {
 			const path = route.pattern ?? route.path;

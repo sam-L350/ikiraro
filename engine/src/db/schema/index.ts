@@ -35,6 +35,7 @@ export type {
 	User,
 } from "./identity";
 export { accounts, sessions, users } from "./identity";
+export { enrollments } from "./learning";
 export {
 	consents,
 	declaredRelationships,

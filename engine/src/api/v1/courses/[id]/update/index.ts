@@ -12,6 +12,9 @@ export async function updateCourseDraft(input: {
 	titleRw?: string;
 	summaryEn?: string;
 	summaryRw?: string;
+	category?: string;
+	economicSector?: string;
+	level?: number;
 }): Promise<CourseView> {
 	const user = await requireAuth();
 	await authorize({ permission: "content.write" });
@@ -21,6 +24,9 @@ export async function updateCourseDraft(input: {
 		titleRw: input.titleRw,
 		summaryEn: input.summaryEn,
 		summaryRw: input.summaryRw,
+		category: input.category,
+		economicSector: input.economicSector,
+		level: input.level,
 		actorId: user.id,
 		ip: clientIp(),
 	});

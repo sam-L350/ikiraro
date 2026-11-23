@@ -87,6 +87,9 @@ export type CourseView = {
 	titleRw: string;
 	summaryEn: string;
 	summaryRw: string;
+	category: string;
+	economicSector: string;
+	level: number;
 	missingKinyarwanda: boolean;
 	reviewNote: string;
 	approved: boolean;
@@ -99,6 +102,12 @@ type CourseText = {
 	titleRw?: string;
 	summaryEn?: string;
 	summaryRw?: string;
+};
+
+type CourseCatalog = {
+	category?: string;
+	economicSector?: string;
+	level?: number;
 };
 
 function clean(value: string | undefined): string {
@@ -257,6 +266,9 @@ export async function readCourse(
 			status: courses.status,
 			reviewNote: courses.reviewNote,
 			reviewedByUserId: courses.reviewedByUserId,
+			category: courses.category,
+			economicSector: courses.economicSector,
+			level: courses.level,
 		})
 		.from(courses)
 		.leftJoin(courseTranslations, eq(courseTranslations.courseId, courses.id))
@@ -417,6 +429,9 @@ export async function readCourse(
 		titleRw: courseText.titleRw,
 		summaryEn: courseText.summaryEn,
 		summaryRw: courseText.summaryRw,
+		category: courseRows[0]?.category ?? "",
+		economicSector: courseRows[0]?.economicSector ?? "",
+		level: courseRows[0]?.level ?? 1,
 		missingKinyarwanda:
 			gap(courseText.titleEn, courseText.titleRw) ||
 			gap(courseText.summaryEn, courseText.summaryRw) ||
@@ -505,9 +520,9 @@ export async function listCourses(
 }
 
 async function writeCourseText(
-	database: Pick<Database, "insert">,
+	database: Pick<Database, "insert" | "update">,
 	courseId: string,
-	input: CourseText,
+	input: CourseText & CourseCatalog,
 ): Promise<void> {
 	const titleEn = requireEnglishTitle(clean(input.titleEn));
 	const values = [
@@ -533,11 +548,28 @@ async function writeCourseText(
 				set: { title: value.title, summary: value.summary },
 			});
 	}
+	const catalog: {
+		category?: string;
+		economicSector?: string;
+		level?: number;
+	} = {};
+	if (input.category !== undefined) catalog.category = clip(input.category);
+	if (input.economicSector !== undefined) {
+		catalog.economicSector = clip(input.economicSector);
+	}
+	if (input.level !== undefined) catalog.level = requireLevel(input.level);
+	if (Object.keys(catalog).length > 0) {
+		await database.update(courses).set(catalog).where(eq(courses.id, courseId));
+	}
+}
+
+function clip(value: string): string {
+	return clean(value).slice(0, 80);
 }
 
 export async function createCourse(
 	database: AuthorDb,
-	input: CourseText & { actorId: number; ip: string },
+	input: CourseText & CourseCatalog & { actorId: number; ip: string },
 ): Promise<CourseView> {
 	const courseId = await database.transaction(async (tx) => {
 		const [course] = await tx
@@ -560,7 +592,8 @@ export async function createCourse(
 
 export async function updateCourse(
 	database: AuthorDb,
-	input: CourseText & { courseId: string; actorId: number; ip: string },
+	input: CourseText &
+		CourseCatalog & { courseId: string; actorId: number; ip: string },
 ): Promise<CourseView> {
 	await requireDraft(database, input.courseId);
 	await writeCourseText(database, input.courseId, input);

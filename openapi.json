@@ -18,6 +18,9 @@
 			"name": "auth"
 		},
 		{
+			"name": "catalog"
+		},
+		{
 			"name": "centers"
 		},
 		{
@@ -1252,6 +1255,624 @@
 				}
 			}
 		},
+		"/api/v1/catalog/{id}/enroll": {
+			"post": {
+				"operationId": "createCatalogEnrollment",
+				"summary": "Pin the learner to the latest published version, at their home center.",
+				"tags": [
+					"catalog"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"learnerId": {
+										"type": "number"
+									},
+									"centerId": {
+										"type": "string"
+									}
+								},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"courseId": {
+													"type": "string"
+												},
+												"contentVersionId": {
+													"type": "string"
+												},
+												"versionNumber": {
+													"type": "number"
+												},
+												"centerId": {
+													"type": "string"
+												},
+												"startedAt": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"courseId",
+												"contentVersionId",
+												"versionNumber",
+												"centerId",
+												"startedAt"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/catalog/{id}": {
+			"get": {
+				"operationId": "getCatalogCourse",
+				"summary": "One published course, in the version a new enrollment would pin.",
+				"tags": [
+					"catalog"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"courseId": {
+													"type": "string"
+												},
+												"versionId": {
+													"type": "string"
+												},
+												"versionNumber": {
+													"type": "number"
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												},
+												"summaryEn": {
+													"type": "string"
+												},
+												"summaryRw": {
+													"type": "string"
+												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
+												"languages": {
+													"type": "array",
+													"items": {
+														"type": "string",
+														"enum": [
+															"rw",
+															"en"
+														]
+													}
+												},
+												"enrolled": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"courseId",
+												"versionId",
+												"versionNumber",
+												"titleEn",
+												"titleRw",
+												"summaryEn",
+												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
+												"languages",
+												"enrolled"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/catalog": {
+			"get": {
+				"operationId": "getCatalog",
+				"summary": "Published courses, in the latest pinned version, filtered for the catalog.",
+				"tags": [
+					"catalog"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "language",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "category",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sector",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "level",
+						"required": false,
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"courses": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"courseId": {
+																"type": "string"
+															},
+															"versionId": {
+																"type": "string"
+															},
+															"versionNumber": {
+																"type": "number"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"category": {
+																"type": "string"
+															},
+															"economicSector": {
+																"type": "string"
+															},
+															"level": {
+																"type": "number"
+															},
+															"languages": {
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"rw",
+																		"en"
+																	]
+																}
+															},
+															"enrolled": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"courseId",
+															"versionId",
+															"versionNumber",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"category",
+															"economicSector",
+															"level",
+															"languages",
+															"enrolled"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"courses"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/catalog/learners": {
+			"get": {
+				"operationId": "getCatalogLearners",
+				"summary": "Learners whose home center is one this person can enroll.",
+				"tags": [
+					"catalog"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "centerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"learners": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"learners"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/centers/{id}": {
 			"get": {
 				"operationId": "getCenter",
@@ -1810,6 +2431,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -2047,6 +2677,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -2189,6 +2822,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -2426,6 +3068,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -2555,6 +3200,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -2792,6 +3446,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -2949,6 +3606,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -3186,6 +3852,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -3328,6 +3997,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -3565,6 +4243,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -3673,6 +4354,15 @@
 									},
 									"summaryRw": {
 										"type": "string"
+									},
+									"category": {
+										"type": "string"
+									},
+									"economicSector": {
+										"type": "string"
+									},
+									"level": {
+										"type": "number"
 									}
 								},
 								"required": [
@@ -3721,6 +4411,15 @@
 												},
 												"summaryRw": {
 													"type": "string"
+												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
 												},
 												"missingKinyarwanda": {
 													"type": "boolean"
@@ -3959,6 +4658,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -4106,6 +4808,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -4343,6 +5054,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -4617,6 +5331,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -4854,6 +5577,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -5524,6 +6250,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -5761,6 +6496,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -5918,6 +6656,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -6155,6 +6902,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -7341,6 +8091,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -7581,6 +8340,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -7711,6 +8473,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -7951,6 +8722,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -8094,6 +8868,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -8334,6 +9117,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -8477,6 +9263,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -8717,6 +9512,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -8866,6 +9664,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -9106,6 +9913,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -10419,6 +11229,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -10656,6 +11475,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",
@@ -10834,6 +11656,15 @@
 												"summaryRw": {
 													"type": "string"
 												},
+												"category": {
+													"type": "string"
+												},
+												"economicSector": {
+													"type": "string"
+												},
+												"level": {
+													"type": "number"
+												},
 												"missingKinyarwanda": {
 													"type": "boolean"
 												},
@@ -11071,6 +11902,9 @@
 												"titleRw",
 												"summaryEn",
 												"summaryRw",
+												"category",
+												"economicSector",
+												"level",
 												"missingKinyarwanda",
 												"reviewNote",
 												"approved",

@@ -66,6 +66,9 @@ type Course = {
 	titleRw: string;
 	summaryEn: string;
 	summaryRw: string;
+	category: string;
+	economicSector: string;
+	level: number;
 	missingKinyarwanda: boolean;
 	badge: CourseBadge | null;
 	modules: Module[];
@@ -316,12 +319,18 @@ function CourseFields({
 	const [titleRw, setTitleRw] = useState(course.titleRw);
 	const [summaryEn, setSummaryEn] = useState(course.summaryEn);
 	const [summaryRw, setSummaryRw] = useState(course.summaryRw);
+	const [category, setCategory] = useState(course.category);
+	const [economicSector, setEconomicSector] = useState(course.economicSector);
+	const [level, setLevel] = useState(String(course.level));
 	const [error, setError] = useState<MessageKey | null>(null);
 	const dirty =
 		titleEn !== course.titleEn ||
 		titleRw !== course.titleRw ||
 		summaryEn !== course.summaryEn ||
-		summaryRw !== course.summaryRw;
+		summaryRw !== course.summaryRw ||
+		category !== course.category ||
+		economicSector !== course.economicSector ||
+		level !== String(course.level);
 	useEffect(() => {
 		onDirty(course.id, dirty);
 	}, [course.id, dirty, onDirty]);
@@ -329,9 +338,23 @@ function CourseFields({
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(null);
+		const parsedLevel = Number(level);
+		if (!Number.isInteger(parsedLevel) || parsedLevel < 1) {
+			setError("invalidLevel");
+			return;
+		}
 		try {
 			await save.mutateAsync({
-				body: { id: course.id, titleEn, titleRw, summaryEn, summaryRw },
+				body: {
+					id: course.id,
+					titleEn,
+					titleRw,
+					summaryEn,
+					summaryRw,
+					category,
+					economicSector,
+					level: parsedLevel,
+				},
 			});
 			await onSaved();
 		} catch (caught) {
@@ -370,6 +393,27 @@ function CourseFields({
 				disabled={!editable}
 				onChange={setSummaryRw}
 				hint={summaryEn.trim().length > 0 && summaryRw.trim().length === 0}
+			/>
+			<Field
+				id={`${course.id}-category`}
+				label={t("courseCategory")}
+				value={category}
+				disabled={!editable}
+				onChange={setCategory}
+			/>
+			<Field
+				id={`${course.id}-sector`}
+				label={t("courseSector")}
+				value={economicSector}
+				disabled={!editable}
+				onChange={setEconomicSector}
+			/>
+			<Field
+				id={`${course.id}-level`}
+				label={t("courseLevel")}
+				value={level}
+				disabled={!editable}
+				onChange={setLevel}
 			/>
 			{error ? <Alert message={t(error)} /> : null}
 			{editable ? (

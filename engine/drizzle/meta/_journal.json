@@ -64,6 +64,13 @@
       "when": 1795428314999,
       "tag": "0008_phase2_rubrics_badges_media",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795431937399,
+      "tag": "0009_phase3_catalog_enrollment",
+      "breakpoints": true
     }
   ]
 }

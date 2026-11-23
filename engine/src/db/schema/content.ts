@@ -42,12 +42,19 @@ export const courses = pgTable(
 			() => users.id,
 		),
 		publishedAt: timestamp("published_at", { withTimezone: true }),
+		/** Catalog filters. Copied into the published snapshot. */
+		category: text("category").notNull().default(""),
+		economicSector: text("economic_sector").notNull().default(""),
+		level: integer("level").notNull().default(1),
 		retiredAt: timestamp("retired_at", { withTimezone: true }),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
 	},
-	(table) => [check("courses_status", sql`${table.status} in (${statusSql})`)],
+	(table) => [
+		check("courses_status", sql`${table.status} in (${statusSql})`),
+		check("courses_level", sql`${table.level} > 0`),
+	],
 );
 
 export const courseTranslations = pgTable(

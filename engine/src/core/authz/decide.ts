@@ -62,6 +62,10 @@ export function decideAccess(input: {
 	if (holders.length === 0) {
 		return { ok: false, reason: "You do not have this permission" };
 	}
+	// The published catalog is the same shelf for every center. Scope applies when enrolling.
+	if (input.permission === "learning.read") {
+		return { ok: true };
+	}
 	// A center-scoped trainer still has a profile of their own. Self permissions
 	// follow the resource owner, not the job scope.
 	if (
