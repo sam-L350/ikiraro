@@ -12,6 +12,7 @@ export async function updateModuleDraft(input: {
 	titleRw?: string;
 	summaryEn?: string;
 	summaryRw?: string;
+	requires?: string[];
 }): Promise<CourseView> {
 	const user = await requireAuth();
 	await authorize({ permission: "content.write" });
@@ -21,6 +22,7 @@ export async function updateModuleDraft(input: {
 		titleRw: input.titleRw,
 		summaryEn: input.summaryEn,
 		summaryRw: input.summaryRw,
+		requires: input.requires,
 		actorId: user.id,
 		ip: clientIp(),
 	});

@@ -137,6 +137,35 @@ describe("decideAccess", () => {
 		expect(decision.ok).toBe(false);
 	});
 
+	test("a learner can read their own progress and not someone else's", () => {
+		const own = decideAccess({
+			actorId: "4",
+			permission: "learning.progress",
+			assignments: [{ role: "learner", scopeType: "self", scopeId: null }],
+			resource: { ownerId: "4", centerId: "center-a" },
+		});
+		const other = decideAccess({
+			actorId: "4",
+			permission: "learning.progress",
+			assignments: [{ role: "learner", scopeType: "self", scopeId: null }],
+			resource: { ownerId: "5", centerId: "center-a" },
+		});
+		expect(own).toEqual({ ok: true });
+		expect(other.ok).toBe(false);
+	});
+
+	test("a trainer at center A cannot read progress at center B", () => {
+		const decision = decideAccess({
+			actorId: "7",
+			permission: "learning.progress",
+			assignments: [
+				{ role: "trainer", scopeType: "center", scopeId: "center-a" },
+			],
+			resource: { ownerId: "9", centerId: "center-b" },
+		});
+		expect(decision.ok).toBe(false);
+	});
+
 	test("a role without the permission is rejected", () => {
 		const decision = decideAccess({
 			actorId: "4",

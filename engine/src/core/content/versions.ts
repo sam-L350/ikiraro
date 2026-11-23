@@ -24,6 +24,7 @@ export function publishedSnapshot(course: CourseView): JsonValue {
 			titleRw: module.titleRw,
 			summaryEn: module.summaryEn,
 			summaryRw: module.summaryRw,
+			requires: module.requires,
 			tasks: module.tasks.map((task) => ({
 				id: task.id,
 				position: task.position,

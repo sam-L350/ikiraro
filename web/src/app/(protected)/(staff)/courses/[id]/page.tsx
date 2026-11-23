@@ -56,6 +56,7 @@ type Module = {
 	summaryEn: string;
 	summaryRw: string;
 	missingKinyarwanda: boolean;
+	requires: string[];
 	tasks: Task[];
 };
 
@@ -119,6 +120,8 @@ function reasonKey(error: unknown): MessageKey {
 			return "invalidLevel";
 		case "not_published":
 			return "nextDraftPublishedOnly";
+		case "not_earlier":
+			return "notEarlier";
 		default:
 			return "tryAgain";
 	}
@@ -240,10 +243,14 @@ export default function CourseEditorPage() {
 					onDirty={mark}
 					onSaved={() => course.invalidate()}
 				/>
-				{draft.modules.map((module) => (
+				{draft.modules.map((module, index) => (
 					<ModuleFields
 						key={module.id}
 						module={module}
+						earlier={draft.modules.slice(0, index).map((item) => ({
+							id: item.id,
+							title: item.titleEn || item.titleRw,
+						}))}
 						editable={editable}
 						onDirty={mark}
 						onSaved={() => course.invalidate()}
@@ -431,13 +438,22 @@ function CourseFields({
 	);
 }
 
+function sameIds(left: readonly string[], right: readonly string[]): boolean {
+	if (left.length !== right.length) return false;
+	const sortedLeft = [...left].sort();
+	const sortedRight = [...right].sort();
+	return sortedLeft.every((id, index) => id === sortedRight[index]);
+}
+
 function ModuleFields({
 	module,
+	earlier,
 	editable,
 	onDirty,
 	onSaved,
 }: {
 	module: Module;
+	earlier: { id: string; title: string }[];
 	editable: boolean;
 	onDirty: (key: string, dirty: boolean) => void;
 	onSaved: () => Promise<void>;
@@ -448,12 +464,14 @@ function ModuleFields({
 	const [titleRw, setTitleRw] = useState(module.titleRw);
 	const [summaryEn, setSummaryEn] = useState(module.summaryEn);
 	const [summaryRw, setSummaryRw] = useState(module.summaryRw);
+	const [requires, setRequires] = useState(module.requires);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const dirty =
 		titleEn !== module.titleEn ||
 		titleRw !== module.titleRw ||
 		summaryEn !== module.summaryEn ||
-		summaryRw !== module.summaryRw;
+		summaryRw !== module.summaryRw ||
+		!sameIds(requires, module.requires);
 	useEffect(() => {
 		onDirty(module.id, dirty);
 	}, [module.id, dirty, onDirty]);
@@ -463,7 +481,14 @@ function ModuleFields({
 		setError(null);
 		try {
 			await save.mutateAsync({
-				body: { id: module.id, titleEn, titleRw, summaryEn, summaryRw },
+				body: {
+					id: module.id,
+					titleEn,
+					titleRw,
+					summaryEn,
+					summaryRw,
+					requires,
+				},
 			});
 			await onSaved();
 		} catch (caught) {
@@ -507,6 +532,37 @@ function ModuleFields({
 					onChange={setSummaryRw}
 					hint={summaryEn.trim().length > 0 && summaryRw.trim().length === 0}
 				/>
+				<fieldset className="flex flex-col gap-2">
+					<legend className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+						{t("requiresEarlier")}
+					</legend>
+					{earlier.length === 0 ? (
+						<p className="font-sans text-sm text-fg-muted">
+							{t("requiresNone")}
+						</p>
+					) : (
+						earlier.map((item) => (
+							<label key={item.id} className="flex min-h-11 items-center gap-3">
+								<input
+									type="checkbox"
+									className="size-5 accent-ink"
+									checked={requires.includes(item.id)}
+									disabled={!editable}
+									onChange={(event) => {
+										setRequires((current) =>
+											event.target.checked
+												? [...current, item.id]
+												: current.filter((id) => id !== item.id),
+										);
+									}}
+								/>
+								<span className="font-sans text-sm font-medium text-fg">
+									{item.title}
+								</span>
+							</label>
+						))
+					)}
+				</fieldset>
 				{error ? <Alert message={t(error)} /> : null}
 				{editable ? (
 					<div>

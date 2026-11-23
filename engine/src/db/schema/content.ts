@@ -97,6 +97,29 @@ export const modules = pgTable(
 	],
 );
 
+/** A module may require modules that come before it. The pin copies this list. */
+export const modulePrerequisites = pgTable(
+	"module_prerequisites",
+	{
+		moduleId: uuid("module_id")
+			.notNull()
+			.references(() => modules.id, { onDelete: "cascade" }),
+		requiredModuleId: uuid("required_module_id")
+			.notNull()
+			.references(() => modules.id, { onDelete: "cascade" }),
+	},
+	(table) => [
+		uniqueIndex("module_prerequisites_pair").on(
+			table.moduleId,
+			table.requiredModuleId,
+		),
+		check(
+			"module_prerequisites_not_self",
+			sql`${table.moduleId} <> ${table.requiredModuleId}`,
+		),
+	],
+);
+
 export const moduleTranslations = pgTable(
 	"module_translations",
 	{

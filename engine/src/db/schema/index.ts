@@ -13,6 +13,7 @@ export {
 	contentVersions,
 	courses,
 	courseTranslations,
+	modulePrerequisites,
 	modules,
 	moduleTranslations,
 	rubricCriteria,
@@ -35,7 +36,7 @@ export type {
 	User,
 } from "./identity";
 export { accounts, sessions, users } from "./identity";
-export { enrollments } from "./learning";
+export { enrollments, moduleProgress, taskProgress } from "./learning";
 export {
 	consents,
 	declaredRelationships,

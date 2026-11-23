@@ -71,6 +71,13 @@
       "when": 1795431937399,
       "tag": "0009_phase3_catalog_enrollment",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795433181560,
+      "tag": "0010_phase3_progress_prerequisites",
+      "breakpoints": true
     }
   ]
 }

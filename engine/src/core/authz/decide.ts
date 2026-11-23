@@ -66,6 +66,13 @@ export function decideAccess(input: {
 	if (input.permission === "learning.read") {
 		return { ok: true };
 	}
+	// A learner reads their own progress. A trainer still has to match the center.
+	if (
+		input.permission === "learning.progress" &&
+		input.resource.ownerId === input.actorId
+	) {
+		return { ok: true };
+	}
 	// A center-scoped trainer still has a profile of their own. Self permissions
 	// follow the resource owner, not the job scope.
 	if (

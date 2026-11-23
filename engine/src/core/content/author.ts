@@ -4,6 +4,7 @@ import {
 	badges,
 	courses,
 	courseTranslations,
+	modulePrerequisites,
 	modules,
 	moduleTranslations,
 	rubricCriteria,
@@ -18,6 +19,8 @@ import { storeMediaKey, storeOutboundUrl } from "./media";
 import { requirePassThreshold } from "./rubric";
 
 type AuthorDb = Pick<Database, "insert" | "select" | "transaction" | "update">;
+
+type ModuleWriteDb = AuthorDb & Pick<Database, "delete">;
 
 export const EVIDENCE_TYPES = ["photo", "file", "note"] as const;
 
@@ -77,6 +80,7 @@ export type ModuleView = {
 	summaryEn: string;
 	summaryRw: string;
 	missingKinyarwanda: boolean;
+	requires: string[];
 	tasks: TaskView[];
 };
 
@@ -300,6 +304,16 @@ export async function readCourse(
 		.orderBy(asc(modules.position));
 
 	const moduleIds = [...new Set(moduleRows.map((row) => row.id))];
+	const prerequisiteRows =
+		moduleIds.length === 0
+			? []
+			: await database
+					.select({
+						moduleId: modulePrerequisites.moduleId,
+						requiredModuleId: modulePrerequisites.requiredModuleId,
+					})
+					.from(modulePrerequisites)
+					.where(inArray(modulePrerequisites.moduleId, moduleIds));
 	const taskRows =
 		moduleIds.length === 0
 			? []
@@ -412,6 +426,9 @@ export async function readCourse(
 				titleRw: text.titleRw,
 				summaryEn: text.summaryEn,
 				summaryRw: text.summaryRw,
+				requires: prerequisiteRows
+					.filter((row) => row.moduleId === head.id)
+					.map((row) => row.requiredModuleId),
 				missingKinyarwanda:
 					gap(text.titleEn, text.titleRw) ||
 					gap(text.summaryEn, text.summaryRw) ||
@@ -662,13 +679,59 @@ export async function createModule(
 }
 
 export async function updateModule(
-	database: AuthorDb,
-	input: CourseText & { moduleId: string; actorId: number; ip: string },
+	database: ModuleWriteDb,
+	input: CourseText & {
+		moduleId: string;
+		actorId: number;
+		ip: string;
+		requires?: string[];
+	},
 ): Promise<CourseView> {
 	const courseId = await courseIdForModule(database, input.moduleId);
 	await requireDraft(database, courseId);
 	await writeModuleText(database, input.moduleId, input);
+	if (input.requires !== undefined) {
+		await writeModuleRequires(
+			database,
+			courseId,
+			input.moduleId,
+			input.requires,
+		);
+	}
 	return readCourse(database, courseId);
+}
+
+async function writeModuleRequires(
+	database: ModuleWriteDb,
+	courseId: string,
+	moduleId: string,
+	requires: string[],
+): Promise<void> {
+	const rows = await database
+		.select({ id: modules.id, position: modules.position })
+		.from(modules)
+		.where(eq(modules.courseId, courseId));
+	const self = rows.find((row) => row.id === moduleId);
+	if (!self) throw errors.notFound("That module was not found.");
+	const unique = [...new Set(requires)];
+	for (const requiredId of unique) {
+		const earlier = rows.find((row) => row.id === requiredId);
+		if (!earlier || earlier.position >= self.position) {
+			throw errors.badRequest("A module can only require an earlier module.", {
+				reason: "not_earlier",
+			});
+		}
+	}
+	await database
+		.delete(modulePrerequisites)
+		.where(eq(modulePrerequisites.moduleId, moduleId));
+	if (unique.length === 0) return;
+	await database.insert(modulePrerequisites).values(
+		unique.map((requiredModuleId) => ({
+			moduleId,
+			requiredModuleId,
+		})),
+	);
 }
 
 type TaskText = {
