@@ -72,7 +72,7 @@ async function compressImage(file: Blob): Promise<Blob | null> {
 
 /**
  * Keep a small allowed file as-is. Compress a large image to JPEG.
- * A PDF is never re-encoded.
+ * A PDF is never re-encoded. The upload queue retries these bytes, not the original.
  */
 export async function prepareEvidenceFile(file: File): Promise<PrepareResult> {
 	if (file.size < 1) return "too_large";

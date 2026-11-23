@@ -174,6 +174,12 @@ export const en = {
 	evidenceClosed: "This task is waiting on a trainer.",
 	evidenceTooLarge: "That file is still too large.",
 	evidenceUploadFailed: "The file did not upload. Try again.",
+	photoDark: "This photo looks too dark. Take another, or send this one.",
+	photoBlurry: "This photo looks blurry. Take another, or send this one.",
+	photoDarkBlurry:
+		"This photo looks dark and blurry. Take another, or send this one.",
+	sendThisPhoto: "Send this one",
+	uploadWaiting: "{count} items waiting to upload.",
 	submissionHistory: "What you sent",
 	attemptLabel: "Attempt {count}",
 	withdrawSubmission: "Take this back",
@@ -546,6 +552,13 @@ export const rw: Record<MessageKey, string> = {
 	evidenceClosed: "Iki gikorwa kirategereje umwarimu.",
 	evidenceTooLarge: "Iyo dosiye iracyari nini cyane.",
 	evidenceUploadFailed: "Dosiye ntiyoherejwe. Ongera ugerageze.",
+	photoDark: "Iyi foto isa n'iyijimye. Fata indi, cyangwa ohereze iyi.",
+	photoBlurry:
+		"Iyi foto isa n'itagaragara neza. Fata indi, cyangwa ohereze iyi.",
+	photoDarkBlurry:
+		"Iyi foto isa n'iyijimye kandi itagaragara neza. Fata indi, cyangwa ohereze iyi.",
+	sendThisPhoto: "Ohereza iyi",
+	uploadWaiting: "Ibyo wohereje {count} birategereje interineti.",
 	submissionHistory: "Ibyo wohereje",
 	attemptLabel: "Igerageza {count}",
 	withdrawSubmission: "Kuramo ibyo wohereje",

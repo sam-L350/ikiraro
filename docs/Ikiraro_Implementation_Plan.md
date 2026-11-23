@@ -58,7 +58,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
 - [ ] Phase 4 — Trust loop (`phase/4-trust-loop`)
   - [x] `phase/4.1-private-media`
   - [x] `phase/4.2-submissions`
-  - [ ] `phase/4.3-upload-queue`
+  - [x] `phase/4.3-upload-queue`
   - [ ] `phase/4.4-review-queue`
   - [ ] `phase/4.5-decisions-and-conflicts`
   - [ ] `phase/4.6-atomic-award`

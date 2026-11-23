@@ -18,11 +18,21 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { deviceType, readGeo } from "@/lib/media/device";
 import { prepareEvidenceFile } from "@/lib/media/prepare";
+import { type PhotoWarning, readPhotoWarning } from "@/lib/media/quality";
+import { blobToBase64 } from "@/lib/offline/bytes";
 import {
 	mediaShouldLoad,
 	readDataSaver,
 	writeDataSaver,
 } from "@/lib/offline/data-saver";
+import { deliverSubmission } from "@/lib/offline/deliver";
+import {
+	classifyFailure,
+	enqueueSubmission,
+	flushQueue,
+	isQueued,
+	type SubmissionQueuePayload,
+} from "@/lib/offline/outbox";
 
 type EvidenceKind = "photo" | "file" | "note";
 type StoredNotice =
@@ -33,6 +43,12 @@ type StoredNotice =
 	| "closed"
 	| "too_large"
 	| "failed";
+type HeldPhoto = {
+	bytes: Blob;
+	contentType: string;
+	sha256: string;
+	warning: Exclude<PhotoWarning, "ok">;
+};
 type SubmissionStatus =
 	| "draft"
 	| "pending"
@@ -87,6 +103,7 @@ export default function TaskPage() {
 	);
 	const [sending, setSending] = useState(false);
 	const [stored, setStored] = useState<StoredNotice | null>(null);
+	const [held, setHeld] = useState<HeldPhoto | null>(null);
 	const enrollment = useEngine(
 		"/enrollments/:id",
 		{ query: { id: enrollmentId } },
@@ -104,9 +121,6 @@ export default function TaskPage() {
 		{ query: { id: enrollmentId } },
 		{ enabled: enrollmentId.length > 0 },
 	);
-	const intent = useEngineMutation("/media/upload-intent");
-	const finalize = useEngineMutation("/media/:id/finalize");
-	const submit = useEngineMutation("/submissions/create");
 	const withdraw = useEngineMutation("/submissions/:id/withdraw");
 
 	useEffect(() => {
@@ -206,9 +220,11 @@ export default function TaskPage() {
 		setSending(true);
 		setStored(null);
 		try {
-			await recordAttempt({ note: text });
-			setStored("note");
-			if (note.current) note.current.value = "";
+			const result = await sendOrQueue({ evidenceType: "note", note: text });
+			if (result === "sent") {
+				setStored("note");
+				if (note.current) note.current.value = "";
+			}
 		} catch (caught) {
 			setStored(noticeFor(caught));
 		} finally {
@@ -232,27 +248,26 @@ export default function TaskPage() {
 				setStored("failed");
 				return;
 			}
-			const started = await intent.mutateAsync({
-				body: {
-					contentType: prepared.contentType,
-					byteSize: prepared.bytes.size,
-				},
-			});
-			const put = await fetch(started.uploadUrl, {
-				method: "PUT",
-				headers: { "content-type": started.contentType },
-				body: prepared.bytes,
-				credentials: "omit",
-			});
-			if (!put.ok) {
-				setStored("failed");
-				return;
+			if (kind === "photo") {
+				const warning = await readPhotoWarning(prepared.bytes);
+				if (warning !== "ok") {
+					setHeld({
+						bytes: prepared.bytes,
+						contentType: prepared.contentType,
+						sha256: prepared.sha256,
+						warning,
+					});
+					return;
+				}
 			}
-			const finalized = await finalize.mutateAsync({
-				body: { id: started.id, sha256: prepared.sha256 },
+			setHeld(null);
+			const result = await sendOrQueue({
+				evidenceType: kind === "photo" ? "photo" : "file",
+				bytes: prepared.bytes,
+				contentType: prepared.contentType,
+				sha256: prepared.sha256,
 			});
-			await recordAttempt({ mediaId: finalized.id });
-			setStored(kind === "photo" ? "photo" : "file");
+			if (result === "sent") setStored(kind === "photo" ? "photo" : "file");
 		} catch (caught) {
 			setStored(noticeFor(caught));
 		} finally {
@@ -260,21 +275,63 @@ export default function TaskPage() {
 		}
 	}
 
-	async function recordAttempt(input: { mediaId?: string; note?: string }) {
-		const geo = await readGeo();
-		await submit.mutateAsync({
-			body: {
-				id: crypto.randomUUID(),
-				enrollmentId,
-				taskId,
-				submit: true,
-				deviceInfo: deviceType(),
-				...(input.mediaId ? { mediaId: input.mediaId } : {}),
-				...(input.note ? { note: input.note } : {}),
-				...(geo ?? {}),
-			},
-		});
-		await invalidateEngine("/enrollments/:id/submissions");
+	async function sendHeld() {
+		if (!held) return;
+		setSending(true);
+		setStored(null);
+		try {
+			const result = await sendOrQueue({
+				evidenceType: "photo",
+				bytes: held.bytes,
+				contentType: held.contentType,
+				sha256: held.sha256,
+			});
+			setHeld(null);
+			if (result === "sent") setStored("photo");
+		} catch (caught) {
+			setStored(noticeFor(caught));
+		} finally {
+			setSending(false);
+		}
+	}
+
+	async function sendOrQueue(input: {
+		evidenceType: EvidenceKind;
+		bytes?: Blob;
+		contentType?: string;
+		sha256?: string;
+		note?: string;
+	}): Promise<"sent" | "queued"> {
+		const online = navigator.onLine;
+		const geo = online ? await readGeo() : null;
+		const payload: SubmissionQueuePayload = {
+			kind: "submission",
+			id: crypto.randomUUID(),
+			enrollmentId,
+			taskId,
+			evidenceType: input.evidenceType,
+			contentType: input.contentType ?? "text/plain",
+			sha256: input.sha256 ?? "",
+			bytesBase64: input.bytes ? await blobToBase64(input.bytes) : "",
+			note: input.note ?? null,
+			deviceInfo: deviceType(),
+			geoLat: geo?.geoLat ?? null,
+			geoLng: geo?.geoLng ?? null,
+			submit: true,
+		};
+		if (!online) {
+			enqueueSubmission(payload);
+			return "queued";
+		}
+		try {
+			await deliverSubmission(payload);
+			return "sent";
+		} catch (caught) {
+			if (classifyFailure(caught) !== "retry") throw caught;
+			enqueueSubmission(payload);
+			await flushQueue(deliverSubmission);
+			return isQueued(payload.id) ? "queued" : "sent";
+		}
 	}
 
 	async function takeBack(id: string) {
@@ -474,6 +531,20 @@ export default function TaskPage() {
 						<EvidenceIcon kind={kind} />
 						{evidenceLabel(kind, t)}
 					</Button>
+					{held ? (
+						<p className="text-lg text-fg">{warningCopy(held.warning, t)}</p>
+					) : null}
+					{held ? (
+						<Button
+							type="button"
+							variant="quiet"
+							className="w-fit"
+							disabled={sending}
+							onClick={() => void sendHeld()}
+						>
+							{t("sendThisPhoto")}
+						</Button>
+					) : null}
 					{stored ? (
 						<p className="text-lg text-fg">{storedCopy(stored, t)}</p>
 					) : null}
@@ -596,6 +667,24 @@ function evidenceCopy(
 			return t("evidenceAsksNote");
 		default: {
 			const unreachable: never = kind;
+			return unreachable;
+		}
+	}
+}
+
+function warningCopy(
+	warning: Exclude<PhotoWarning, "ok">,
+	t: (key: "photoDark" | "photoBlurry" | "photoDarkBlurry") => string,
+): string {
+	switch (warning) {
+		case "dark":
+			return t("photoDark");
+		case "blurry":
+			return t("photoBlurry");
+		case "both":
+			return t("photoDarkBlurry");
+		default: {
+			const unreachable: never = warning;
 			return unreachable;
 		}
 	}
