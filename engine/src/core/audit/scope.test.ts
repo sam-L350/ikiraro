@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { auditScope } from "./scope";
+import { auditActionVisible, auditScope } from "./scope";
 
 describe("auditScope", () => {
 	test("an auditor sees every row and a center manager sees that center", () => {
@@ -20,6 +20,17 @@ describe("auditScope", () => {
 			centerIds: ["center-a"],
 			districtIds: [],
 		});
+	});
+
+	test("a center list hides a concern and a global list keeps it", () => {
+		const limited = {
+			kind: "limited" as const,
+			centerIds: ["center-a"],
+			districtIds: [],
+		};
+		expect(auditActionVisible(limited, "misconduct.filed")).toBe(false);
+		expect(auditActionVisible({ kind: "all" }, "misconduct.filed")).toBe(true);
+		expect(auditActionVisible(limited, "account.deactivated")).toBe(true);
 	});
 
 	test("a trainer has no audit scope", () => {

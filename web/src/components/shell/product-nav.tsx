@@ -60,6 +60,13 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/points", label: "pointsNav" },
 		);
 	}
+	const canFileConcern =
+		user?.roles.some(
+			(role) => role.code === "learner" || role.code === "trainer",
+		) ?? false;
+	if (canFileConcern) {
+		items.push({ to: "/report", label: "reportNav" });
+	}
 	if (!isStaff) return items;
 	items.push(
 		{ to: "/staff", label: "staffTitle", end: true },
@@ -106,6 +113,14 @@ function useProductNavItems(): NavItem[] {
 		) ?? false;
 	if (canReadAudit) {
 		items.push({ to: "/audit", label: "auditNav" });
+	}
+	const canReviewConcerns =
+		user?.roles.some(
+			(role) =>
+				role.code === "district_coordinator" || role.code === "platform_admin",
+		) ?? false;
+	if (canReviewConcerns) {
+		items.push({ to: "/concerns", label: "concernsNav" });
 	}
 	return items;
 }

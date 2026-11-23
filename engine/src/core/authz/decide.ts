@@ -66,6 +66,13 @@ export function decideAccess(input: {
 	if (input.permission === "audit.read") {
 		return { ok: true };
 	}
+	// Filing and reviewing are opened here. The report query then hides the accused center.
+	if (
+		input.permission === "misconduct.file" ||
+		input.permission === "misconduct.review"
+	) {
+		return { ok: true };
+	}
 	// The published catalog is the same shelf for every center. Scope applies when enrolling.
 	if (input.permission === "learning.read") {
 		return { ok: true };

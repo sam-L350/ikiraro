@@ -47,6 +47,27 @@ describe("decideAccess", () => {
 		expect(trainer.ok).toBe(false);
 	});
 
+	test("a trainer can file a concern and cannot review one", () => {
+		const file = decideAccess({
+			actorId: "7",
+			permission: "misconduct.file",
+			assignments: [
+				{ role: "trainer", scopeType: "center", scopeId: "center-a" },
+			],
+			resource: { ownerId: "7" },
+		});
+		const review = decideAccess({
+			actorId: "7",
+			permission: "misconduct.review",
+			assignments: [
+				{ role: "trainer", scopeType: "center", scopeId: "center-a" },
+			],
+			resource: { ownerId: "7" },
+		});
+		expect(file).toEqual({ ok: true });
+		expect(review.ok).toBe(false);
+	});
+
 	test("a global admin passes a center-scoped resource", () => {
 		const decision = decideAccess({
 			actorId: "1",

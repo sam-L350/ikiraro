@@ -1,6 +1,12 @@
 import { ROLE_PERMISSIONS } from "../authz/catalog";
 import type { Assignment } from "../authz/decide";
 
+/** A concern is not visible on a center-scoped audit list. */
+export function auditActionVisible(scope: AuditScope, action: string): boolean {
+	if (!action.startsWith("misconduct.")) return true;
+	return scope.kind === "all";
+}
+
 /** Whose audit rows this viewer may read. */
 export type AuditScope =
 	| { kind: "all" }

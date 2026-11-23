@@ -34,6 +34,8 @@ export const PERMISSION_CODES = [
 	"grant.decide",
 	"report.read",
 	"audit.read",
+	"misconduct.file",
+	"misconduct.review",
 	"admin.manage",
 	"mentor.connect",
 ] as const;
@@ -62,6 +64,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
 		"learning.read",
 		"learning.enroll",
 		"learning.progress",
+		"misconduct.file",
 	],
 	trainer: [
 		"profile.read.self",
@@ -70,6 +73,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
 		"learning.read",
 		"learning.enroll",
 		"learning.progress",
+		"misconduct.file",
 	],
 	center_manager: [
 		"profile.read.self",
@@ -87,6 +91,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
 		"district.manage",
 		"submission.review",
 		"audit.read",
+		"misconduct.review",
 	],
 	content_author: ["profile.read.self", "profile.write.self", "content.write"],
 	content_reviewer: [
@@ -111,6 +116,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
 		"profile.write.self",
 		"admin.manage",
 		"audit.read",
+		"misconduct.review",
 	],
 	mentor: ["profile.read.self", "profile.write.self", "mentor.connect"],
 	public_verifier: ["profile.read.self", "profile.write.self"],
@@ -131,6 +137,9 @@ export const PERMISSION_DESCRIPTIONS: Record<PermissionCode, string> = {
 	"grant.decide": "Vote on an allocation round",
 	"report.read": "Read aggregated reports",
 	"audit.read": "Search the audit log inside the viewer's scope",
+	"misconduct.file": "File a confidential concern about the reporter's center",
+	"misconduct.review":
+		"Read a concern from a center the reviewer does not work at",
 	"admin.manage": "Manage users, roles, and configuration",
 	"mentor.connect": "Request contact with an opted-in learner",
 };

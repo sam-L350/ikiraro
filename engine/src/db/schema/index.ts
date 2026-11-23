@@ -50,6 +50,7 @@ export {
 	taskProgress,
 } from "./learning";
 export { mediaObjects } from "./media";
+export { misconductReports } from "./misconduct";
 export {
 	notificationPreferences,
 	notifications,

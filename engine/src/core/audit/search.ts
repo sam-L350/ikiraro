@@ -121,11 +121,14 @@ export async function readAudit(
 	const scopeClause =
 		visible === "all"
 			? undefined
-			: or(
-					inArray(systemAuditLogs.actorId, visible),
-					and(
-						eq(systemAuditLogs.targetType, "user"),
-						inArray(systemAuditLogs.targetId, visible.map(String)),
+			: and(
+					sql`${systemAuditLogs.action} not like 'misconduct.%'`,
+					or(
+						inArray(systemAuditLogs.actorId, visible),
+						and(
+							eq(systemAuditLogs.targetType, "user"),
+							inArray(systemAuditLogs.targetId, visible.map(String)),
+						),
 					),
 				);
 	const actionClause = filter.action

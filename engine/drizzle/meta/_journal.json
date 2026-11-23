@@ -183,6 +183,13 @@
       "when": 1795450000000,
       "tag": "0025_phase6_audit_privacy",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795451000000,
+      "tag": "0026_phase6_misconduct",
+      "breakpoints": true
     }
   ]
 }
