@@ -59,7 +59,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/4.1-private-media`
   - [x] `phase/4.2-submissions`
   - [x] `phase/4.3-upload-queue`
-  - [ ] `phase/4.4-review-queue`
+  - [x] `phase/4.4-review-queue`
   - [ ] `phase/4.5-decisions-and-conflicts`
   - [ ] `phase/4.6-atomic-award`
   - [ ] `phase/4.7-resubmit-and-revoke`

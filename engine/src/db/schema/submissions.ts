@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
 	check,
 	doublePrecision,
+	index,
 	integer,
 	pgTable,
 	text,
@@ -61,6 +62,9 @@ export const taskSubmissions = pgTable(
 		uniqueIndex("task_submissions_one_open")
 			.on(table.enrollmentId, table.taskId)
 			.where(sql`${table.status} in ('draft', 'pending', 'in_review')`),
+		index("task_submissions_waiting")
+			.on(table.submittedAt)
+			.where(sql`${table.status} in ('pending', 'in_review')`),
 		check(
 			"task_submissions_status",
 			sql`${table.status} in (${submissionStatusSql})`,

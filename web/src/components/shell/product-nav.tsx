@@ -21,6 +21,13 @@ function useProductNavItems(): NavItem[] {
 		user?.roles.some((role) => role.code === "content_author") ?? false;
 	const canReviewCourses =
 		user?.roles.some((role) => role.code === "content_reviewer") ?? false;
+	const canReviewEvidence =
+		user?.roles.some(
+			(role) =>
+				role.code === "trainer" ||
+				role.code === "center_manager" ||
+				role.code === "district_coordinator",
+		) ?? false;
 	const canUseCatalog =
 		user?.roles.some(
 			(role) =>
@@ -52,6 +59,9 @@ function useProductNavItems(): NavItem[] {
 	}
 	if (canReviewCourses) {
 		items.push({ to: "/reviews", label: "reviewsNav" });
+	}
+	if (canReviewEvidence) {
+		items.push({ to: "/evidence", label: "evidenceQueueTitle" });
 	}
 	return items;
 }

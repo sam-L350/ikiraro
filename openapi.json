@@ -39,6 +39,9 @@
 			"name": "enrollments"
 		},
 		{
+			"name": "evidence-queue"
+		},
+		{
 			"name": "examples"
 		},
 		{
@@ -7379,6 +7382,533 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/evidence-queue/{id}": {
+			"get": {
+				"operationId": "getEvidenceReview",
+				"summary": "The evidence and the rubric for one waiting attempt.",
+				"tags": [
+					"evidence-queue"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"attempt": {
+													"type": "number"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"in_review",
+														"pending"
+													]
+												},
+												"evidenceType": {
+													"type": "string",
+													"enum": [
+														"photo",
+														"file",
+														"note"
+													]
+												},
+												"submittedAt": {
+													"type": "string"
+												},
+												"urgency": {
+													"type": "string",
+													"enum": [
+														"ok",
+														"soon",
+														"overdue"
+													]
+												},
+												"learnerName": {
+													"type": "string"
+												},
+												"centerId": {
+													"type": "string"
+												},
+												"centerName": {
+													"type": "string"
+												},
+												"taskTitleRw": {
+													"type": "string"
+												},
+												"taskTitleEn": {
+													"type": "string"
+												},
+												"instructionsRw": {
+													"type": "string"
+												},
+												"instructionsEn": {
+													"type": "string"
+												},
+												"note": {
+													"type": "string",
+													"nullable": true
+												},
+												"evidenceUrl": {
+													"type": "string",
+													"nullable": true
+												},
+												"evidenceContentType": {
+													"type": "string",
+													"nullable": true
+												},
+												"criteria": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"weight": {
+																"type": "number"
+															},
+															"promptRw": {
+																"type": "string"
+															},
+															"promptEn": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"weight",
+															"promptRw",
+															"promptEn"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"attempt",
+												"status",
+												"evidenceType",
+												"submittedAt",
+												"urgency",
+												"learnerName",
+												"centerId",
+												"centerName",
+												"taskTitleRw",
+												"taskTitleEn",
+												"instructionsRw",
+												"instructionsEn",
+												"note",
+												"evidenceUrl",
+												"evidenceContentType",
+												"criteria"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/evidence-queue/{id}/start": {
+			"post": {
+				"operationId": "createEvidenceReviewStart",
+				"summary": "Mark the attempt in review so the learner can no longer take it back.",
+				"tags": [
+					"evidence-queue"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"status": {
+													"const": "in_review",
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"status"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/evidence-queue": {
+			"get": {
+				"operationId": "getEvidenceQueue",
+				"summary": "Oldest waiting evidence at the centers this person reviews.",
+				"tags": [
+					"evidence-queue"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "centerId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												},
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"attempt": {
+																"type": "number"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"in_review",
+																	"pending"
+																]
+															},
+															"evidenceType": {
+																"type": "string",
+																"enum": [
+																	"photo",
+																	"file",
+																	"note"
+																]
+															},
+															"submittedAt": {
+																"type": "string"
+															},
+															"urgency": {
+																"type": "string",
+																"enum": [
+																	"ok",
+																	"soon",
+																	"overdue"
+																]
+															},
+															"learnerName": {
+																"type": "string"
+															},
+															"centerId": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"taskTitleRw": {
+																"type": "string"
+															},
+															"taskTitleEn": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"attempt",
+															"status",
+															"evidenceType",
+															"submittedAt",
+															"urgency",
+															"learnerName",
+															"centerId",
+															"centerName",
+															"taskTitleRw",
+															"taskTitleEn"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"centers",
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}

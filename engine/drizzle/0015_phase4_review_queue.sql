@@ -1,0 +1,1 @@
+CREATE INDEX "task_submissions_waiting" ON "task_submissions" USING btree ("submitted_at") WHERE "task_submissions"."status" in ('pending', 'in_review');
