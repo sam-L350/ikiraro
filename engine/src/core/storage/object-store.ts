@@ -35,6 +35,7 @@ export interface ObjectStore {
 	}): Promise<SignedUrl>;
 	put(input: StoredBytes & { key: string }): Promise<void>;
 	read(key: string): Promise<StoredBytes | null>;
+	remove(key: string): Promise<void>;
 }
 
 type R2Config = {
@@ -118,6 +119,9 @@ export function createMemoryObjectStore(input: {
 		async read(key) {
 			return objects.get(key) ?? null;
 		},
+		async remove(key) {
+			objects.delete(key);
+		},
 	};
 }
 
@@ -126,7 +130,7 @@ export function createS3ObjectStore(
 	now: () => Date = () => new Date(),
 ): ObjectStore {
 	function signed(
-		method: "GET" | "PUT" | "HEAD",
+		method: "GET" | "PUT" | "HEAD" | "DELETE",
 		key: string,
 		expiresInSeconds: number,
 		contentType?: string,
@@ -195,6 +199,12 @@ export function createS3ObjectStore(
 				contentType: response.headers.get("content-type") ?? "",
 				bytes,
 			};
+		},
+		async remove(key) {
+			const url = signed("DELETE", key, 60);
+			const response = await fetch(url, { method: "DELETE" });
+			if (response.ok || response.status === 404) return;
+			throw new Error("The private store did not remove the object");
 		},
 	};
 }

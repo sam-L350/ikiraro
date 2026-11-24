@@ -16,6 +16,7 @@ export async function createAuthSession(input: {
 	code?: string;
 	email?: string;
 	password?: string;
+	secondCode?: string;
 	sharedDevice?: boolean;
 }): Promise<{ id: number; email: string; name: string | null }> {
 	const ip = clientIp();
@@ -30,6 +31,7 @@ export async function createAuthSession(input: {
 				method: "otp",
 				phone: input.phone,
 				code: input.code,
+				secondCode: input.secondCode,
 				ip,
 				sharedDevice: input.sharedDevice,
 			});
@@ -46,6 +48,7 @@ export async function createAuthSession(input: {
 				method: "password",
 				email: input.email,
 				password: input.password,
+				secondCode: input.secondCode,
 				ip,
 				sharedDevice: input.sharedDevice,
 			});

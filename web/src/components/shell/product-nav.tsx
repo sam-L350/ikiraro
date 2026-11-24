@@ -236,6 +236,8 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/privacy-tools", label: "privacyToolsNav" },
 			{ to: "/settings", label: "settingsNav" },
 			{ to: "/webhooks", label: "webhooksNav" },
+			{ to: "/duplicates", label: "duplicatesNav" },
+			{ to: "/retention", label: "retentionNav" },
 		);
 	}
 	const canReadAudit =

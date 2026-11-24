@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from "react";
+import { AccountSecurity } from "@/components/auth/account-security";
 import { PrivacyActions } from "@/components/auth/privacy-actions";
-import { SessionList } from "@/components/auth/session-list";
 import { SubjectTools } from "@/components/auth/subject-tools";
 import { Spinner } from "@/components/spinner";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +96,7 @@ function ProfileEditor({
 		profile.locale === "en" ? "en" : "rw",
 	);
 	const [error, setError] = useState<MessageKey | null>(null);
+	const [tab, setTab] = useState<"details" | "sessions">("details");
 	const save = useEngineMutation("/profile/update");
 	const consent = useEngineMutation("/consents");
 
@@ -129,175 +130,216 @@ function ProfileEditor({
 			<p className="mt-4 font-sans text-lg font-medium text-fg">
 				{t("profileSentence")}
 			</p>
-			<form className="mt-8 flex flex-col gap-4" onSubmit={onSubmit}>
-				<label className="flex flex-col gap-2" htmlFor="profile-name">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("nameLabel")}
-					</span>
-					<Input
-						id="profile-name"
-						className="h-11"
-						value={name}
-						onChange={(event) => setName(event.target.value)}
-						required
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="profile-dob">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("dateOfBirthLabel")}
-					</span>
-					<Input
-						id="profile-dob"
-						className="h-11"
-						type="date"
-						value={dateOfBirth}
-						onChange={(event) => setDateOfBirth(event.target.value)}
-						required
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="profile-district">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("districtLabel")}
-					</span>
-					<Input
-						id="profile-district"
-						className="h-11"
-						value={district}
-						onChange={(event) => setDistrict(event.target.value)}
-						required
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="profile-sector">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("sectorLabel")}
-					</span>
-					<Input
-						id="profile-sector"
-						className="h-11"
-						value={sector}
-						onChange={(event) => setSector(event.target.value)}
-						required
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="profile-village">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("villageLabel")}
-					</span>
-					<Input
-						id="profile-village"
-						className="h-11"
-						value={village}
-						onChange={(event) => setVillage(event.target.value)}
-						required
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="profile-work">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("economicSectorLabel")}
-					</span>
-					<Input
-						id="profile-work"
-						className="h-11"
-						value={economicSector}
-						onChange={(event) => setEconomicSector(event.target.value)}
-						required
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="profile-guardian">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("guardianLabel")}
-					</span>
-					<Input
-						id="profile-guardian"
-						className="h-11"
-						value={guardian}
-						onChange={(event) => setGuardian(event.target.value)}
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="profile-locale">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("localeLabel")}
-					</span>
-					<select
-						id="profile-locale"
-						className="h-11 w-full rounded-xl border border-line-strong bg-surface px-3 font-sans text-fg"
-						value={locale}
-						onChange={(event) =>
-							setLocale(event.target.value === "en" ? "en" : "rw")
+			<div
+				role="tablist"
+				aria-label={t("profileTitle")}
+				className="mt-8 flex gap-2"
+			>
+				{(
+					[
+						["details", "detailsTab"],
+						["sessions", "sessionsTab"],
+					] as const
+				).map(([value, label]) => (
+					<button
+						key={value}
+						type="button"
+						role="tab"
+						aria-selected={tab === value}
+						className={
+							tab === value
+								? "inline-flex min-h-11 items-center rounded-full bg-ink px-4 font-sans text-sm font-semibold text-ink-fg"
+								: "inline-flex min-h-11 items-center rounded-full px-4 font-sans text-sm font-semibold text-fg hover:bg-surface"
 						}
+						onClick={() => setTab(value)}
 					>
-						<option value="rw">{t("kinyarwanda")}</option>
-						<option value="en">{t("english")}</option>
-					</select>
-				</label>
-				{error ? (
-					<p className="font-sans text-sm font-medium text-danger" role="alert">
-						{t(error)}
-					</p>
-				) : null}
-				<div>
-					<Button type="submit" variant="sticker" disabled={save.isPending}>
-						{t("saveProfile")}
-					</Button>
+						{t(label)}
+					</button>
+				))}
+			</div>
+			{tab === "sessions" ? (
+				<div role="tabpanel">
+					<AccountSecurity />
 				</div>
-			</form>
-			<section className="mt-12">
-				<h2 className="font-sans text-2xl font-semibold text-fg">
-					{t("consentHeading")}
-				</h2>
-				{profile.minor ? (
-					<p className="mt-3 font-sans text-sm font-medium text-fg">
-						{t("minorVisibility")}
-					</p>
-				) : null}
-				<ul className="mt-4 flex flex-col">
-					{profile.consents.map((row) => {
-						const locked = profile.minor && lockedForMinor(row.purpose);
-						return (
-							<li
-								key={row.purpose}
-								className="flex items-center justify-between gap-4 border-t border-ink/15 py-4"
+			) : null}
+			{tab === "details" ? (
+				<div role="tabpanel">
+					<form className="mt-8 flex flex-col gap-4" onSubmit={onSubmit}>
+						<label className="flex flex-col gap-2" htmlFor="profile-name">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("nameLabel")}
+							</span>
+							<Input
+								id="profile-name"
+								className="h-11"
+								value={name}
+								onChange={(event) => setName(event.target.value)}
+								required
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="profile-dob">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("dateOfBirthLabel")}
+							</span>
+							<Input
+								id="profile-dob"
+								className="h-11"
+								type="date"
+								value={dateOfBirth}
+								onChange={(event) => setDateOfBirth(event.target.value)}
+								required
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="profile-district">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("districtLabel")}
+							</span>
+							<Input
+								id="profile-district"
+								className="h-11"
+								value={district}
+								onChange={(event) => setDistrict(event.target.value)}
+								required
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="profile-sector">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("sectorLabel")}
+							</span>
+							<Input
+								id="profile-sector"
+								className="h-11"
+								value={sector}
+								onChange={(event) => setSector(event.target.value)}
+								required
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="profile-village">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("villageLabel")}
+							</span>
+							<Input
+								id="profile-village"
+								className="h-11"
+								value={village}
+								onChange={(event) => setVillage(event.target.value)}
+								required
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="profile-work">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("economicSectorLabel")}
+							</span>
+							<Input
+								id="profile-work"
+								className="h-11"
+								value={economicSector}
+								onChange={(event) => setEconomicSector(event.target.value)}
+								required
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="profile-guardian">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("guardianLabel")}
+							</span>
+							<Input
+								id="profile-guardian"
+								className="h-11"
+								value={guardian}
+								onChange={(event) => setGuardian(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="profile-locale">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("localeLabel")}
+							</span>
+							<select
+								id="profile-locale"
+								className="h-11 w-full rounded-xl border border-line-strong bg-surface px-3 font-sans text-fg"
+								value={locale}
+								onChange={(event) =>
+									setLocale(event.target.value === "en" ? "en" : "rw")
+								}
 							>
-								<span className="font-sans font-semibold text-fg">
-									{t(purposeTitle(row.purpose))}
-								</span>
-								<span className="flex items-center gap-3">
-									<Badge variant={row.granted ? "pending" : "neutral"}>
-										{row.granted ? t("consentOn") : t("consentOff")}
-									</Badge>
-									{locked && !row.granted ? null : (
-										<Button
-											type="button"
-											variant="quiet"
-											disabled={consent.isPending}
-											onClick={() => {
-												setError(null);
-												consent.mutate(
-													{
-														body: {
-															purpose: row.purpose,
-															granted: !row.granted,
-														},
-													},
-													{
-														onSuccess: () => void onChanged(),
-														onError: (caught) => setError(reasonKey(caught)),
-													},
-												);
-											}}
-										>
-											{row.granted ? t("withdrawConsent") : t("allowConsent")}
-										</Button>
-									)}
-								</span>
-							</li>
-						);
-					})}
-				</ul>
-			</section>
-			<SubjectTools />
-			<PrivacyActions />
-			<SessionList />
+								<option value="rw">{t("kinyarwanda")}</option>
+								<option value="en">{t("english")}</option>
+							</select>
+						</label>
+						{error ? (
+							<p
+								className="font-sans text-sm font-medium text-danger"
+								role="alert"
+							>
+								{t(error)}
+							</p>
+						) : null}
+						<div>
+							<Button type="submit" variant="sticker" disabled={save.isPending}>
+								{t("saveProfile")}
+							</Button>
+						</div>
+					</form>
+					<section className="mt-12">
+						<h2 className="font-sans text-2xl font-semibold text-fg">
+							{t("consentHeading")}
+						</h2>
+						{profile.minor ? (
+							<p className="mt-3 font-sans text-sm font-medium text-fg">
+								{t("minorVisibility")}
+							</p>
+						) : null}
+						<ul className="mt-4 flex flex-col">
+							{profile.consents.map((row) => {
+								const locked = profile.minor && lockedForMinor(row.purpose);
+								return (
+									<li
+										key={row.purpose}
+										className="flex items-center justify-between gap-4 border-t border-ink/15 py-4"
+									>
+										<span className="font-sans font-semibold text-fg">
+											{t(purposeTitle(row.purpose))}
+										</span>
+										<span className="flex items-center gap-3">
+											<Badge variant={row.granted ? "pending" : "neutral"}>
+												{row.granted ? t("consentOn") : t("consentOff")}
+											</Badge>
+											{locked && !row.granted ? null : (
+												<Button
+													type="button"
+													variant="quiet"
+													disabled={consent.isPending}
+													onClick={() => {
+														setError(null);
+														consent.mutate(
+															{
+																body: {
+																	purpose: row.purpose,
+																	granted: !row.granted,
+																},
+															},
+															{
+																onSuccess: () => void onChanged(),
+																onError: (caught) =>
+																	setError(reasonKey(caught)),
+															},
+														);
+													}}
+												>
+													{row.granted
+														? t("withdrawConsent")
+														: t("allowConsent")}
+												</Button>
+											)}
+										</span>
+									</li>
+								);
+							})}
+						</ul>
+					</section>
+					<SubjectTools />
+					<PrivacyActions />
+				</div>
+			) : null}
 		</div>
 	);
 }

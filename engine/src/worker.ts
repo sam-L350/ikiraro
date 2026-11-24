@@ -8,11 +8,13 @@ import { createApp } from "./app";
 import { configureEnv } from "./config/env";
 import { cleanExpiredSessions } from "./core/auth/sessions";
 import { askDueFollowUps } from "./core/hardware/follow-ups";
+import { dropExpiredImages } from "./core/identity/retention";
 import { escalateOverdue } from "./core/learning/sla";
 import { logger } from "./core/logger";
 import { drainNotifications } from "./core/notifications/drain";
 import { sendDueWebhooks } from "./core/partners/webhooks";
 import { sendDueReports } from "./core/reports/reports";
+import { getObjectStore } from "./core/storage/object-store";
 import { db } from "./db";
 
 type Bindings = Record<string, string | undefined>;
@@ -54,6 +56,10 @@ export default {
 					.then(() => sendDueWebhooks(db))
 					.catch((error) => {
 						logger.error("partner notice failed", { error });
+					})
+					.then(() => dropExpiredImages(db, getObjectStore()))
+					.catch((error) => {
+						logger.error("evidence retention failed", { error });
 					})
 					.then(() => drainNotifications(db))
 					.catch((error) => {

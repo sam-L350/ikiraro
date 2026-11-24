@@ -30,6 +30,10 @@ function messageKey(error: unknown): MessageKey {
 			return "notActive";
 		case "deactivated":
 			return "deactivated";
+		case "second_code":
+			return "enterSecondCode";
+		case "wrong_second":
+			return "wrongSecondCode";
 		default:
 			return "tryAgain";
 	}
@@ -140,6 +144,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 	const [code, setCode] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [secondCode, setSecondCode] = useState("");
 	const [shared, setShared] = useState(false);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const [pending, setPending] = useState(false);
@@ -164,6 +169,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 					method: "otp",
 					phone,
 					code,
+					secondCode: secondCode.trim() || undefined,
 					sharedDevice: shared,
 				});
 			} else if (step === "password") {
@@ -171,6 +177,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 					method: "password",
 					email,
 					password,
+					secondCode: secondCode.trim() || undefined,
 					sharedDevice: shared,
 				});
 			} else {
@@ -270,6 +277,24 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 							required
 						/>
 					</label>
+					<label
+						className="flex w-full flex-col gap-2"
+						htmlFor="login-second-password"
+					>
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("loginSecond")}
+						</span>
+						<Input
+							id="login-second-password"
+							inputMode="numeric"
+							autoComplete="one-time-code"
+							value={secondCode}
+							onChange={(event) => setSecondCode(event.target.value)}
+						/>
+						<span className="font-sans text-sm font-medium text-fg-muted">
+							{t("loginSecondHint")}
+						</span>
+					</label>
 				</div>
 			) : (
 				<label
@@ -295,6 +320,26 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 					/>
 				</label>
 			)}
+			{step === "code" ? (
+				<label
+					className="mt-4 flex w-full flex-col gap-2"
+					htmlFor="login-second-code"
+				>
+					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+						{t("loginSecond")}
+					</span>
+					<Input
+						id="login-second-code"
+						inputMode="numeric"
+						autoComplete="one-time-code"
+						value={secondCode}
+						onChange={(event) => setSecondCode(event.target.value)}
+					/>
+					<span className="font-sans text-sm font-medium text-fg-muted">
+						{t("loginSecondHint")}
+					</span>
+				</label>
+			) : null}
 			{error ? (
 				<p
 					className="mt-2 font-sans text-sm font-medium text-danger"

@@ -20,7 +20,7 @@ export function SessionList() {
 	}
 
 	return (
-		<section className="mt-16">
+		<section className="mt-2">
 			<h2 className="font-sans text-2xl font-semibold text-fg">
 				{t("sessionsTitle")}
 			</h2>

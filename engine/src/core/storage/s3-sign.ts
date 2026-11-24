@@ -1,7 +1,7 @@
 import { createHash, createHmac } from "node:crypto";
 
 export type SignInput = {
-	method: "GET" | "PUT" | "HEAD";
+	method: "GET" | "PUT" | "HEAD" | "DELETE";
 	endpoint: string;
 	bucket: string;
 	key: string;

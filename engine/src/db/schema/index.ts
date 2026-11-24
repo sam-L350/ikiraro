@@ -51,6 +51,13 @@ export {
 	rankingSnapshots,
 } from "./grants";
 export { handoverRecords } from "./handover";
+export {
+	accountMergeRequests,
+	accountMerges,
+	loginLocks,
+	retentionPolicies,
+	staffFactors,
+} from "./hardening";
 export type {
 	Account,
 	NewAccount,

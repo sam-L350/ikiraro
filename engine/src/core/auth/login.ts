@@ -2,15 +2,17 @@ import { timingSafeEqual } from "node:crypto";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { env } from "../../config/env";
 import type { Database } from "../../db";
-import { otpChallenges, users } from "../../db/schema";
+import { loginLocks, otpChallenges, users } from "../../db/schema";
 import { errors, isApiError } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { consumeRateLimit } from "../guard/rate-limit";
 import { rememberSmsSpend } from "../sms/charges";
 import type { SmsSender } from "../sms/sender";
+import { confirmedSecret } from "./factors";
 import { hashPassword, verifyPassword } from "./password";
 import { normalizeRwandanPhone } from "./phone";
 import { createSession } from "./sessions";
+import { verifyTotp } from "./totp";
 
 const CODE_TTL_MS = 5 * 60 * 1000;
 const LOCK_MS = 15 * 60 * 1000;
@@ -19,7 +21,7 @@ const SEND_LIMIT = 3;
 const IP_SEND_LIMIT = 10;
 
 type LoginDb = Pick<Database, "insert" | "select" | "update">;
-type FailureReason = "wrong_code" | "wrong_password";
+type FailureReason = "wrong_code" | "wrong_password" | "wrong_second";
 type Failure = { count: number; resetAt: number };
 
 const failures = new Map<string, Failure>();
@@ -27,11 +29,17 @@ const lockedUntil = new Map<string, number>();
 let now = () => Date.now();
 let dummyHash: Promise<string> | null = null;
 
-export type OtpLogin = { method: "otp"; phone: string; code: string };
+export type OtpLogin = {
+	method: "otp";
+	phone: string;
+	code: string;
+	secondCode?: string;
+};
 export type PasswordLogin = {
 	method: "password";
 	email: string;
 	password: string;
+	secondCode?: string;
 };
 export type SignedInUser = {
 	id: number;
@@ -53,12 +61,76 @@ function guardKey(kind: "otp" | "password", subject: string): string {
 	return `${kind}\n${subject}`;
 }
 
-function assertUnlocked(key: string): void {
+async function readStoredLock(
+	database: Pick<Database, "select">,
+	key: string,
+): Promise<{ failures: number; resetAt: number; lockedUntil: number } | null> {
+	const [row] = await database
+		.select({
+			failures: loginLocks.failures,
+			resetAt: loginLocks.resetAt,
+			lockedUntil: loginLocks.lockedUntil,
+		})
+		.from(loginLocks)
+		.where(eq(loginLocks.subject, key))
+		.limit(1);
+	if (!row) return null;
+	return {
+		failures: row.failures,
+		resetAt: row.resetAt.getTime(),
+		lockedUntil: row.lockedUntil?.getTime() ?? 0,
+	};
+}
+
+async function writeStoredLock(
+	database: Pick<Database, "insert">,
+	key: string,
+	input: { failures: number; resetAt: number; lockedUntil: number },
+): Promise<void> {
+	await database
+		.insert(loginLocks)
+		.values({
+			subject: key,
+			failures: input.failures,
+			resetAt: new Date(input.resetAt),
+			lockedUntil: input.lockedUntil > 0 ? new Date(input.lockedUntil) : null,
+		})
+		.onConflictDoUpdate({
+			target: loginLocks.subject,
+			set: {
+				failures: input.failures,
+				resetAt: new Date(input.resetAt),
+				lockedUntil: input.lockedUntil > 0 ? new Date(input.lockedUntil) : null,
+			},
+		});
+}
+
+async function clearStoredLock(
+	database: Pick<Database, "update">,
+	key: string,
+): Promise<void> {
+	await database
+		.update(loginLocks)
+		.set({
+			failures: 0,
+			resetAt: new Date(now()),
+			lockedUntil: null,
+		})
+		.where(eq(loginLocks.subject, key));
+}
+
+async function assertUnlocked(database: LoginDb, key: string): Promise<void> {
 	const until = lockedUntil.get(key) ?? 0;
 	if (until > now()) {
 		throw errors.tooManyRequests("Too many attempts. Wait and try again.");
 	}
 	if (until) lockedUntil.delete(key);
+	const stored = await readStoredLock(database, key);
+	if (stored && stored.lockedUntil > now()) {
+		lockedUntil.set(key, stored.lockedUntil);
+		throw errors.tooManyRequests("Too many attempts. Wait and try again.");
+	}
+	if (stored && stored.lockedUntil > 0) await clearStoredLock(database, key);
 }
 
 function failureMessage(reason: FailureReason): string {
@@ -67,6 +139,8 @@ function failureMessage(reason: FailureReason): string {
 			return "That code is not right.";
 		case "wrong_password":
 			return "The email or password is wrong.";
+		case "wrong_second":
+			return "That code is not right.";
 		default: {
 			const unreachable: never = reason;
 			return unreachable;
@@ -74,21 +148,78 @@ function failureMessage(reason: FailureReason): string {
 	}
 }
 
-function noteFailure(key: string, reason: FailureReason): never {
+async function noteFailure(
+	database: LoginDb,
+	key: string,
+	reason: FailureReason,
+): Promise<never> {
 	const current = failures.get(key);
-	const count = current && current.resetAt > now() ? current.count + 1 : 1;
+	const stored = await readStoredLock(database, key);
+	const memoryCount = current && current.resetAt > now() ? current.count : 0;
+	const storedCount = stored && stored.resetAt > now() ? stored.failures : 0;
+	const count = Math.max(memoryCount, storedCount) + 1;
 	if (count >= MAX_FAILURES) {
 		failures.delete(key);
-		lockedUntil.set(key, now() + LOCK_MS);
+		const until = now() + LOCK_MS;
+		lockedUntil.set(key, until);
+		await writeStoredLock(database, key, {
+			failures: 0,
+			resetAt: until,
+			lockedUntil: until,
+		});
 		throw errors.tooManyRequests("Too many attempts. Wait and try again.");
 	}
-	failures.set(key, { count, resetAt: now() + LOCK_MS });
+	const resetAt = now() + LOCK_MS;
+	failures.set(key, { count, resetAt });
+	await writeStoredLock(database, key, {
+		failures: count,
+		resetAt,
+		lockedUntil: 0,
+	});
 	throw errors.badRequest(failureMessage(reason), { reason });
 }
 
-function clearFailures(key: string): void {
+async function clearFailures(database: LoginDb, key: string): Promise<void> {
 	failures.delete(key);
 	lockedUntil.delete(key);
+	await clearStoredLock(database, key);
+}
+
+async function requireSecondCode(
+	database: LoginDb,
+	userId: number,
+	key: string,
+	secondCode: string | undefined,
+): Promise<void> {
+	const secret = await confirmedSecret(database, userId);
+	if (!secret) return;
+	const code = secondCode?.trim() ?? "";
+	if (!code) {
+		throw errors.badRequest("Enter the second code.", {
+			reason: "second_code",
+		});
+	}
+	if (!(await verifyTotp(secret, code, now()))) {
+		await noteFailure(database, key, "wrong_second");
+	}
+}
+
+/** Whether this person's sign-in is locked. The guard key stays on the server. */
+export async function readOwnLock(
+	database: Pick<Database, "select">,
+	input: { email: string; phone: string | null },
+): Promise<{ locked: boolean; until: string | null }> {
+	const keys = [guardKey("password", input.email.trim().toLowerCase())];
+	if (input.phone) keys.push(guardKey("otp", input.phone));
+	let until = 0;
+	for (const key of keys) {
+		const memory = lockedUntil.get(key) ?? 0;
+		const stored = await readStoredLock(database, key);
+		const candidate = Math.max(memory, stored?.lockedUntil ?? 0);
+		if (candidate > until) until = candidate;
+	}
+	if (until <= now()) return { locked: false, until: null };
+	return { locked: true, until: new Date(until).toISOString() };
 }
 
 async function hashCode(phone: string, code: string): Promise<string> {
@@ -176,7 +307,7 @@ export async function createOtp(
 	if (!phoneLimit.ok || !ipLimit.ok) {
 		throw errors.tooManyRequests("Too many attempts. Wait and try again.");
 	}
-	assertUnlocked(guardKey("otp", phone));
+	await assertUnlocked(database, guardKey("otp", phone));
 
 	const [user] = await database
 		.select({ id: users.id, centerId: users.centerId })
@@ -249,7 +380,7 @@ export async function readMatchingOtp(
 		});
 	}
 	const key = guardKey("otp", phone);
-	assertUnlocked(key);
+	await assertUnlocked(database, key);
 
 	const [challenge] = await database
 		.select({
@@ -276,7 +407,12 @@ export async function readMatchingOtp(
 				.set({ attempts: challenge.attempts + 1 })
 				.where(eq(otpChallenges.id, challenge.id));
 		}
-		noteFailure(key, "wrong_code");
+		await noteFailure(database, key, "wrong_code");
+	}
+	if (!challenge) {
+		throw errors.badRequest("That code is not right.", {
+			reason: "wrong_code",
+		});
 	}
 
 	const [user] = await database
@@ -290,7 +426,12 @@ export async function readMatchingOtp(
 		.from(users)
 		.where(and(eq(users.phone, phone), isNull(users.deletedAt)))
 		.limit(1);
-	if (!user) noteFailure(key, "wrong_code");
+	if (!user) await noteFailure(database, key, "wrong_code");
+	if (!user) {
+		throw errors.badRequest("That code is not right.", {
+			reason: "wrong_code",
+		});
+	}
 	return { challengeId: challenge.id, phone, user };
 }
 
@@ -321,8 +462,14 @@ async function loginWithOtp(
 			{ reason: "deactivated" },
 		);
 	}
+	await requireSecondCode(
+		database,
+		matched.user.id,
+		guardKey("otp", matched.phone),
+		input.secondCode,
+	);
 	await consumeOtpChallenge(database, matched.challengeId);
-	clearFailures(guardKey("otp", matched.phone));
+	await clearFailures(database, guardKey("otp", matched.phone));
 	return issue(
 		database,
 		matched.user,
@@ -338,7 +485,7 @@ async function loginWithPassword(
 ): Promise<{ token: string; user: SignedInUser }> {
 	const email = input.email.trim().toLowerCase();
 	const key = guardKey("password", email);
-	assertUnlocked(key);
+	await assertUnlocked(database, key);
 
 	const [user] = await database
 		.select({
@@ -354,7 +501,14 @@ async function loginWithPassword(
 		.limit(1);
 	const passwordHash = user?.passwordHash ?? (await dummyPasswordHash());
 	const valid = await verifyPassword(input.password, passwordHash);
-	if (!user?.passwordHash || !valid) noteFailure(key, "wrong_password");
+	if (!user?.passwordHash || !valid) {
+		await noteFailure(database, key, "wrong_password");
+	}
+	if (!user?.passwordHash) {
+		throw errors.badRequest("The email or password is wrong.", {
+			reason: "wrong_password",
+		});
+	}
 
 	if (!user.activatedAt) {
 		throw errors.badRequest(
@@ -368,7 +522,8 @@ async function loginWithPassword(
 			{ reason: "deactivated" },
 		);
 	}
-	clearFailures(key);
+	await requireSecondCode(database, user.id, key, input.secondCode);
+	await clearFailures(database, key);
 	return issue(
 		database,
 		{ id: user.id, email: user.email, name: user.name },

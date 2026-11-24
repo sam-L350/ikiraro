@@ -14,6 +14,7 @@ import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
  *   A badge can expire. Its Open Badges file leaves the email out. A software licence has seats and an end date.
  *   A pop-up tour sends people back to a home center. A sector with no center is listed with the learners who name it. A template becomes a draft when an author uses it.
  *   A learner can send a voice note and pin three pieces of work. A trainer can decide several waiting items at once. A repair and a warranty sit on an item. A short pulse follows a first badge or a review. A partner address hears when a credential or a grant happens.
+ *   Possible duplicates wait for a second admin before one account is closed into the other. A staff account can add a second code. A photo older than the stored period is removed, and the decision stays. Sign-in lockout is remembered.
  * - `rawRoutes`  — explicit routes for things that are not JSON function calls
  * - `onError`    — hook unexpected failures into your error tracker
  */

@@ -8,11 +8,13 @@
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { askDueFollowUps } from "./core/hardware/follow-ups";
+import { dropExpiredImages } from "./core/identity/retention";
 import { escalateOverdue } from "./core/learning/sla";
 import { logger } from "./core/logger";
 import { drainNotifications } from "./core/notifications/drain";
 import { sendDueWebhooks } from "./core/partners/webhooks";
 import { sendDueReports } from "./core/reports/reports";
+import { getObjectStore } from "./core/storage/object-store";
 import { db } from "./db";
 
 const app = createApp();
@@ -53,6 +55,10 @@ const drainTimer = setInterval(() => {
 		.then(() => sendDueWebhooks(db))
 		.catch((error: unknown) => {
 			logger.error("partner notice failed", { error });
+		})
+		.then(() => dropExpiredImages(db, getObjectStore()))
+		.catch((error: unknown) => {
+			logger.error("evidence retention failed", { error });
 		})
 		.then(() => drainNotifications(db))
 		.catch((error: unknown) => {

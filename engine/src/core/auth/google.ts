@@ -7,6 +7,7 @@ import { defineRawRoutes } from "../api/raw";
 import { parseCookies, serializeCookie } from "../http/cookies";
 import { isOriginAllowed } from "../http/cors";
 import { insertUserWithPassport } from "../identity/create-user";
+import { confirmedSecret } from "./factors";
 import { createSession, sessionCookie } from "./sessions";
 
 /**
@@ -312,6 +313,9 @@ export const googleAuthRoutes = defineRawRoutes([
 				}
 
 				const userId = await upsertGoogleUser(profile);
+				if (await confirmedSecret(db, userId)) {
+					return redirectWithError("second_code", context);
+				}
 				const token = await createSession(userId, db, {
 					sharedDevice: stored.shared === true,
 				});
