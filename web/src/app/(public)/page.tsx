@@ -40,6 +40,12 @@ export default function HomePage() {
 					<Button asChild variant="sticker" className="mt-10">
 						<Link to="/login">{t("signIn")}</Link>
 					</Button>
+					<Link
+						to="/directory"
+						className="mt-4 font-sans text-sm font-semibold text-fg"
+					>
+						{t("directoryNav")}
+					</Link>
 				</div>
 			</section>
 

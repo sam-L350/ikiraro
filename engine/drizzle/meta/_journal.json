@@ -225,6 +225,13 @@
       "when": 1795456000000,
       "tag": "0031_phase7_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795457000000,
+      "tag": "0032_phase7_devices",
+      "breakpoints": true
     }
   ]
 }

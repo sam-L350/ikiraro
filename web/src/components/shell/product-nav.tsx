@@ -50,7 +50,10 @@ function useProductNavItems(): NavItem[] {
 	const isLearner =
 		user?.roles.some((role) => role.code === "learner") ?? false;
 	if (isLearner) {
-		items.push({ to: "/schedule", label: "scheduleNav" });
+		items.push(
+			{ to: "/schedule", label: "scheduleNav" },
+			{ to: "/practice", label: "practiceNav" },
+		);
 	}
 	const canReadPoints =
 		user?.roles.some(
@@ -102,6 +105,7 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/evidence", label: "evidenceQueueTitle" },
 			{ to: "/sessions", label: "sessionsNav" },
+			{ to: "/devices", label: "devicesNav" },
 			{ to: "/second-reviews", label: "secondReviewsNav" },
 			{ to: "/appeals", label: "appealsNav" },
 			{ to: "/feedback", label: "feedbackNav" },

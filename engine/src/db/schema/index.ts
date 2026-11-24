@@ -29,6 +29,7 @@ export {
 	tasks,
 	taskTranslations,
 } from "./content";
+export { deviceBookings, devices } from "./devices";
 export {
 	centerStaff,
 	districts,
