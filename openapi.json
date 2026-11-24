@@ -54,6 +54,9 @@
 			"name": "criteria"
 		},
 		{
+			"name": "decisions"
+		},
+		{
 			"name": "dev"
 		},
 		{
@@ -8685,6 +8688,931 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/decisions/{id}/decline": {
+			"post": {
+				"operationId": "createDecisionDecline",
+				"summary": "Record a no, with the reason, and leave the item in stock.",
+				"tags": [
+					"decisions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"applicationId": {
+										"type": "string"
+									},
+									"reason": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"applicationId",
+									"reason"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/decisions/{id}/grant": {
+			"post": {
+				"operationId": "createDecisionGrant",
+				"summary": "Award one item. The decision, the grant, and the stock change commit together.",
+				"tags": [
+					"decisions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"applicationId": {
+										"type": "string"
+									},
+									"inventoryId": {
+										"type": "string"
+									},
+									"reason": {
+										"type": "string"
+									},
+									"idempotencyKey": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"applicationId",
+									"inventoryId",
+									"reason",
+									"idempotencyKey"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"decisionId": {
+													"type": "string"
+												},
+												"inventoryId": {
+													"type": "string"
+												},
+												"recipientId": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"id",
+												"decisionId",
+												"inventoryId",
+												"recipientId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/decisions/{id}": {
+			"get": {
+				"operationId": "getDecisionRound",
+				"summary": "One round, the latest ranking, and the items still in stock.",
+				"tags": [
+					"decisions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"title": {
+													"type": "string"
+												},
+												"districtName": {
+													"type": "string"
+												},
+												"quantity": {
+													"type": "number"
+												},
+												"formula": {
+													"type": "object",
+													"properties": {
+														"weights": {
+															"type": "object",
+															"properties": {
+																"points": {
+																	"type": "number"
+																},
+																"badges": {
+																	"type": "number"
+																},
+																"hours": {
+																	"type": "number"
+																},
+																"attendance": {
+																	"type": "number"
+																},
+																"months": {
+																	"type": "number"
+																}
+															},
+															"required": [
+																"points",
+																"badges",
+																"hours",
+																"attendance",
+																"months"
+															],
+															"additionalProperties": false
+														},
+														"tieBreak": {
+															"type": "string",
+															"enum": [
+																"none",
+																"earlier_application"
+															]
+														},
+														"onePerHousehold": {
+															"type": "boolean"
+														},
+														"blockActiveGrant": {
+															"type": "boolean"
+														},
+														"quota": {
+															"type": "number"
+														},
+														"genderTarget": {
+															"type": "object",
+															"properties": {
+																"gender": {
+																	"type": "string"
+																},
+																"count": {
+																	"type": "number"
+																}
+															},
+															"required": [
+																"gender",
+																"count"
+															],
+															"additionalProperties": false
+														},
+														"youthTarget": {
+															"type": "object",
+															"properties": {
+																"maxAge": {
+																	"type": "number"
+																},
+																"count": {
+																	"type": "number"
+																}
+															},
+															"required": [
+																"maxAge",
+																"count"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [
+														"weights",
+														"tieBreak",
+														"onePerHousehold",
+														"blockActiveGrant"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"balance": {
+													"type": "object",
+													"properties": {
+														"gender": {
+															"type": "object",
+															"properties": {
+																"label": {
+																	"type": "string"
+																},
+																"target": {
+																	"type": "number"
+																},
+																"awarded": {
+																	"type": "number"
+																}
+															},
+															"required": [
+																"label",
+																"target",
+																"awarded"
+															],
+															"additionalProperties": false
+														},
+														"youth": {
+															"type": "object",
+															"properties": {
+																"maxAge": {
+																	"type": "number"
+																},
+																"target": {
+																	"type": "number"
+																},
+																"awarded": {
+																	"type": "number"
+																}
+															},
+															"required": [
+																"maxAge",
+																"target",
+																"awarded"
+															],
+															"additionalProperties": false
+														}
+													},
+													"required": [],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"applicants": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"applicationId": {
+																"type": "string"
+															},
+															"learnerName": {
+																"type": "string"
+															},
+															"statement": {
+																"type": "string"
+															},
+															"score": {
+																"type": "number",
+																"nullable": true
+															},
+															"rank": {
+																"type": "number",
+																"nullable": true
+															},
+															"genderMatch": {
+																"type": "boolean"
+															},
+															"youthMatch": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"applicationId",
+															"learnerName",
+															"statement",
+															"score",
+															"rank",
+															"genderMatch",
+															"youthMatch"
+														],
+														"additionalProperties": false
+													}
+												},
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"serial": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"serial"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"title",
+												"districtName",
+												"quantity",
+												"formula",
+												"balance",
+												"applicants",
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/decisions/{id}/rank": {
+			"post": {
+				"operationId": "createDecisionRank",
+				"summary": "Save the formula on the round and store the ranking it produces.",
+				"tags": [
+					"decisions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"formula": {
+										"type": "object",
+										"properties": {
+											"weights": {
+												"type": "object",
+												"properties": {
+													"points": {
+														"type": "number"
+													},
+													"badges": {
+														"type": "number"
+													},
+													"hours": {
+														"type": "number"
+													},
+													"attendance": {
+														"type": "number"
+													},
+													"months": {
+														"type": "number"
+													}
+												},
+												"required": [
+													"points",
+													"badges",
+													"hours",
+													"attendance",
+													"months"
+												],
+												"additionalProperties": false
+											},
+											"tieBreak": {
+												"type": "string",
+												"enum": [
+													"none",
+													"earlier_application"
+												]
+											},
+											"onePerHousehold": {
+												"type": "boolean"
+											},
+											"blockActiveGrant": {
+												"type": "boolean"
+											},
+											"quota": {
+												"type": "number"
+											},
+											"genderTarget": {
+												"type": "object",
+												"properties": {
+													"gender": {
+														"type": "string"
+													},
+													"count": {
+														"type": "number"
+													}
+												},
+												"required": [
+													"gender",
+													"count"
+												],
+												"additionalProperties": false
+											},
+											"youthTarget": {
+												"type": "object",
+												"properties": {
+													"maxAge": {
+														"type": "number"
+													},
+													"count": {
+														"type": "number"
+													}
+												},
+												"required": [
+													"maxAge",
+													"count"
+												],
+												"additionalProperties": false
+											}
+										},
+										"required": [
+											"weights",
+											"tieBreak",
+											"onePerHousehold",
+											"blockActiveGrant"
+										],
+										"additionalProperties": false
+									}
+								},
+								"required": [
+									"formula"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/decisions": {
+			"get": {
+				"operationId": "getDecisions",
+				"summary": "Rounds the committee can rank and decide.",
+				"tags": [
+					"decisions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"rounds": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"title": {
+																"type": "string"
+															},
+															"districtName": {
+																"type": "string"
+															},
+															"quantity": {
+																"type": "number"
+															},
+															"applications": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"id",
+															"title",
+															"districtName",
+															"quantity",
+															"applications"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"rounds"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}

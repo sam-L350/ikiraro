@@ -37,6 +37,11 @@ export {
 	provinces,
 	sectors,
 } from "./geography";
+export {
+	committeeDecisions,
+	hardwareGrants,
+	rankingSnapshots,
+} from "./grants";
 export type {
 	Account,
 	NewAccount,

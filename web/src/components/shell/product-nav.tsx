@@ -171,6 +171,11 @@ function useProductNavItems(): NavItem[] {
 	if (canOpenRounds) {
 		items.push({ to: "/rounds", label: "roundsNav" });
 	}
+	const canDecideGrants =
+		user?.roles.some((role) => role.code === "committee_member") ?? false;
+	if (canDecideGrants) {
+		items.push({ to: "/decisions", label: "decisionsNav" });
+	}
 	return items;
 }
 

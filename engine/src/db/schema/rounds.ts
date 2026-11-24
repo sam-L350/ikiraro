@@ -27,6 +27,7 @@ export const allocationRounds = pgTable(
 		opensAt: timestamp("opens_at", { withTimezone: true }).notNull(),
 		closesAt: timestamp("closes_at", { withTimezone: true }).notNull(),
 		criteria: jsonb("criteria").$type<JsonValue>().notNull().default([]),
+		formula: jsonb("formula").$type<JsonValue>().notNull().default({}),
 		openedByUserId: integer("opened_by_user_id")
 			.notNull()
 			.references(() => users.id),
