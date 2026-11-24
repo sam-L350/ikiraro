@@ -9,7 +9,7 @@ import {
 } from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
-import { isEvidenceType } from "../content/author";
+import { type EvidenceType, isEvidenceType } from "../content/author";
 import { applyDuplicateFlag, isDuplicateKind } from "./duplicates";
 import { readEnrollmentProgress, startTaskProgress } from "./progress";
 import { readReviewSlaMs, reviewDueAt } from "./sla";
@@ -37,7 +37,7 @@ export type SubmissionView = {
 	taskId: string;
 	attempt: number;
 	status: SubmissionStatus;
-	evidenceType: "photo" | "file" | "note";
+	evidenceType: EvidenceType;
 	submittedAt: string | null;
 	/** The learner's own words, when the attempt is a note or a draft. */
 	note: string | null;
@@ -472,7 +472,7 @@ export async function createSubmission(
 async function evidenceFor(
 	database: SubmissionDb,
 	input: {
-		evidenceType: "photo" | "file" | "note";
+		evidenceType: EvidenceType;
 		ownerUserId: number;
 		mediaId?: string;
 		note: string | null;
@@ -496,6 +496,7 @@ async function evidenceFor(
 			};
 		case "photo":
 		case "file":
+		case "voice":
 			return readMedia(
 				database,
 				input.evidenceType,
@@ -509,9 +510,37 @@ async function evidenceFor(
 	}
 }
 
+function mediaMatches(
+	evidenceType: "photo" | "file" | "voice",
+	contentType: string,
+): boolean {
+	switch (evidenceType) {
+		case "photo":
+			return (
+				contentType === "image/jpeg" ||
+				contentType === "image/png" ||
+				contentType === "image/webp"
+			);
+		case "file":
+			return contentType === "application/pdf";
+		case "voice":
+			return (
+				contentType === "audio/wav" ||
+				contentType === "audio/mpeg" ||
+				contentType === "audio/ogg" ||
+				contentType === "audio/webm" ||
+				contentType === "audio/mp4"
+			);
+		default: {
+			const unreachable: never = evidenceType;
+			return unreachable;
+		}
+	}
+}
+
 async function readMedia(
 	database: SubmissionDb,
-	evidenceType: "photo" | "file",
+	evidenceType: "photo" | "file" | "voice",
 	ownerUserId: number,
 	mediaId: string | undefined,
 ): Promise<{
@@ -541,12 +570,7 @@ async function readMedia(
 	if (media.status !== "ready" || !media.sha256) {
 		throw errors.conflict("That file is not ready.", { reason: "media" });
 	}
-	const allowed =
-		evidenceType === "photo"
-			? media.contentType === "image/jpeg" ||
-				media.contentType === "image/png" ||
-				media.contentType === "image/webp"
-			: media.contentType === "application/pdf";
+	const allowed = mediaMatches(evidenceType, media.contentType);
 	if (!allowed) {
 		throw errors.badRequest("That file type does not match this task.", {
 			reason: "type",

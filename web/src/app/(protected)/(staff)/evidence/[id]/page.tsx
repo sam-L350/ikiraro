@@ -20,7 +20,7 @@ type EvidenceReview = {
 	id: string;
 	attempt: number;
 	status: WaitingStatus;
-	evidenceType: "photo" | "file" | "note";
+	evidenceType: "photo" | "file" | "note" | "voice";
 	submittedAt: string;
 	urgency?: "ok" | "soon" | "overdue";
 	escalation?: "none" | "manager" | "district";
@@ -31,6 +31,7 @@ type EvidenceReview = {
 	instructionsRw: string;
 	instructionsEn: string;
 	note: string | null;
+	transcript: string | null;
 	evidenceUrl: string | null;
 	evidenceContentType: string | null;
 	duplicate?: "none" | "same" | "other";
@@ -190,6 +191,8 @@ export default function EvidenceReviewPage() {
 	const [queued, setQueued] = useState(false);
 	const [place, setPlace] = useState("");
 	const [seenAt, setSeenAt] = useState("");
+	const [transcript, setTranscript] = useState("");
+	const [transcriptError, setTranscriptError] = useState<string | null>(null);
 	const claimed = useRef(false);
 	const sheet = useRef<HTMLDialogElement>(null);
 	const approveKey = useRef(crypto.randomUUID());
@@ -201,6 +204,7 @@ export default function EvidenceReviewPage() {
 	);
 	const start = useEngineMutation("/evidence-queue/:id/start");
 	const decide = useEngineMutation("/verifications/create");
+	const writeTranscript = useEngineMutation("/transcripts/write");
 	const snippets = useEngine("/feedback-snippets");
 
 	useEffect(() => {
@@ -263,8 +267,29 @@ export default function EvidenceReviewPage() {
 	const image =
 		item.evidenceUrl !== null &&
 		(item.evidenceContentType ?? "").startsWith("image/");
+	const audio =
+		item.evidenceType === "voice" &&
+		item.evidenceUrl !== null &&
+		(item.evidenceContentType ?? "").startsWith("audio/");
 	const file =
 		item.evidenceUrl !== null && item.evidenceContentType === "application/pdf";
+
+	async function onTranscript() {
+		const body = transcript.trim();
+		if (!body) return;
+		setTranscriptError(null);
+		try {
+			await writeTranscript.mutateAsync({
+				body: { submissionId: item.id, body },
+			});
+			setTranscript("");
+			await invalidateEngine("/evidence-queue/:id");
+		} catch (caught) {
+			setTranscriptError(
+				caught instanceof Error ? caught.message : t("tryAgain"),
+			);
+		}
+	}
 
 	function storeOffline(input: {
 		id: string;
@@ -446,6 +471,11 @@ export default function EvidenceReviewPage() {
 					{item.evidenceType === "note" ? (
 						<p className="font-sans text-lg text-fg">{item.note}</p>
 					) : null}
+					{audio ? (
+						<audio className="w-full" controls src={item.evidenceUrl ?? ""}>
+							<track kind="captions" />
+						</audio>
+					) : null}
 					{image ? (
 						<img
 							src={item.evidenceUrl ?? ""}
@@ -463,8 +493,47 @@ export default function EvidenceReviewPage() {
 							{t("openEvidenceFile")}
 						</a>
 					) : null}
-					{item.evidenceType !== "note" && !image && !file ? (
+					{item.evidenceType !== "note" && !image && !file && !audio ? (
 						<p className="font-sans text-lg text-fg">{t("evidenceMissing")}</p>
+					) : null}
+					{item.evidenceType === "voice" ? (
+						<div className="flex flex-col gap-3">
+							<h3 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("transcriptLabel")}
+							</h3>
+							{item.transcript ? (
+								<p className="font-sans text-lg text-fg">{item.transcript}</p>
+							) : (
+								<>
+									<label className="flex flex-col gap-2" htmlFor="transcript">
+										<span className="sr-only">{t("transcriptLabel")}</span>
+										<textarea
+											id="transcript"
+											className="min-h-24 rounded-md border border-line bg-card px-3 py-3 font-sans text-lg text-fg"
+											value={transcript}
+											maxLength={2000}
+											onChange={(event) => setTranscript(event.target.value)}
+										/>
+									</label>
+									{transcriptError ? (
+										<p className="font-sans text-lg text-danger" role="alert">
+											{transcriptError}
+										</p>
+									) : null}
+									{transcript.trim() ? (
+										<Button
+											type="button"
+											variant="quiet"
+											className="w-fit"
+											disabled={writeTranscript.isPending}
+											onClick={() => void onTranscript()}
+										>
+											{t("transcriptSave")}
+										</Button>
+									) : null}
+								</>
+							)}
+						</div>
 					) : null}
 				</section>
 				<section className="flex flex-col gap-4">

@@ -10,11 +10,12 @@ import {
 	taskSubmissions,
 	taskTranslations,
 	users,
+	voiceTranscripts,
 } from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { ROLE_PERMISSIONS } from "../authz/catalog";
-import { isEvidenceType } from "../content/author";
+import { type EvidenceType, isEvidenceType } from "../content/author";
 import {
 	centerStaffByRole,
 	expandCenterAssignments,
@@ -40,7 +41,7 @@ export type EvidenceQueueItem = {
 	id: string;
 	attempt: number;
 	status: "pending" | "in_review";
-	evidenceType: "photo" | "file" | "note";
+	evidenceType: EvidenceType;
 	submittedAt: string;
 	reviewDueAt: string;
 	urgency: ReviewUrgency;
@@ -70,6 +71,7 @@ export type EvidenceReview = EvidenceQueueItem & {
 	instructionsRw: string;
 	instructionsEn: string;
 	note: string | null;
+	transcript: string | null;
 	evidenceUrl: string | null;
 	evidenceContentType: string | null;
 	criteria: EvidenceCriterion[];
@@ -389,11 +391,17 @@ export async function readEvidenceReview(
 		.from(contentVersions)
 		.where(eq(contentVersions.id, row.contentVersionId))
 		.limit(1);
+	const [transcript] = await database
+		.select({ body: voiceTranscripts.body })
+		.from(voiceTranscripts)
+		.where(eq(voiceTranscripts.submissionId, row.id))
+		.limit(1);
 	return {
 		...presentItem(row, copy, input.now ?? new Date()),
 		instructionsRw: copy?.instructionsRw ?? "",
 		instructionsEn: copy?.instructionsEn ?? "",
 		note: row.note,
+		transcript: transcript?.body ?? null,
 		evidenceUrl,
 		evidenceContentType,
 		criteria: await criteriaFor(database, row.taskId),

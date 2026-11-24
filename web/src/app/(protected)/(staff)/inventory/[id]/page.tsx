@@ -2,7 +2,12 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
+import {
+	invalidateEngine,
+	isApiClientError,
+	useEngine,
+	useEngineMutation,
+} from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
 import { useOnline } from "@/lib/offline/use-online";
@@ -384,6 +389,136 @@ export default function InventoryItemPage() {
 					))}
 				</ul>
 			</div>
+			<ItemCare inventoryId={detail.id} />
 		</section>
+	);
+}
+
+function ItemCare({ inventoryId }: { inventoryId: string }) {
+	const { t } = useI18n();
+	const care = useEngine("/item-care", { query: { inventoryId } });
+	const repair = useEngineMutation("/item-care/repair");
+	const warranty = useEngineMutation("/item-care/warranty");
+	const [note, setNote] = useState("");
+	const [endsOn, setEndsOn] = useState("");
+	const [error, setError] = useState<MessageKey | null>(null);
+
+	if (care.isPending) {
+		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
+	}
+	if (isApiClientError(care.error) && care.error.status === 403) {
+		return <p className="font-sans text-lg text-fg">{t("careDenied")}</p>;
+	}
+
+	async function onRepair(event: FormEvent) {
+		event.preventDefault();
+		if (!note.trim()) return;
+		setError(null);
+		try {
+			await repair.mutateAsync({
+				body: { inventoryId, note: note.trim() },
+			});
+			setNote("");
+			await invalidateEngine("/item-care");
+		} catch {
+			setError("tryAgain");
+		}
+	}
+
+	async function onWarranty(event: FormEvent) {
+		event.preventDefault();
+		if (!endsOn.trim()) return;
+		setError(null);
+		try {
+			await warranty.mutateAsync({
+				body: { inventoryId, endsOn: endsOn.trim() },
+			});
+			setEndsOn("");
+			await invalidateEngine("/item-care");
+		} catch {
+			setError("tryAgain");
+		}
+	}
+
+	const repairs = care.data?.repairs ?? [];
+	return (
+		<div className="flex flex-col gap-8">
+			<section className="flex flex-col gap-3">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+					{t("repairTitle")}
+				</h2>
+				{repairs.length === 0 ? (
+					<p className="font-sans text-lg text-fg">{t("repairEmpty")}</p>
+				) : (
+					<ul>
+						{repairs.map((row) => (
+							<li
+								key={row.id}
+								className="border-t border-ink/15 py-3 font-sans text-lg text-fg"
+							>
+								{row.note}
+							</li>
+						))}
+					</ul>
+				)}
+				<form
+					className="flex flex-col gap-3"
+					onSubmit={(event) => void onRepair(event)}
+				>
+					<label className="flex flex-col gap-2" htmlFor="repair-note">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("repairNote")}
+						</span>
+						<input
+							id="repair-note"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={note}
+							maxLength={500}
+							onChange={(event) => setNote(event.target.value)}
+						/>
+					</label>
+					{note.trim() ? (
+						<Button type="submit" variant="quiet" className="w-fit">
+							{t("repairSave")}
+						</Button>
+					) : null}
+				</form>
+			</section>
+			<section className="flex flex-col gap-3">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+					{t("warrantyTitle")}
+				</h2>
+				<p className="font-sans text-lg text-fg">
+					{care.data?.warrantyEndsOn ?? t("warrantyNone")}
+				</p>
+				<form
+					className="flex flex-col gap-3"
+					onSubmit={(event) => void onWarranty(event)}
+				>
+					<label className="flex flex-col gap-2" htmlFor="warranty-ends">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("warrantyEnds")}
+						</span>
+						<input
+							id="warranty-ends"
+							type="date"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={endsOn}
+							onChange={(event) => setEndsOn(event.target.value)}
+						/>
+					</label>
+					{endsOn.trim() ? (
+						<Button type="submit" variant="quiet" className="w-fit">
+							{t("warrantySave")}
+						</Button>
+					) : null}
+				</form>
+			</section>
+			{error ? (
+				<p className="font-sans text-lg text-danger" role="alert">
+					{t(error)}
+				</p>
+			) : null}
+		</div>
 	);
 }

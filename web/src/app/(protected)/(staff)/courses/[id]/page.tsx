@@ -945,6 +945,7 @@ function TaskFields({
 						<option value="photo">{t("evidencePhoto")}</option>
 						<option value="file">{t("evidenceFile")}</option>
 						<option value="note">{t("evidenceNote")}</option>
+						<option value="voice">{t("evidenceVoice")}</option>
 					</select>
 				</label>
 				<Field

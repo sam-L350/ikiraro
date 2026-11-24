@@ -50,7 +50,7 @@ export const contentTemplates = pgTable(
 		),
 		check(
 			"content_templates_evidence",
-			sql`${table.evidenceType} is null or ${table.evidenceType} in ('photo', 'file', 'note')`,
+			sql`${table.evidenceType} is null or ${table.evidenceType} in ('photo', 'file', 'note', 'voice')`,
 		),
 	],
 );

@@ -84,7 +84,7 @@ export const taskSubmissions = pgTable(
 		check("task_submissions_attempt_positive", sql`${table.attempt} > 0`),
 		check(
 			"task_submissions_evidence",
-			sql`${table.evidenceType} in ('photo', 'file', 'note')`,
+			sql`${table.evidenceType} in ('photo', 'file', 'note', 'voice')`,
 		),
 		check(
 			"task_submissions_escalation",

@@ -9,6 +9,27 @@ export type PreparedEvidence = {
 
 export type PrepareResult = PreparedEvidence | "too_large" | "type";
 
+function audioType(value: string): string | null {
+	const type = value.split(";")[0]?.trim().toLowerCase() ?? "";
+	switch (type) {
+		case "audio/wav":
+		case "audio/wave":
+		case "audio/x-wav":
+			return "audio/wav";
+		case "audio/mpeg":
+		case "audio/mp3":
+			return "audio/mpeg";
+		case "audio/ogg":
+			return "audio/ogg";
+		case "audio/webm":
+			return "audio/webm";
+		case "audio/mp4":
+			return "audio/mp4";
+		default:
+			return null;
+	}
+}
+
 function allowed(type: string): boolean {
 	switch (type) {
 		case "image/jpeg":
@@ -76,6 +97,15 @@ async function compressImage(file: Blob): Promise<Blob | null> {
  */
 export async function prepareEvidenceFile(file: File): Promise<PrepareResult> {
 	if (file.size < 1) return "too_large";
+	const declared = audioType(file.type);
+	if (declared) {
+		if (file.size > DOOR_BYTES) return "too_large";
+		return {
+			bytes: file,
+			contentType: declared,
+			sha256: await sha256Hex(file),
+		};
+	}
 	if (file.type === "application/pdf") {
 		if (file.size > DOOR_BYTES) return "too_large";
 		return {

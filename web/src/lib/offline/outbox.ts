@@ -16,7 +16,7 @@ export type SubmissionQueuePayload = {
 	id: string;
 	enrollmentId: string;
 	taskId: string;
-	evidenceType: "photo" | "file" | "note";
+	evidenceType: "photo" | "file" | "note" | "voice";
 	contentType: string;
 	sha256: string;
 	bytesBase64: string;

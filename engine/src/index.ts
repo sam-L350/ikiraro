@@ -11,6 +11,7 @@ import { askDueFollowUps } from "./core/hardware/follow-ups";
 import { escalateOverdue } from "./core/learning/sla";
 import { logger } from "./core/logger";
 import { drainNotifications } from "./core/notifications/drain";
+import { sendDueWebhooks } from "./core/partners/webhooks";
 import { sendDueReports } from "./core/reports/reports";
 import { db } from "./db";
 
@@ -48,6 +49,10 @@ const drainTimer = setInterval(() => {
 		.then(() => sendDueReports(db))
 		.catch((error: unknown) => {
 			logger.error("scheduled report failed", { error });
+		})
+		.then(() => sendDueWebhooks(db))
+		.catch((error: unknown) => {
+			logger.error("partner notice failed", { error });
 		})
 		.then(() => drainNotifications(db))
 		.catch((error: unknown) => {

@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { callEngine, isApiClientError, useEngine } from "@/lib/engine";
+import {
+	callEngine,
+	invalidateEngine,
+	isApiClientError,
+	useEngine,
+	useEngineMutation,
+} from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import { PassportShare } from "./share";
 
@@ -188,6 +194,7 @@ export default function PassportPage() {
 				)}
 				{error ? <p className="text-lg text-destructive">{error}</p> : null}
 			</section>
+			<Showcase />
 			{referrals.length > 0 ? (
 				<section className="flex flex-col gap-3">
 					<h2 className="font-meta text-xs uppercase text-fg-muted">
@@ -260,6 +267,109 @@ function textFor(locale: "en" | "rw", rw: string, en: string): string {
 	if (locale === "rw" && rw.trim()) return rw;
 	if (en.trim()) return en;
 	return rw;
+}
+
+type ShowcaseItem = {
+	submissionId: string;
+	titleEn: string;
+	titleRw: string;
+	evidenceType: string;
+	evidenceUrl: string | null;
+};
+
+function evidenceName(
+	value: string,
+	t: (
+		key: "evidencePhoto" | "evidenceFile" | "evidenceNote" | "evidenceVoice",
+	) => string,
+): string {
+	switch (value) {
+		case "photo":
+			return t("evidencePhoto");
+		case "file":
+			return t("evidenceFile");
+		case "note":
+			return t("evidenceNote");
+		case "voice":
+			return t("evidenceVoice");
+		default:
+			return t("evidenceNote");
+	}
+}
+
+function Showcase() {
+	const { locale, t } = useI18n();
+	const list = useEngine("/showcase");
+	const pin = useEngineMutation("/showcase/pin");
+	const pins = (list.data?.pins ?? []) as ShowcaseItem[];
+	const open = (list.data?.open ?? []) as ShowcaseItem[];
+
+	async function onPin(submissionId: string) {
+		try {
+			await pin.mutateAsync({ body: { submissionId } });
+			await invalidateEngine("/showcase");
+		} catch {
+			return;
+		}
+	}
+
+	return (
+		<section className="flex flex-col gap-4">
+			<h2 className="font-meta text-xs uppercase text-fg-muted">
+				{t("showcaseTitle")}
+			</h2>
+			{pins.length === 0 ? (
+				<p className="text-lg text-fg">{t("showcaseEmpty")}</p>
+			) : (
+				<ul className="grid gap-4 sm:grid-cols-3">
+					{pins.map((item) => {
+						const title = textFor(locale, item.titleRw, item.titleEn);
+						return (
+							<li
+								key={item.submissionId}
+								className="flex flex-col gap-3 border border-line bg-card p-4"
+							>
+								{item.evidenceType === "photo" && item.evidenceUrl ? (
+									<img
+										src={item.evidenceUrl}
+										alt={title}
+										className="h-40 w-full object-contain"
+									/>
+								) : null}
+								{item.evidenceType === "voice" && item.evidenceUrl ? (
+									<audio className="w-full" controls src={item.evidenceUrl}>
+										<track kind="captions" />
+									</audio>
+								) : null}
+								<p className="font-sans text-lg text-fg">{title}</p>
+								<Badge variant="neutral">
+									{evidenceName(item.evidenceType, t)}
+								</Badge>
+							</li>
+						);
+					})}
+				</ul>
+			)}
+			{open.map((item) => (
+				<div
+					key={item.submissionId}
+					className="flex items-center justify-between gap-3"
+				>
+					<p className="font-sans text-lg text-fg">
+						{textFor(locale, item.titleRw, item.titleEn)}
+					</p>
+					<Button
+						type="button"
+						variant="quiet"
+						disabled={pin.isPending}
+						onClick={() => void onPin(item.submissionId)}
+					>
+						{t("showcasePin")}
+					</Button>
+				</div>
+			))}
+		</section>
+	);
 }
 
 function when(value: string, locale: "en" | "rw"): string {

@@ -38,11 +38,12 @@ import {
 	type SubmissionQueuePayload,
 } from "@/lib/offline/outbox";
 
-type EvidenceKind = "photo" | "file" | "note";
+type EvidenceKind = "photo" | "file" | "note" | "voice";
 type StoredNotice =
 	| "photo"
 	| "file"
 	| "note"
+	| "voice"
 	| "empty"
 	| "closed"
 	| "limit"
@@ -300,13 +301,18 @@ export default function TaskPage() {
 			}
 			setHeld(null);
 			const result = await sendOrQueue({
-				evidenceType: kind === "photo" ? "photo" : "file",
+				evidenceType:
+					kind === "photo" ? "photo" : kind === "voice" ? "voice" : "file",
 				bytes: prepared.bytes,
 				contentType: prepared.contentType,
 				sha256: prepared.sha256,
 			});
 			if (result === "capped") setStored("capped");
-			if (result === "sent") setStored(kind === "photo" ? "photo" : "file");
+			if (result === "sent") {
+				setStored(
+					kind === "photo" ? "photo" : kind === "voice" ? "voice" : "file",
+				);
+			}
 		} catch (caught) {
 			setStored(noticeFor(caught));
 		} finally {
@@ -618,7 +624,13 @@ export default function TaskPage() {
 						<input
 							ref={file}
 							type="file"
-							accept={kind === "photo" ? "image/*" : "application/pdf"}
+							accept={
+								kind === "photo"
+									? "image/*"
+									: kind === "voice"
+										? "audio/*"
+										: "application/pdf"
+							}
 							capture={kind === "photo" ? "environment" : undefined}
 							className="sr-only"
 							aria-hidden="true"
@@ -805,6 +817,8 @@ function EvidenceIcon({ kind }: { kind: EvidenceKind }) {
 			return <File aria-hidden="true" />;
 		case "note":
 			return <PenLine aria-hidden="true" />;
+		case "voice":
+			return <Volume2 aria-hidden="true" />;
 		default: {
 			const unreachable: never = kind;
 			return unreachable;
@@ -814,7 +828,7 @@ function EvidenceIcon({ kind }: { kind: EvidenceKind }) {
 
 function evidenceLabel(
 	kind: EvidenceKind,
-	t: (key: "takePhoto" | "addFile" | "writeNote") => string,
+	t: (key: "takePhoto" | "addFile" | "writeNote" | "recordVoice") => string,
 ): string {
 	switch (kind) {
 		case "photo":
@@ -823,6 +837,8 @@ function evidenceLabel(
 			return t("addFile");
 		case "note":
 			return t("writeNote");
+		case "voice":
+			return t("recordVoice");
 		default: {
 			const unreachable: never = kind;
 			return unreachable;
@@ -833,7 +849,11 @@ function evidenceLabel(
 function evidenceCopy(
 	kind: EvidenceKind,
 	t: (
-		key: "evidenceAsksPhoto" | "evidenceAsksFile" | "evidenceAsksNote",
+		key:
+			| "evidenceAsksPhoto"
+			| "evidenceAsksFile"
+			| "evidenceAsksNote"
+			| "evidenceAsksVoice",
 	) => string,
 ): string {
 	switch (kind) {
@@ -843,6 +863,8 @@ function evidenceCopy(
 			return t("evidenceAsksFile");
 		case "note":
 			return t("evidenceAsksNote");
+		case "voice":
+			return t("evidenceAsksVoice");
 		default: {
 			const unreachable: never = kind;
 			return unreachable;
@@ -889,6 +911,7 @@ function storedCopy(
 			| "evidenceStoredPhoto"
 			| "evidenceStoredFile"
 			| "evidenceStoredNote"
+			| "evidenceStoredVoice"
 			| "evidenceNoteEmpty"
 			| "evidenceClosed"
 			| "meetTrainer"
@@ -904,6 +927,8 @@ function storedCopy(
 			return t("evidenceStoredFile");
 		case "note":
 			return t("evidenceStoredNote");
+		case "voice":
+			return t("evidenceStoredVoice");
 		case "empty":
 			return t("evidenceNoteEmpty");
 		case "closed":
@@ -988,6 +1013,7 @@ function evidenceKind(value: string | null): EvidenceKind {
 		case "photo":
 		case "file":
 		case "note":
+		case "voice":
 			return value;
 		default:
 			return "note";

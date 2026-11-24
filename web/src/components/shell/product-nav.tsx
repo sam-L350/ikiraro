@@ -88,6 +88,9 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/points", label: "pointsNav" },
 		);
 	}
+	if (user?.roles.some((role) => role.code === "learner")) {
+		items.push({ to: "/pulse", label: "pulseNav" });
+	}
 	const canFileConcern =
 		user?.roles.some(
 			(role) => role.code === "learner" || role.code === "trainer",
@@ -232,6 +235,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/notification-templates", label: "templatesNav" },
 			{ to: "/privacy-tools", label: "privacyToolsNav" },
 			{ to: "/settings", label: "settingsNav" },
+			{ to: "/webhooks", label: "webhooksNav" },
 		);
 	}
 	const canReadAudit =

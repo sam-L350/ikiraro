@@ -87,9 +87,10 @@ function optionalEvidence(value: string | undefined): string | null {
 	const evidence = value?.trim() ?? "";
 	if (!evidence) return null;
 	if (!isEvidenceType(evidence)) {
-		throw errors.badRequest("Choose a photo, a file, or a note.", {
-			reason: "unknown_evidence",
-		});
+		throw errors.badRequest(
+			"Choose a photo, a file, a note, or a voice note.",
+			{ reason: "unknown_evidence" },
+		);
 	}
 	return evidence;
 }

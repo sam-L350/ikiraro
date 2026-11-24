@@ -2,7 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { isApiClientError, useEngine } from "@/lib/engine";
+import {
+	invalidateEngine,
+	isApiClientError,
+	useEngine,
+	useEngineMutation,
+} from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
 
@@ -119,12 +124,56 @@ function urgencyKey(urgency: ReviewUrgency): MessageKey | null {
 	}
 }
 
+const REJECT_REASONS = [
+	"not_the_task",
+	"not_the_learner",
+	"unreadable",
+	"incomplete",
+] as const;
+
+type RejectReason = (typeof REJECT_REASONS)[number];
+
+function reasonKey(reason: RejectReason): MessageKey {
+	switch (reason) {
+		case "not_the_task":
+			return "reasonNotTheTask";
+		case "not_the_learner":
+			return "reasonNotTheLearner";
+		case "unreadable":
+			return "reasonUnreadable";
+		case "incomplete":
+			return "reasonIncomplete";
+		default: {
+			const unreachable: never = reason;
+			return unreachable;
+		}
+	}
+}
+
+function isRejectReason(value: string): value is RejectReason {
+	switch (value) {
+		case "not_the_task":
+		case "not_the_learner":
+		case "unreadable":
+		case "incomplete":
+			return true;
+		default:
+			return false;
+	}
+}
+
 export default function EvidenceQueuePage() {
 	const { locale, t } = useI18n();
 	const [centerId, setCenterId] = useState("");
+	const [selected, setSelected] = useState<string[]>([]);
+	const [decision, setDecision] = useState("");
+	const [reason, setReason] = useState("");
+	const [note, setNote] = useState("");
+	const [error, setError] = useState<string | null>(null);
 	const queue = useEngine("/evidence-queue", {
 		query: centerId ? { centerId } : {},
 	});
+	const apply = useEngineMutation("/verifications/bulk");
 
 	if (queue.isLoading) {
 		return <div className="h-8 w-48 animate-pulse rounded-full bg-surface" />;
@@ -140,7 +189,41 @@ export default function EvidenceQueuePage() {
 
 	const centers = queue.data?.centers ?? [];
 	const items = (queue.data?.items ?? []) as QueueItem[];
-	const first = items[0];
+	const ready =
+		selected.length > 0 &&
+		note.trim().length > 0 &&
+		(decision === "approved" ||
+			(decision === "rejected" && isRejectReason(reason)));
+
+	function toggle(id: string) {
+		setSelected((current) =>
+			current.includes(id)
+				? current.filter((item) => item !== id)
+				: [...current, id],
+		);
+	}
+
+	async function onApply() {
+		if (!ready) return;
+		setError(null);
+		try {
+			await apply.mutateAsync({
+				body: {
+					submissionIds: selected,
+					decision,
+					note: note.trim(),
+					...(decision === "rejected" ? { reasonCode: reason } : {}),
+				},
+			});
+			setSelected([]);
+			setDecision("");
+			setReason("");
+			setNote("");
+			await invalidateEngine("/evidence-queue");
+		} catch (caught) {
+			setError(caught instanceof Error ? caught.message : t("tryAgain"));
+		}
+	}
 
 	return (
 		<section>
@@ -153,11 +236,6 @@ export default function EvidenceQueuePage() {
 						{t("evidenceQueueSentence")}
 					</p>
 				</div>
-				{first ? (
-					<Button variant="sticker" asChild>
-						<Link to={`/evidence/${first.id}`}>{t("startReview")}</Link>
-					</Button>
-				) : null}
 			</div>
 			{centers.length > 1 ? (
 				<label
@@ -187,56 +265,159 @@ export default function EvidenceQueuePage() {
 					{t("evidenceQueueEmpty")}
 				</p>
 			) : (
-				<ul className="mt-10">
-					{items.map((item) => {
-						const urgency = urgencyKey(item.urgency);
-						const escalation = escalationKey(item.escalation ?? "none");
-						const duplicate = duplicateKey(item.duplicate);
-						const learner = item.learnerName.trim() || t("learnerUnnamed");
-						return (
-							<li key={item.id} className="border-t border-ink/15 py-5">
-								<Link
-									to={`/evidence/${item.id}`}
-									className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start"
+				<div className="mt-10 flex flex-col gap-6">
+					<div className="flex max-w-xl flex-col gap-4">
+						<label className="flex flex-col gap-2" htmlFor="bulk-decision">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("bulkDecision")}
+							</span>
+							<select
+								id="bulk-decision"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={decision}
+								onChange={(event) => {
+									setDecision(event.target.value);
+									setReason("");
+								}}
+							>
+								<option value="">{t("bulkChoose")}</option>
+								<option value="approved">{t("bulkApprove")}</option>
+								<option value="rejected">{t("bulkReject")}</option>
+							</select>
+						</label>
+						{decision === "rejected" ? (
+							<label className="flex flex-col gap-2" htmlFor="bulk-reason">
+								<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+									{t("rejectReasonLabel")}
+								</span>
+								<select
+									id="bulk-reason"
+									className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+									value={reason}
+									onChange={(event) => setReason(event.target.value)}
 								>
-									<div>
-										<p className="font-sans text-lg font-semibold text-fg">
-											{textFor(locale, item.taskTitleRw, item.taskTitleEn)}
-										</p>
-										<p className="mt-1 font-sans text-lg text-fg">
-											{learner} · {item.centerName}
-										</p>
-									</div>
-									<div className="flex flex-wrap items-center gap-2">
-										<p className="font-sans text-lg tabular-nums text-fg">
-											{waitingCopy(item.submittedAt, t)}
-										</p>
-										{urgency ? (
-											<Badge
-												variant={item.urgency === "soon" ? "pending" : "danger"}
-											>
-												{t(urgency)}
-											</Badge>
-										) : null}
-										{escalation ? (
-											<Badge variant="pending">{t(escalation)}</Badge>
-										) : null}
-										{duplicate ? (
-											<Badge
-												variant={
-													item.duplicate === "other" ? "danger" : "pending"
-												}
-											>
-												{t(duplicate)}
-											</Badge>
-										) : null}
-										<Badge variant="neutral">{t(statusKey(item.status))}</Badge>
-									</div>
-								</Link>
-							</li>
-						);
-					})}
-				</ul>
+									<option value="">{t("bulkChoose")}</option>
+									{REJECT_REASONS.map((item) => (
+										<option key={item} value={item}>
+											{t(reasonKey(item))}
+										</option>
+									))}
+								</select>
+							</label>
+						) : null}
+						{decision === "approved" || decision === "rejected" ? (
+							<label className="flex flex-col gap-2" htmlFor="bulk-note">
+								<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+									{t("bulkNote")}
+								</span>
+								<textarea
+									id="bulk-note"
+									className="min-h-24 rounded-md border border-line bg-card px-3 py-3 font-sans text-lg text-fg"
+									value={note}
+									maxLength={2000}
+									onChange={(event) => setNote(event.target.value)}
+								/>
+							</label>
+						) : null}
+						{error ? (
+							<p className="font-sans text-lg text-danger" role="alert">
+								{error}
+							</p>
+						) : null}
+						{ready ? (
+							<Button
+								type="button"
+								variant="ink"
+								className="w-fit"
+								disabled={apply.isPending}
+								onClick={() => void onApply()}
+							>
+								{t("bulkApply")}
+							</Button>
+						) : null}
+					</div>
+					<table className="w-full border-collapse text-left">
+						<thead>
+							<tr className="font-meta text-xs uppercase text-fg-muted">
+								<th className="border-b border-line py-2 font-semibold">
+									<span className="sr-only">{t("bulkDecision")}</span>
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("evidenceQueueTitle")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("submissionPending")}
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{items.map((item) => {
+								const learner = item.learnerName.trim() || t("learnerUnnamed");
+								const urgency = urgencyKey(item.urgency);
+								const escalation = escalationKey(item.escalation ?? "none");
+								const duplicate = duplicateKey(item.duplicate);
+								return (
+									<tr key={item.id}>
+										<td className="border-b border-line py-3">
+											<input
+												type="checkbox"
+												className="size-5"
+												checked={selected.includes(item.id)}
+												aria-label={learner}
+												onChange={() => toggle(item.id)}
+											/>
+										</td>
+										<td className="border-b border-line py-3">
+											<p className="font-sans text-lg font-semibold text-fg">
+												{textFor(locale, item.taskTitleRw, item.taskTitleEn)}
+											</p>
+											<p className="font-sans text-lg text-fg">
+												{learner} · {item.centerName}
+											</p>
+										</td>
+										<td className="border-b border-line py-3">
+											<div className="flex flex-wrap items-center gap-2">
+												<p className="font-sans text-lg text-fg">
+													{waitingCopy(item.submittedAt, t)}
+												</p>
+												<Badge variant="neutral">
+													{t(statusKey(item.status))}
+												</Badge>
+												{urgency ? (
+													<Badge
+														variant={
+															item.urgency === "soon" ? "pending" : "danger"
+														}
+													>
+														{t(urgency)}
+													</Badge>
+												) : null}
+												{escalation ? (
+													<Badge variant="pending">{t(escalation)}</Badge>
+												) : null}
+												{duplicate ? (
+													<Badge
+														variant={
+															item.duplicate === "other" ? "danger" : "pending"
+														}
+													>
+														{t(duplicate)}
+													</Badge>
+												) : null}
+												<Link
+													to={`/evidence/${item.id}`}
+													className="font-sans text-lg text-fg underline"
+												>
+													{t("startReview")}
+												</Link>
+											</div>
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+				</div>
 			)}
 		</section>
 	);

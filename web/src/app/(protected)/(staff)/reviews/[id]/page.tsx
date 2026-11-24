@@ -134,6 +134,8 @@ function evidenceLabel(
 			return t("evidenceFile");
 		case "note":
 			return t("evidenceNote");
+		case "voice":
+			return t("evidenceVoice");
 		case null:
 		case "":
 			return t("evidenceType");

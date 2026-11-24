@@ -19,6 +19,7 @@ import { writeAudit } from "../audit/write";
 import { consumeRateLimit } from "../guard/rate-limit";
 import { isUnder18 } from "../identity/age";
 import { currentConsents } from "../identity/consent";
+import { notifyPartners } from "../partners/webhooks";
 
 const ISSUER = "Ikiraro";
 const CHECK_LIMIT = 30;
@@ -171,6 +172,10 @@ async function insertCredential(
 				targetId: created.id,
 				ipAddress: ip,
 				metadata: { earnedBadgeId: row.earnedBadgeId },
+			});
+			await notifyPartners(tx, {
+				event: "credential.awarded",
+				targetId: created.id,
 			});
 		});
 	} catch (error) {

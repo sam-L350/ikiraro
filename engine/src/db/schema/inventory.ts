@@ -107,3 +107,49 @@ export const hardwareStatusHistory = pgTable(
 		),
 	],
 );
+
+/** A repair written by the officer. The row stays. */
+export const itemRepairs = pgTable(
+	"item_repairs",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		inventoryId: uuid("inventory_id")
+			.notNull()
+			.references(() => hardwareInventory.id),
+		note: text("note").notNull(),
+		recordedByUserId: integer("recorded_by_user_id")
+			.notNull()
+			.references(() => users.id),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.default(sql`clock_timestamp()`),
+	},
+	(table) => [
+		index("item_repairs_item").on(table.inventoryId, table.createdAt),
+		check(
+			"item_repairs_note",
+			sql`char_length(btrim(${table.note})) between 1 and 500`,
+		),
+	],
+);
+
+/** A warranty end date the officer wrote. A later row replaces it by time. */
+export const itemWarranties = pgTable(
+	"item_warranties",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		inventoryId: uuid("inventory_id")
+			.notNull()
+			.references(() => hardwareInventory.id),
+		endsOn: date("ends_on").notNull(),
+		recordedByUserId: integer("recorded_by_user_id")
+			.notNull()
+			.references(() => users.id),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.default(sql`clock_timestamp()`),
+	},
+	(table) => [
+		index("item_warranties_item").on(table.inventoryId, table.createdAt),
+	],
+);

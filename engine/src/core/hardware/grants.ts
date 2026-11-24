@@ -21,6 +21,7 @@ import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { countAttendedSessions } from "../learning/center-sessions";
 import { reviewConflict } from "../learning/verifications";
+import { notifyPartners } from "../partners/webhooks";
 import {
 	ageYears,
 	assignRanks,
@@ -659,10 +660,15 @@ export async function decideGrant(
 		`);
 		const result = readResult(rows);
 		if (!isGrant(result)) throw errors.internal("The grant could not be read.");
-		return {
+		const granted = {
 			...result,
 			recipientId: Number(result.recipientId),
 		};
+		await notifyPartners(database, {
+			event: "grant.decided",
+			targetId: granted.id,
+		});
+		return granted;
 	} catch (error) {
 		failGrant(error);
 	}
@@ -749,6 +755,10 @@ export async function declineApplication(
 		await writeEvent(tx, {
 			name: "grant.decided",
 			payload: { userId: application.userId },
+		});
+		await notifyPartners(tx, {
+			event: "grant.decided",
+			targetId: row.id,
 		});
 		return { id: row.id };
 	});

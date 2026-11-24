@@ -14,6 +14,11 @@ const ALLOWED = [
 	"image/png",
 	"image/webp",
 	"application/pdf",
+	"audio/wav",
+	"audio/mpeg",
+	"audio/ogg",
+	"audio/webm",
+	"audio/mp4",
 ] as const;
 
 export type MediaContentType = (typeof ALLOWED)[number];
@@ -24,6 +29,11 @@ export function mediaContentType(value: string): MediaContentType | null {
 		case "image/png":
 		case "image/webp":
 		case "application/pdf":
+		case "audio/wav":
+		case "audio/mpeg":
+		case "audio/ogg":
+		case "audio/webm":
+		case "audio/mp4":
 			return value;
 		default:
 			return null;

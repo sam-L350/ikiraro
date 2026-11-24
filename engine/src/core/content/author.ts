@@ -27,7 +27,7 @@ type AuthorDb = Pick<Database, "insert" | "select" | "transaction" | "update">;
 
 type ModuleWriteDb = AuthorDb & Pick<Database, "delete">;
 
-export const EVIDENCE_TYPES = ["photo", "file", "note"] as const;
+export const EVIDENCE_TYPES = ["photo", "file", "note", "voice"] as const;
 
 export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
 
@@ -157,6 +157,7 @@ export function isEvidenceType(value: string): value is EvidenceType {
 		case "photo":
 		case "file":
 		case "note":
+		case "voice":
 			return true;
 		default:
 			return false;
@@ -780,9 +781,10 @@ function storedEvidence(value: string | undefined): string | null {
 	const evidence = clean(value);
 	if (!evidence) return null;
 	if (!isEvidenceType(evidence)) {
-		throw errors.badRequest("Choose a photo, a file, or a note.", {
-			reason: "unknown_evidence",
-		});
+		throw errors.badRequest(
+			"Choose a photo, a file, a note, or a voice note.",
+			{ reason: "unknown_evidence" },
+		);
 	}
 	return evidence;
 }

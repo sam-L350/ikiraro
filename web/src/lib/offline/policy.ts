@@ -32,7 +32,7 @@ export type DraftPlan =
 export function planDraftSync(input: {
 	localId: string;
 	taskId: string;
-	evidenceType: "photo" | "file" | "note";
+	evidenceType: "photo" | "file" | "note" | "voice";
 	localNote: string | null;
 	submit: boolean;
 	server: readonly ServerAttempt[];

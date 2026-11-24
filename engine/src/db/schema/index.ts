@@ -60,7 +60,12 @@ export type {
 	User,
 } from "./identity";
 export { accounts, sessions, users } from "./identity";
-export { hardwareInventory, hardwareStatusHistory } from "./inventory";
+export {
+	hardwareInventory,
+	hardwareStatusHistory,
+	itemRepairs,
+	itemWarranties,
+} from "./inventory";
 export {
 	enrollments,
 	moduleProgress,
@@ -120,6 +125,13 @@ export {
 	warningRules,
 } from "./reports";
 export { allocationRounds, roundApplications } from "./rounds";
+export {
+	partnerWebhooks,
+	satisfactionPulses,
+	showcasePins,
+	voiceTranscripts,
+	webhookDeliveries,
+} from "./signals";
 export { smsCharges } from "./sms";
 export { successStories } from "./stories";
 export { taskSubmissions } from "./submissions";

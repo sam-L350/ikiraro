@@ -120,6 +120,9 @@
 			"name": "inventory"
 		},
 		{
+			"name": "item-care"
+		},
+		{
 			"name": "leaderboard"
 		},
 		{
@@ -204,6 +207,9 @@
 			"name": "profile"
 		},
 		{
+			"name": "pulse"
+		},
+		{
 			"name": "quality"
 		},
 		{
@@ -234,6 +240,9 @@
 			"name": "second-reviews"
 		},
 		{
+			"name": "showcase"
+		},
+		{
 			"name": "staff"
 		},
 		{
@@ -261,10 +270,16 @@
 			"name": "tours"
 		},
 		{
+			"name": "transcripts"
+		},
+		{
 			"name": "verifications"
 		},
 		{
 			"name": "warnings"
+		},
+		{
+			"name": "webhooks"
 		}
 	],
 	"paths": {
@@ -13630,7 +13645,8 @@
 																"enum": [
 																	"photo",
 																	"file",
-																	"note"
+																	"note",
+																	"voice"
 																]
 															},
 															"submittedAt": {
@@ -14526,7 +14542,8 @@
 													"enum": [
 														"photo",
 														"file",
-														"note"
+														"note",
+														"voice"
 													]
 												},
 												"submittedAt": {
@@ -14581,6 +14598,10 @@
 													"type": "string"
 												},
 												"note": {
+													"type": "string",
+													"nullable": true
+												},
+												"transcript": {
 													"type": "string",
 													"nullable": true
 												},
@@ -14645,6 +14666,7 @@
 												"instructionsRw",
 												"instructionsEn",
 												"note",
+												"transcript",
 												"evidenceUrl",
 												"evidenceContentType",
 												"criteria",
@@ -14915,7 +14937,8 @@
 																"enum": [
 																	"photo",
 																	"file",
-																	"note"
+																	"note",
+																	"voice"
 																]
 															},
 															"submittedAt": {
@@ -19651,6 +19674,375 @@
 											"required": [
 												"items",
 												"centers"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/item-care": {
+			"get": {
+				"operationId": "getItemCare",
+				"summary": "Repairs and the warranty date on one item.",
+				"tags": [
+					"item-care"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "inventoryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"repairs": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"note": {
+																"type": "string"
+															},
+															"recordedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"note",
+															"recordedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"warrantyEndsOn": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"repairs",
+												"warrantyEndsOn"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/item-care/repair": {
+			"post": {
+				"operationId": "createItemRepair",
+				"summary": "Write what was repaired.",
+				"tags": [
+					"item-care"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"inventoryId": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"inventoryId",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/item-care/warranty": {
+			"post": {
+				"operationId": "createItemWarranty",
+				"summary": "Write the warranty end date.",
+				"tags": [
+					"item-care"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"inventoryId": {
+										"type": "string"
+									},
+									"endsOn": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"inventoryId",
+									"endsOn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
 											],
 											"additionalProperties": false
 										},
@@ -30868,6 +31260,224 @@
 				}
 			}
 		},
+		"/api/v1/pulse/answer": {
+			"post": {
+				"operationId": "createSatisfactionPulse",
+				"summary": "Store one answer for the open moment.",
+				"tags": [
+					"pulse"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"moment": {
+										"type": "string"
+									},
+									"verificationId": {
+										"type": "string"
+									},
+									"body": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"moment",
+									"body"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pulse": {
+			"get": {
+				"operationId": "getSatisfactionPulse",
+				"summary": "The moment this person can still answer, if there is one.",
+				"tags": [
+					"pulse"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"moment": {
+													"type": "string",
+													"enum": [
+														"first_badge",
+														"review"
+													],
+													"nullable": true
+												},
+												"verificationId": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"moment",
+												"verificationId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/quality": {
 			"get": {
 				"operationId": "getQuality",
@@ -36613,6 +37223,281 @@
 				}
 			}
 		},
+		"/api/v1/showcase": {
+			"get": {
+				"operationId": "getShowcase",
+				"summary": "Pinned work, and approved work that is not pinned yet.",
+				"tags": [
+					"showcase"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"pins": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"submissionId": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"evidenceType": {
+																"type": "string",
+																"enum": [
+																	"photo",
+																	"file",
+																	"note",
+																	"voice"
+																]
+															},
+															"evidenceUrl": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"submissionId",
+															"titleEn",
+															"titleRw",
+															"evidenceType",
+															"evidenceUrl"
+														],
+														"additionalProperties": false
+													}
+												},
+												"open": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"submissionId": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"evidenceType": {
+																"type": "string",
+																"enum": [
+																	"photo",
+																	"file",
+																	"note",
+																	"voice"
+																]
+															},
+															"evidenceUrl": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"submissionId",
+															"titleEn",
+															"titleRw",
+															"evidenceType",
+															"evidenceUrl"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"pins",
+												"open"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/showcase/pin": {
+			"post": {
+				"operationId": "createShowcasePin",
+				"summary": "Pin one approved piece. Three is the most.",
+				"tags": [
+					"showcase"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"submissionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"submissionId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/staff/{id}/deactivation": {
 			"post": {
 				"operationId": "createStaffDeactivation",
@@ -37405,7 +38290,8 @@
 													"enum": [
 														"photo",
 														"file",
-														"note"
+														"note",
+														"voice"
 													]
 												},
 												"submittedAt": {
@@ -37611,7 +38497,8 @@
 													"enum": [
 														"photo",
 														"file",
-														"note"
+														"note",
+														"voice"
 													]
 												},
 												"submittedAt": {
@@ -37840,7 +38727,8 @@
 													"enum": [
 														"photo",
 														"file",
-														"note"
+														"note",
+														"voice"
 													]
 												},
 												"submittedAt": {
@@ -43701,6 +44589,125 @@
 				}
 			}
 		},
+		"/api/v1/transcripts/write": {
+			"post": {
+				"operationId": "createVoiceTranscript",
+				"summary": "Store the trainer's transcript of a voice note.",
+				"tags": [
+					"transcripts"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"submissionId": {
+										"type": "string"
+									},
+									"body": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"submissionId",
+									"body"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/verifications/{id}/revoke": {
 			"post": {
 				"operationId": "createVerificationRevocation",
@@ -43790,6 +44797,134 @@
 												"verifiedMinutes",
 												"badgeRevoked",
 												"reviewerSuspended"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/verifications/bulk": {
+			"post": {
+				"operationId": "createBulkVerification",
+				"summary": "Decide each selected attempt on its own.",
+				"tags": [
+					"verifications"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"submissionIds": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"decision": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									},
+									"reasonCode": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"submissionIds",
+									"decision"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"count": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"count"
 											],
 											"additionalProperties": false
 										},
@@ -44304,6 +45439,255 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/webhooks/create": {
+			"post": {
+				"operationId": "createPartnerWebhook",
+				"summary": "Store one https address for a credential or a grant.",
+				"tags": [
+					"webhooks"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"url": {
+										"type": "string"
+									},
+									"event": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"url",
+									"event"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"url": {
+													"type": "string"
+												},
+												"event": {
+													"type": "string",
+													"enum": [
+														"grant.decided",
+														"credential.awarded"
+													]
+												},
+												"createdAt": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id",
+												"url",
+												"event",
+												"createdAt"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/webhooks": {
+			"get": {
+				"operationId": "getPartnerWebhooks",
+				"summary": "Partner addresses and the event each one hears.",
+				"tags": [
+					"webhooks"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"hooks": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"url": {
+																"type": "string"
+															},
+															"event": {
+																"type": "string",
+																"enum": [
+																	"grant.decided",
+																	"credential.awarded"
+																]
+															},
+															"createdAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"url",
+															"event",
+															"createdAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"hooks"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}

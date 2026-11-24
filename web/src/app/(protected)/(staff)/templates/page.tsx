@@ -25,7 +25,8 @@ function evidenceLabel(
 			| "contentTemplatesEvidenceNone"
 			| "evidencePhoto"
 			| "evidenceFile"
-			| "evidenceNote",
+			| "evidenceNote"
+			| "evidenceVoice",
 	) => string,
 ): string {
 	switch (value) {
@@ -35,6 +36,8 @@ function evidenceLabel(
 			return t("evidenceFile");
 		case "note":
 			return t("evidenceNote");
+		case "voice":
+			return t("evidenceVoice");
 		default:
 			return t("contentTemplatesEvidenceNone");
 	}
@@ -210,6 +213,7 @@ export default function TemplatesPage() {
 						<option value="photo">{t("evidencePhoto")}</option>
 						<option value="file">{t("evidenceFile")}</option>
 						<option value="note">{t("evidenceNote")}</option>
+						<option value="voice">{t("evidenceVoice")}</option>
 					</select>
 				</label>
 				{formReady ? (
