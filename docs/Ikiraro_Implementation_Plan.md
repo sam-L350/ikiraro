@@ -109,6 +109,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [ ] `phase/9.5-coverage-and-tours`
   - [ ] `phase/9.6-remaining-could-haves`
   - [ ] `phase/9.7-account-hardening`
+  - [ ] `phase/9.8-interface-polish`
 
 ---
 
@@ -939,8 +940,75 @@ This is the product. Do not open phase 7 while this gate is red.
 | `phase/9.5-coverage-and-tours` | Pop-up tours linked back to a home center. Underserved-sector view. Content templates. | `FR-CEN-08`, `FR-CEN-09`, `FR-CMS-09` |
 | `phase/9.6-remaining-could-haves` | Voice-note evidence, bulk review actions, evidence showcase, repair and warranty, satisfaction pulse, partner webhooks. | `FR-SUB-09`, `FR-VER-11`, `FR-PAS-09`, `FR-HW-13`, `FR-SUP-05`, `FR-INT-05` |
 | `phase/9.7-account-hardening` | Duplicate detection and admin merge. Optional staff two-factor. Retention jobs (drop images, keep the decision). Session and lockout polish if anything in 1.5 proved thin in the field. | `FR-IAM-09` (second factor), `FR-IAM-13`, `FR-ADM-06` |
+| `phase/9.8-interface-polish` | The rail scrolls on its own, a phone opens the same links in a drawer, and the lists below become tables with a row action, a tab when a page mixes a list and a form, and an empty state. | Screens already on `DEV`. No new requirement. |
 
 USSD, native apps, mobile money, and automatic grading stay out. They need their own design and are not given branches here.
+
+#### How each subphase shows its work
+
+Paper, ink, and one working action stay. An icon sits beside a label. A status stays a labeled pill. Tables use paper, ink, and that pill. Kinyarwanda and English both get the new labels. A person reads the item name, the district name, and the center name.
+
+| Branch | Shows |
+| --- | --- |
+| `phase/9.1-pathways-and-placement` | The placement check is a short list of rules, each with a pass, fail, or unknown pill. The pathway is ordered. The next course is the ink action. |
+| `phase/9.2-peer-and-group-work` | Questions on a task are a thread. Group credit is a table of people and what each person did. Practice mode has its own empty state, and the sample data is labeled as sample. |
+| `phase/9.3-scheduled-reports-and-warnings` | A warning is a table: who, kind, and how old it is. The scheduled report uses the same table shape as the donor report, and the download stays quiet. |
+| `phase/9.4-portable-credentials` | Badge level and expiry sit in a table on the passport. Licence seats are a table. Grant and revoke are row actions, and only one of them is ink. |
+| `phase/9.5-coverage-and-tours` | Underserved sectors are a table: sector, learners, and the home center. A template is a row with Use as the action. The public directory search stays, and the results become a table. |
+| `phase/9.6-remaining-could-haves` | Bulk review is the evidence table with a checkbox column and one ink action for the selected rows. The showcase is a gallery. Repair and warranty sit on the item. The satisfaction pulse is a short form. Partner webhooks are a settings table. |
+| `phase/9.7-account-hardening` | Possible duplicates are a table. Merge is the row action, and it still waits for a second admin. Sessions and lockout live on their own profile tab. |
+| `phase/9.8-interface-polish` | The shell and the screens already on `DEV`, listed below. Later subphases use these pieces instead of inventing a second layout. |
+
+#### 9.8 What the current screens need
+
+Reviewed 24 Nov 2026 in the browser, desktop and a 390px phone, signed in as each demo role. The product has no data table. Equity says "Download the table" and then stacks the counts. On a 1440px desktop the rail is `h-screen` with overflow visible, so the last link sits below the fold (about 1313px for a trainer, 1601px for an admin). On a phone the rail is hidden and the same links wrap under the header, about 572px tall for an admin, with no drawer.
+
+**Shell**
+
+- The desktop rail scrolls inside itself. The page scrolls on its own. The wordmark and the signed-in person stay put while the links move.
+- A phone gets a drawer with the same links, opened from the header. Sign out stays visible.
+- Each nav label gets a small ink icon. Empty states use the same stroke weight. Login already has this kind of icon, and the product pages get it too.
+- Staff home names the work that is waiting. A learner home keeps the next task. A center manager home names the waiting evidence, sessions, or announcements. A verifier home offers "Check a badge". A coordinator or admin with nothing waiting gets the sentence and an illustration.
+
+**Tables and the row action**
+
+These pages are stacks of text or a long `select`. Each becomes a table. The row action is a quiet link, or the page's one ink button when that row is the work. Search and filters sit above the table.
+
+- Evidence, follow-ups, surveys, and dormancy: person, task or day, center or district, waiting time, status. Open is the row action.
+- Devices, practice machines, sessions: center, name, kind, condition, free or not.
+- Inventory, handover, and recovery: item, status, and center. The title is the item name. The serial stays in the row, not in the heading.
+- Audit log: time, action, actor, target. Download stays quiet.
+- Equity and the donor report: the counts in a real table. The download stays quiet. Funnel, decisions, and outcomes are tabs.
+- Tickets, role changes, mentor applications, message review, and concerns: status pill and one row action.
+- Courses and review: title, language, status. Tabs for draft, waiting, published, and retired. A course list of dozens of retired drafts does not stay one long stack.
+- Catalog can stay as cards. The four filters do not stay four stacked selects.
+- Inbox: subject, unread, and mark read on the row.
+- Rounds and decisions: title, district, items, and open. The district picker sits above the table.
+- Public directory, the board, and the audit summary: a table or a ranked list. A district code is not the only place name.
+
+**Tabs**
+
+Use a tab when one page is doing two jobs.
+
+- Help: search a guide, or report a problem.
+- Profile: details, consent, and the person's own record.
+- Devices, inventory, and rounds: the list, then the form. The save button stays hidden until the required fields are set. Devices currently shows "Save the device" before a name is typed.
+- Surveys: baseline and endline, instead of two links.
+- Courses and review, and the donor and equity reports, as above.
+
+**Empty states**
+
+A sentence stays. An illustration in paper and ink is added, and a next action is added only when that role can do something.
+
+- Evidence, schedule, practice, conditions, follow-ups, referrals, messages, points, concerns, your story, and partner stories.
+- Mentor discovery currently has no heading, only "An approved mentor sees these learners."
+- Home for a coordinator, an auditor's unused pages, and a verifier.
+
+**Calls to action**
+
+- One ink button per view. Row actions and downloads are quiet.
+- A form does not show its ink button until it can be submitted.
+- Denial copy stays a sentence. The role's own next action is the only button.
 
 ---
 
