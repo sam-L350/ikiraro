@@ -5,6 +5,7 @@ import {
 	hardwareStatusHistory,
 	type JsonValue,
 	learningCenters,
+	users,
 } from "../../db/schema";
 import { errors } from "../api/error";
 import { writeAudit } from "../audit/write";
@@ -60,6 +61,7 @@ export type InventoryHistory = {
 	id: string;
 	status: InventoryStatus;
 	centerName: string;
+	holderName: string | null;
 	note: string | null;
 	recordedAt: string;
 };
@@ -338,6 +340,7 @@ export async function readInventory(
 			id: hardwareStatusHistory.id,
 			status: hardwareStatusHistory.status,
 			centerName: learningCenters.name,
+			holderName: users.name,
 			note: hardwareStatusHistory.note,
 			recordedAt: hardwareStatusHistory.recordedAt,
 		})
@@ -346,6 +349,7 @@ export async function readInventory(
 			learningCenters,
 			eq(learningCenters.id, hardwareStatusHistory.centerId),
 		)
+		.leftJoin(users, eq(users.id, hardwareStatusHistory.holderUserId))
 		.where(eq(hardwareStatusHistory.inventoryId, itemId))
 		.orderBy(desc(hardwareStatusHistory.recordedAt))
 		.limit(50);
@@ -361,6 +365,7 @@ export async function readInventory(
 			id: entry.id,
 			status: asStatus(entry.status),
 			centerName: entry.centerName,
+			holderName: entry.holderName,
 			note: entry.note,
 			recordedAt: entry.recordedAt.toISOString(),
 		})),
@@ -479,6 +484,7 @@ export async function updateInventoryItem(
 				inventoryId: current.id,
 				status,
 				centerId: center.id,
+				holderUserId: current.currentHolderUserId,
 				note,
 				recordedByUserId: input.actorId,
 			});

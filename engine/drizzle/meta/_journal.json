@@ -253,6 +253,13 @@
       "when": 1795460000000,
       "tag": "0035_phase7_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795461000000,
+      "tag": "0036_phase7_handover",
+      "breakpoints": true
     }
   ]
 }

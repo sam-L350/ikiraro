@@ -30,6 +30,7 @@ type HistoryRow = {
 	id: string;
 	status: InventoryStatus;
 	centerName: string;
+	holderName: string | null;
 	note: string | null;
 };
 
@@ -376,6 +377,7 @@ export default function InventoryItemPage() {
 							) : null}
 							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 								{entry.centerName}
+								{entry.holderName ? ` · ${entry.holderName}` : ""}
 								{entry.note ? ` · ${entry.note}` : ""}
 							</p>
 						</li>

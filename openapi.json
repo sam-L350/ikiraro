@@ -78,6 +78,9 @@
 			"name": "feedback-snippets"
 		},
 		{
+			"name": "handovers"
+		},
+		{
 			"name": "inventory"
 		},
 		{
@@ -13372,6 +13375,640 @@
 				}
 			}
 		},
+		"/api/v1/handovers/{id}/code": {
+			"post": {
+				"operationId": "createHandoverCode",
+				"summary": "Send a one-time code to the recipient. The code is not returned.",
+				"tags": [
+					"handovers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sent": {
+													"const": true,
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"sent"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/handovers/{id}": {
+			"get": {
+				"operationId": "getHandover",
+				"summary": "The form, the witnesses at the center, and the custody trail.",
+				"tags": [
+					"handovers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"recorded": {
+													"type": "boolean"
+												},
+												"preview": {
+													"type": "object",
+													"properties": {
+														"itemName": {
+															"type": "string"
+														},
+														"serial": {
+															"type": "string"
+														},
+														"category": {
+															"type": "string"
+														},
+														"donor": {
+															"type": "string",
+															"nullable": true
+														},
+														"centerName": {
+															"type": "string"
+														},
+														"recipientName": {
+															"type": "string"
+														},
+														"awardedOn": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"itemName",
+														"serial",
+														"category",
+														"donor",
+														"centerName",
+														"recipientName",
+														"awardedOn"
+													],
+													"additionalProperties": false
+												},
+												"form": {
+													"type": "object",
+													"properties": {
+														"itemName": {
+															"type": "string"
+														},
+														"serial": {
+															"type": "string"
+														},
+														"category": {
+															"type": "string"
+														},
+														"donor": {
+															"type": "string",
+															"nullable": true
+														},
+														"centerName": {
+															"type": "string"
+														},
+														"recipientName": {
+															"type": "string"
+														},
+														"awardedOn": {
+															"type": "string"
+														},
+														"witnessName": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"itemName",
+														"serial",
+														"category",
+														"donor",
+														"centerName",
+														"recipientName",
+														"awardedOn",
+														"witnessName"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"acknowledgment": {
+													"type": "string",
+													"enum": [
+														"otp",
+														"signature"
+													],
+													"nullable": true
+												},
+												"witnesses": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												},
+												"trail": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"retired",
+																	"in_stock",
+																	"reserved",
+																	"awarded",
+																	"in_repair",
+																	"lost"
+																]
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"holderName": {
+																"type": "string",
+																"nullable": true
+															},
+															"recordedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"centerName",
+															"holderName",
+															"recordedAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"recorded",
+												"preview",
+												"form",
+												"acknowledgment",
+												"witnesses",
+												"trail"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/handovers/{id}/record": {
+			"post": {
+				"operationId": "createHandover",
+				"summary": "Store the form, the acknowledgment, the photo, and the witness.",
+				"tags": [
+					"handovers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"witnessUserId": {
+										"type": "number"
+									},
+									"acknowledgment": {
+										"type": "string"
+									},
+									"signatureMediaId": {
+										"type": "string"
+									},
+									"code": {
+										"type": "string"
+									},
+									"photoMediaId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"witnessUserId",
+									"acknowledgment",
+									"photoMediaId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/handovers": {
+			"get": {
+				"operationId": "getHandovers",
+				"summary": "Active grants, and whether the handover is already stored.",
+				"tags": [
+					"handovers"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"grants": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"itemName": {
+																"type": "string"
+															},
+															"serial": {
+																"type": "string"
+															},
+															"recipientName": {
+																"type": "string"
+															},
+															"recorded": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"itemName",
+															"serial",
+															"recipientName",
+															"recorded"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"grants"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/inventory/{id}": {
 			"get": {
 				"operationId": "getInventoryItem",
@@ -13586,6 +14223,10 @@
 															"centerName": {
 																"type": "string"
 															},
+															"holderName": {
+																"type": "string",
+																"nullable": true
+															},
 															"note": {
 																"type": "string",
 																"nullable": true
@@ -13598,6 +14239,7 @@
 															"id",
 															"status",
 															"centerName",
+															"holderName",
 															"note",
 															"recordedAt"
 														],
@@ -14060,6 +14702,10 @@
 															"centerName": {
 																"type": "string"
 															},
+															"holderName": {
+																"type": "string",
+																"nullable": true
+															},
 															"note": {
 																"type": "string",
 																"nullable": true
@@ -14072,6 +14718,7 @@
 															"id",
 															"status",
 															"centerName",
+															"holderName",
 															"note",
 															"recordedAt"
 														],

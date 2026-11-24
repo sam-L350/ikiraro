@@ -42,6 +42,7 @@ export {
 	hardwareGrants,
 	rankingSnapshots,
 } from "./grants";
+export { handoverRecords } from "./handover";
 export type {
 	Account,
 	NewAccount,

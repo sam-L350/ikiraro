@@ -29,6 +29,9 @@ export const hardwareInventory = pgTable(
 			.notNull()
 			.references(() => learningCenters.id),
 		donor: text("donor"),
+		currentHolderUserId: integer("current_holder_user_id").references(
+			() => users.id,
+		),
 		acquiredOn: date("acquired_on").notNull(),
 		criteria: jsonb("criteria").$type<JsonValue>().notNull().default([]),
 		createdByUserId: integer("created_by_user_id")
@@ -80,6 +83,7 @@ export const hardwareStatusHistory = pgTable(
 		centerId: uuid("center_id")
 			.notNull()
 			.references(() => learningCenters.id),
+		holderUserId: integer("holder_user_id").references(() => users.id),
 		note: text("note"),
 		recordedByUserId: integer("recorded_by_user_id")
 			.notNull()

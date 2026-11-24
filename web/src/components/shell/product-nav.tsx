@@ -161,7 +161,10 @@ function useProductNavItems(): NavItem[] {
 	const canManageHardware =
 		user?.roles.some((role) => role.code === "hardware_officer") ?? false;
 	if (canManageHardware) {
-		items.push({ to: "/inventory", label: "inventoryNav" });
+		items.push(
+			{ to: "/inventory", label: "inventoryNav" },
+			{ to: "/handovers", label: "handoverNav" },
+		);
 	}
 	const canOpenRounds =
 		user?.roles.some(

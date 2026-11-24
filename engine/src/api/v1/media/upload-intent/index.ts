@@ -26,7 +26,15 @@ export async function createMediaUploadIntent(input: {
 	} catch (error) {
 		if (!(error instanceof ApiError) || error.status !== 403) throw error;
 	}
-	if (!allowed) await authorize({ permission: "content.write" });
+	if (!allowed) {
+		try {
+			await authorize({ permission: "content.write" });
+			allowed = true;
+		} catch (error) {
+			if (!(error instanceof ApiError) || error.status !== 403) throw error;
+		}
+	}
+	if (!allowed) await authorize({ permission: "hardware.manage" });
 	return createUploadIntent(db, getObjectStore(), {
 		ownerUserId: user.id,
 		contentType: input.contentType,
