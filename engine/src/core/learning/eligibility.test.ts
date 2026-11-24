@@ -92,7 +92,7 @@ describe("evaluateEligibility", () => {
 		expect(results[1]?.reason).toBe("Months active are below the minimum.");
 	});
 
-	test("attendance is not a pass or a fail until sessions exist", () => {
+	test("attendance stays unknown until a count is supplied", () => {
 		const results = evaluateEligibility(user(), [
 			{ kind: "points", minimum: 0 },
 			{ kind: "attendance", minimum: 1 },
@@ -104,6 +104,19 @@ describe("evaluateEligibility", () => {
 			["hours", "pass"],
 		]);
 		expect(results[1]?.reason).toBe("Not enough data.");
+	});
+
+	test("a supplied attendance count passes or fails", () => {
+		const none = evaluateEligibility(user({ attendedSessions: 0 }), [
+			{ kind: "attendance", minimum: 1 },
+		]);
+		const met = evaluateEligibility(user({ attendedSessions: 1 }), [
+			{ kind: "attendance", minimum: 1 },
+		]);
+		expect(none[0]?.status).toBe("fail");
+		expect(none[0]?.reason).toBe("Attendance is below the minimum.");
+		expect(met[0]?.status).toBe("pass");
+		expect(met[0]?.reason).toBe("Attendance meets the minimum.");
 	});
 
 	test("no criteria returns no results", () => {

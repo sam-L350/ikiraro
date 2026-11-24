@@ -7,6 +7,11 @@ export type EligibilityUser = {
 	/** Badges the learner still holds. A revoked badge is left out. */
 	badgeIds: readonly string[];
 	verifiedMinutes: number;
+	/**
+	 * Sessions this learner was marked present for. Leave it out when the
+	 * caller has not loaded attendance, and the criterion stays unknown.
+	 */
+	attendedSessions?: number;
 	districtId: string | null;
 	registeredAt: Date;
 	/** The moment of the check. Months active are counted up to this instant. */
@@ -102,8 +107,32 @@ function evaluateOne(
 			}
 			return outcome("hours", "fail", "Hours are below the minimum.");
 		}
-		case "attendance":
-			return outcome("attendance", "unknown", NOT_ENOUGH_DATA);
+		case "attendance": {
+			if (!isMinimum(criterion.minimum)) {
+				return outcome(
+					"attendance",
+					"fail",
+					"That attendance rule is not usable.",
+				);
+			}
+			if (user.attendedSessions === undefined) {
+				return outcome("attendance", "unknown", NOT_ENOUGH_DATA);
+			}
+			if (
+				!Number.isInteger(user.attendedSessions) ||
+				user.attendedSessions < 0
+			) {
+				return outcome(
+					"attendance",
+					"fail",
+					"That attendance count is not usable.",
+				);
+			}
+			if (user.attendedSessions >= criterion.minimum) {
+				return outcome("attendance", "pass", "Attendance meets the minimum.");
+			}
+			return outcome("attendance", "fail", "Attendance is below the minimum.");
+		}
 		case "district": {
 			if (criterion.districtId.trim() === "") {
 				return outcome("district", "fail", "That district rule is not usable.");
@@ -156,7 +185,7 @@ function evaluateOne(
 	}
 }
 
-/** One result per criterion, in the same order. Attendance stays unknown until sessions exist. */
+/** One result per criterion, in the same order. Attendance stays unknown until a count is supplied. */
 export function evaluateEligibility(
 	user: EligibilityUser,
 	criteria: readonly EligibilityCriterion[],

@@ -33,6 +33,9 @@
 			"name": "catalog"
 		},
 		{
+			"name": "center-sessions"
+		},
+		{
 			"name": "centers"
 		},
 		{
@@ -115,6 +118,9 @@
 		},
 		{
 			"name": "reviews"
+		},
+		{
+			"name": "schedule"
 		},
 		{
 			"name": "second-reviews"
@@ -2931,6 +2937,952 @@
 											},
 											"required": [
 												"learners"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/center-sessions/{id}/attendance": {
+			"post": {
+				"operationId": "createCenterSessionAttendance",
+				"summary": "Tick a learner present. The attendance id is the client's, so a retry is the same mark.",
+				"tags": [
+					"center-sessions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"learnerId": {
+										"type": "number"
+									},
+									"attendanceId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"learnerId",
+									"attendanceId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"sessionId": {
+													"type": "string"
+												},
+												"learnerId": {
+													"type": "number"
+												},
+												"method": {
+													"type": "string",
+													"enum": [
+														"tick",
+														"qr"
+													]
+												},
+												"minutes": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"id",
+												"sessionId",
+												"learnerId",
+												"method",
+												"minutes"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/center-sessions/{id}": {
+			"get": {
+				"operationId": "getCenterSession",
+				"summary": "One session, its check-in code, and the learners who can be marked.",
+				"tags": [
+					"center-sessions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"topic": {
+													"type": "string"
+												},
+												"centerId": {
+													"type": "string"
+												},
+												"centerName": {
+													"type": "string"
+												},
+												"courseId": {
+													"type": "string",
+													"nullable": true
+												},
+												"courseTitleRw": {
+													"type": "string",
+													"nullable": true
+												},
+												"courseTitleEn": {
+													"type": "string",
+													"nullable": true
+												},
+												"trainerName": {
+													"type": "string"
+												},
+												"startsAt": {
+													"type": "string"
+												},
+												"minutes": {
+													"type": "number"
+												},
+												"capacity": {
+													"type": "number"
+												},
+												"taken": {
+													"type": "number"
+												},
+												"open": {
+													"type": "boolean"
+												},
+												"checkInToken": {
+													"type": "string"
+												},
+												"checkInUrl": {
+													"type": "string"
+												},
+												"checkInQr": {
+													"type": "string"
+												},
+												"canMark": {
+													"type": "boolean"
+												},
+												"learners": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string"
+															},
+															"attended": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"attended"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"topic",
+												"centerId",
+												"centerName",
+												"courseId",
+												"courseTitleRw",
+												"courseTitleEn",
+												"trainerName",
+												"startsAt",
+												"minutes",
+												"capacity",
+												"taken",
+												"open",
+												"checkInToken",
+												"checkInUrl",
+												"checkInQr",
+												"canMark",
+												"learners"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/center-sessions/check-in": {
+			"post": {
+				"operationId": "createCenterSessionCheckIn",
+				"summary": "A learner checks in with the code on the session.",
+				"tags": [
+					"center-sessions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"token": {
+										"type": "string"
+									},
+									"attendanceId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"token",
+									"attendanceId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"sessionId": {
+													"type": "string"
+												},
+												"learnerId": {
+													"type": "number"
+												},
+												"method": {
+													"type": "string",
+													"enum": [
+														"tick",
+														"qr"
+													]
+												},
+												"minutes": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"id",
+												"sessionId",
+												"learnerId",
+												"method",
+												"minutes"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/center-sessions/create": {
+			"post": {
+				"operationId": "createCenterSession",
+				"summary": "Put a session on a center schedule.",
+				"tags": [
+					"center-sessions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"centerId": {
+										"type": "string"
+									},
+									"topic": {
+										"type": "string"
+									},
+									"courseId": {
+										"type": "string"
+									},
+									"trainerUserId": {
+										"type": "number"
+									},
+									"startsAt": {
+										"type": "string"
+									},
+									"minutes": {
+										"type": "number"
+									},
+									"capacity": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"centerId",
+									"topic",
+									"trainerUserId",
+									"startsAt",
+									"minutes",
+									"capacity"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/center-sessions": {
+			"get": {
+				"operationId": "getCenterSessions",
+				"summary": "Sessions at the centers this person trains, manages, or coordinates.",
+				"tags": [
+					"center-sessions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "centerId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"topic": {
+																"type": "string"
+															},
+															"centerId": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"courseId": {
+																"type": "string",
+																"nullable": true
+															},
+															"courseTitleRw": {
+																"type": "string",
+																"nullable": true
+															},
+															"courseTitleEn": {
+																"type": "string",
+																"nullable": true
+															},
+															"trainerName": {
+																"type": "string"
+															},
+															"startsAt": {
+																"type": "string"
+															},
+															"minutes": {
+																"type": "number"
+															},
+															"capacity": {
+																"type": "number"
+															},
+															"taken": {
+																"type": "number"
+															},
+															"open": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"topic",
+															"centerId",
+															"centerName",
+															"courseId",
+															"courseTitleRw",
+															"courseTitleEn",
+															"trainerName",
+															"startsAt",
+															"minutes",
+															"capacity",
+															"taken",
+															"open"
+														],
+														"additionalProperties": false
+													}
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												},
+												"canCreate": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"items",
+												"centers",
+												"canCreate"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/center-sessions/join": {
+			"get": {
+				"operationId": "getCenterSessionJoin",
+				"summary": "The session a learner is about to check in to. The code is not sent back.",
+				"tags": [
+					"center-sessions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "token",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"topic": {
+													"type": "string"
+												},
+												"centerName": {
+													"type": "string"
+												},
+												"trainerName": {
+													"type": "string"
+												},
+												"startsAt": {
+													"type": "string"
+												},
+												"minutes": {
+													"type": "number"
+												},
+												"open": {
+													"type": "boolean"
+												},
+												"attended": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"topic",
+												"centerName",
+												"trainerName",
+												"startsAt",
+												"minutes",
+												"open",
+												"attended"
 											],
 											"additionalProperties": false
 										},
@@ -19503,6 +20455,142 @@
 												"waiting",
 												"published",
 												"retired"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/schedule": {
+			"get": {
+				"operationId": "getSchedule",
+				"summary": "Upcoming sessions at the learner's home center.",
+				"tags": [
+					"schedule"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"topic": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"courseTitleRw": {
+																"type": "string",
+																"nullable": true
+															},
+															"courseTitleEn": {
+																"type": "string",
+																"nullable": true
+															},
+															"trainerName": {
+																"type": "string"
+															},
+															"startsAt": {
+																"type": "string"
+															},
+															"minutes": {
+																"type": "number"
+															},
+															"open": {
+																"type": "boolean"
+															},
+															"attended": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"topic",
+															"centerName",
+															"courseTitleRw",
+															"courseTitleEn",
+															"trainerName",
+															"startsAt",
+															"minutes",
+															"open",
+															"attended"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
 											],
 											"additionalProperties": false
 										},

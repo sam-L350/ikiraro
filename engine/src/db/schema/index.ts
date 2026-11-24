@@ -7,6 +7,7 @@ export {
 	pointRules,
 	pointTransactions,
 } from "./awards";
+export { centerSessions, sessionAttendance } from "./center-sessions";
 export type { JsonValue } from "./compliance";
 export {
 	configSettings,

@@ -47,6 +47,11 @@ function useProductNavItems(): NavItem[] {
 	if (canUseCatalog) {
 		items.push({ to: "/catalog", label: "catalogNav" });
 	}
+	const isLearner =
+		user?.roles.some((role) => role.code === "learner") ?? false;
+	if (isLearner) {
+		items.push({ to: "/schedule", label: "scheduleNav" });
+	}
 	const canReadPoints =
 		user?.roles.some(
 			(role) =>
@@ -96,6 +101,7 @@ function useProductNavItems(): NavItem[] {
 	if (canReviewEvidence) {
 		items.push(
 			{ to: "/evidence", label: "evidenceQueueTitle" },
+			{ to: "/sessions", label: "sessionsNav" },
 			{ to: "/second-reviews", label: "secondReviewsNav" },
 			{ to: "/appeals", label: "appealsNav" },
 			{ to: "/feedback", label: "feedbackNav" },
