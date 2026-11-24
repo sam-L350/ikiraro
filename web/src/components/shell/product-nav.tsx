@@ -53,6 +53,7 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/schedule", label: "scheduleNav" },
 			{ to: "/practice", label: "practiceNav" },
+			{ to: "/allocation", label: "allocationNav" },
 		);
 	}
 	const canReadPoints =
@@ -161,6 +162,14 @@ function useProductNavItems(): NavItem[] {
 		user?.roles.some((role) => role.code === "hardware_officer") ?? false;
 	if (canManageHardware) {
 		items.push({ to: "/inventory", label: "inventoryNav" });
+	}
+	const canOpenRounds =
+		user?.roles.some(
+			(role) =>
+				role.code === "district_coordinator" || role.code === "platform_admin",
+		) ?? false;
+	if (canOpenRounds) {
+		items.push({ to: "/rounds", label: "roundsNav" });
 	}
 	return items;
 }

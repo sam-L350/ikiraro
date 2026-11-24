@@ -15,6 +15,9 @@
 			"name": "account"
 		},
 		{
+			"name": "allocation"
+		},
+		{
 			"name": "announcement-targets"
 		},
 		{
@@ -132,6 +135,9 @@
 			"name": "reviews"
 		},
 		{
+			"name": "rounds"
+		},
+		{
 			"name": "schedule"
 		},
 		{
@@ -188,6 +194,446 @@
 											},
 											"required": [
 												"deactivated"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/allocation/apply": {
+			"post": {
+				"operationId": "createAllocationApplication",
+				"summary": "Apply when every rule passes. The result of each rule is stored on the row.",
+				"tags": [
+					"allocation"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"roundId": {
+										"type": "string"
+									},
+									"statement": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"roundId",
+									"statement"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"results": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"kind": {
+																"type": "string",
+																"enum": [
+																	"points",
+																	"badges",
+																	"hours",
+																	"attendance",
+																	"district",
+																	"months_active"
+																]
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"pass",
+																	"fail",
+																	"unknown"
+																]
+															},
+															"reason": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"kind",
+															"status",
+															"reason"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"results"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/allocation": {
+			"get": {
+				"operationId": "getAllocation",
+				"summary": "Open rounds in the learner's district, with the check for each rule.",
+				"tags": [
+					"allocation"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"rounds": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"districtId": {
+																"type": "string"
+															},
+															"districtName": {
+																"type": "string"
+															},
+															"title": {
+																"type": "string"
+															},
+															"quantity": {
+																"type": "number"
+															},
+															"opensAt": {
+																"type": "string"
+															},
+															"closesAt": {
+																"type": "string"
+															},
+															"open": {
+																"type": "boolean"
+															},
+															"criteria": {
+																"type": "array",
+																"items": {
+																	"oneOf": [
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "points",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "badges",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				},
+																				"badgeId": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"kind"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "hours",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "attendance",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "district",
+																					"type": "string"
+																				},
+																				"districtId": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"districtId"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "months_active",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		}
+																	]
+																}
+															},
+															"results": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"kind": {
+																			"type": "string",
+																			"enum": [
+																				"points",
+																				"badges",
+																				"hours",
+																				"attendance",
+																				"district",
+																				"months_active"
+																			]
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"pass",
+																				"fail",
+																				"unknown"
+																			]
+																		},
+																		"reason": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"kind",
+																		"status",
+																		"reason"
+																	],
+																	"additionalProperties": false
+																}
+															},
+															"applied": {
+																"type": "boolean"
+															},
+															"statement": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"districtId",
+															"districtName",
+															"title",
+															"quantity",
+															"opensAt",
+															"closesAt",
+															"open",
+															"criteria",
+															"results",
+															"applied",
+															"statement"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"rounds"
 											],
 											"additionalProperties": false
 										},
@@ -385,8 +831,8 @@
 									"scope": {
 										"type": "string",
 										"enum": [
-											"center",
-											"district"
+											"district",
+											"center"
 										]
 									},
 									"scopeId": {
@@ -23012,6 +23458,818 @@
 				}
 			}
 		},
+		"/api/v1/rounds/{id}": {
+			"get": {
+				"operationId": "getRound",
+				"summary": "One round and the applications stored on it.",
+				"tags": [
+					"rounds"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"districtId": {
+													"type": "string"
+												},
+												"districtName": {
+													"type": "string"
+												},
+												"title": {
+													"type": "string"
+												},
+												"quantity": {
+													"type": "number"
+												},
+												"opensAt": {
+													"type": "string"
+												},
+												"closesAt": {
+													"type": "string"
+												},
+												"open": {
+													"type": "boolean"
+												},
+												"criteria": {
+													"type": "array",
+													"items": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "points",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "badges",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	},
+																	"badgeId": {
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"kind"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "hours",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "attendance",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "district",
+																		"type": "string"
+																	},
+																	"districtId": {
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"districtId"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "months_active",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															}
+														]
+													}
+												},
+												"applications": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"learnerName": {
+																"type": "string"
+															},
+															"statement": {
+																"type": "string"
+															},
+															"results": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"kind": {
+																			"type": "string",
+																			"enum": [
+																				"points",
+																				"badges",
+																				"hours",
+																				"attendance",
+																				"district",
+																				"months_active"
+																			]
+																		},
+																		"status": {
+																			"type": "string",
+																			"enum": [
+																				"pass",
+																				"fail",
+																				"unknown"
+																			]
+																		},
+																		"reason": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"kind",
+																		"status",
+																		"reason"
+																	],
+																	"additionalProperties": false
+																}
+															},
+															"createdAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"learnerName",
+															"statement",
+															"results",
+															"createdAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"districtId",
+												"districtName",
+												"title",
+												"quantity",
+												"opensAt",
+												"closesAt",
+												"open",
+												"criteria",
+												"applications"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/rounds/create": {
+			"post": {
+				"operationId": "createRound",
+				"summary": "Open a district round. The quantity and the rules are the ones typed here.",
+				"tags": [
+					"rounds"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"districtId": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									},
+									"quantity": {
+										"type": "number"
+									},
+									"opensAt": {
+										"type": "string"
+									},
+									"closesAt": {
+										"type": "string"
+									},
+									"criteria": {
+										"type": "array",
+										"items": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "points",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "badges",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														},
+														"badgeId": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"kind"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "hours",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "attendance",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "district",
+															"type": "string"
+														},
+														"districtId": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"kind",
+														"districtId"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "months_active",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												}
+											]
+										}
+									}
+								},
+								"required": [
+									"districtId",
+									"title",
+									"quantity",
+									"opensAt",
+									"closesAt",
+									"criteria"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/rounds": {
+			"get": {
+				"operationId": "getRounds",
+				"summary": "Rounds in this coordinator's district, or every district for an admin.",
+				"tags": [
+					"rounds"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"rounds": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"districtId": {
+																"type": "string"
+															},
+															"districtName": {
+																"type": "string"
+															},
+															"title": {
+																"type": "string"
+															},
+															"quantity": {
+																"type": "number"
+															},
+															"opensAt": {
+																"type": "string"
+															},
+															"closesAt": {
+																"type": "string"
+															},
+															"open": {
+																"type": "boolean"
+															},
+															"criteria": {
+																"type": "array",
+																"items": {
+																	"oneOf": [
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "points",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "badges",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				},
+																				"badgeId": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"kind"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "hours",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "attendance",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "district",
+																					"type": "string"
+																				},
+																				"districtId": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"districtId"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "months_active",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		}
+																	]
+																}
+															}
+														},
+														"required": [
+															"id",
+															"districtId",
+															"districtName",
+															"title",
+															"quantity",
+															"opensAt",
+															"closesAt",
+															"open",
+															"criteria"
+														],
+														"additionalProperties": false
+													}
+												},
+												"districts": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"rounds",
+												"districts"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/schedule": {
 			"get": {
 				"operationId": "getSchedule",
@@ -23871,8 +25129,8 @@
 															"scopeType": {
 																"type": "string",
 																"enum": [
-																	"center",
 																	"district",
+																	"center",
 																	"self",
 																	"global"
 																]
@@ -23992,8 +25250,8 @@
 									"scopeType": {
 										"type": "string",
 										"enum": [
-											"center",
 											"district",
+											"center",
 											"self",
 											"global"
 										]

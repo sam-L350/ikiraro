@@ -66,6 +66,7 @@ export {
 	digitalPassports,
 	otpChallenges,
 } from "./registration";
+export { allocationRounds, roundApplications } from "./rounds";
 export { smsCharges } from "./sms";
 export { taskSubmissions } from "./submissions";
 export {

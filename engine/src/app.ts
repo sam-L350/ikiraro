@@ -8,7 +8,7 @@ import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
  * Assembles the HTTP application:
  *
  * - `endpoints`  — generated from `src/api/**` (typed RPC, OpenAPI, client).
- *   The hardware inventory and its status history are included.
+ *   Allocation rounds and the stored eligibility result are included.
  * - `rawRoutes`  — explicit routes for things that are not JSON function calls
  * - `onError`    — hook unexpected failures into your error tracker
  */
