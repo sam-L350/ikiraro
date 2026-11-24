@@ -177,6 +177,9 @@
 			"name": "submissions"
 		},
 		{
+			"name": "surveys"
+		},
+		{
 			"name": "system"
 		},
 		{
@@ -30815,6 +30818,727 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/surveys/{id}/confirm": {
+			"post": {
+				"operationId": "createSurveyConfirmation",
+				"summary": "Optional confirmation. The answers already stored are left as they are.",
+				"tags": [
+					"surveys"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/surveys/baseline": {
+			"post": {
+				"operationId": "createSurveyBaseline",
+				"summary": "The starting survey. Someone who registered earlier can still fill it in.",
+				"tags": [
+					"surveys"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"digitalConfidence": {
+										"type": "number"
+									},
+									"tasksDigital": {
+										"type": "number"
+									},
+									"income": {
+										"type": "number"
+									},
+									"services": {
+										"type": "string"
+									},
+									"jobsOrCustomers": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"digitalConfidence",
+									"tasksDigital",
+									"income",
+									"services",
+									"jobsOrCustomers"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/surveys/endline": {
+			"post": {
+				"operationId": "createSurveyEndline",
+				"summary": "The later survey. It is stored only after the baseline.",
+				"tags": [
+					"surveys"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"digitalConfidence": {
+										"type": "number"
+									},
+									"tasksDigital": {
+										"type": "number"
+									},
+									"income": {
+										"type": "number"
+									},
+									"services": {
+										"type": "string"
+									},
+									"jobsOrCustomers": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"digitalConfidence",
+									"tasksDigital",
+									"income",
+									"services",
+									"jobsOrCustomers"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/surveys": {
+			"get": {
+				"operationId": "getSurveys",
+				"summary": "The signed-in learner's baseline, endline, and the change.",
+				"tags": [
+					"surveys"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"baseline": {
+													"type": "object",
+													"properties": {
+														"digitalConfidence": {
+															"type": "number"
+														},
+														"tasksDigital": {
+															"type": "number"
+														},
+														"income": {
+															"type": "number"
+														},
+														"services": {
+															"type": "string"
+														},
+														"jobsOrCustomers": {
+															"type": "number"
+														},
+														"id": {
+															"type": "string"
+														},
+														"kind": {
+															"type": "string",
+															"enum": [
+																"baseline",
+																"endline"
+															]
+														},
+														"verified": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"digitalConfidence",
+														"tasksDigital",
+														"income",
+														"services",
+														"jobsOrCustomers",
+														"id",
+														"kind",
+														"verified"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"endline": {
+													"type": "object",
+													"properties": {
+														"digitalConfidence": {
+															"type": "number"
+														},
+														"tasksDigital": {
+															"type": "number"
+														},
+														"income": {
+															"type": "number"
+														},
+														"services": {
+															"type": "string"
+														},
+														"jobsOrCustomers": {
+															"type": "number"
+														},
+														"id": {
+															"type": "string"
+														},
+														"kind": {
+															"type": "string",
+															"enum": [
+																"baseline",
+																"endline"
+															]
+														},
+														"verified": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"digitalConfidence",
+														"tasksDigital",
+														"income",
+														"services",
+														"jobsOrCustomers",
+														"id",
+														"kind",
+														"verified"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"change": {
+													"type": "object",
+													"properties": {
+														"digitalConfidence": {
+															"type": "number"
+														},
+														"tasksDigital": {
+															"type": "number"
+														},
+														"income": {
+															"type": "number"
+														},
+														"jobsOrCustomers": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"digitalConfidence",
+														"tasksDigital",
+														"income",
+														"jobsOrCustomers"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												}
+											},
+											"required": [
+												"baseline",
+												"endline",
+												"change"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/surveys/queue": {
+			"get": {
+				"operationId": "getSurveyQueue",
+				"summary": "Surveys a trainer at the learner's center has not confirmed.",
+				"tags": [
+					"surveys"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"kind": {
+																"type": "string",
+																"enum": [
+																	"baseline",
+																	"endline"
+																]
+															},
+															"learnerName": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"digitalConfidence": {
+																"type": "number"
+															},
+															"tasksDigital": {
+																"type": "number"
+															},
+															"income": {
+																"type": "number"
+															},
+															"services": {
+																"type": "string"
+															},
+															"jobsOrCustomers": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"id",
+															"kind",
+															"learnerName",
+															"centerName",
+															"digitalConfidence",
+															"tasksDigital",
+															"income",
+															"services",
+															"jobsOrCustomers"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}

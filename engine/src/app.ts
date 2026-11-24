@@ -8,7 +8,7 @@ import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
  * Assembles the HTTP application:
  *
  * - `endpoints`  — generated from `src/api/**` (typed RPC, OpenAPI, client).
- *   Follow-ups at 30, 90, and 180 days are included.
+ *   Baseline and endline outcome surveys are included.
  * - `rawRoutes`  — explicit routes for things that are not JSON function calls
  * - `onError`    — hook unexpected failures into your error tracker
  */

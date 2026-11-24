@@ -56,6 +56,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/allocation", label: "allocationNav" },
 			{ to: "/conditions", label: "conditionsNav" },
 			{ to: "/follow-ups", label: "followUpsNav" },
+			{ to: "/surveys", label: "surveysNav" },
 		);
 	}
 	const canReadPoints =
@@ -114,6 +115,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/feedback", label: "feedbackNav" },
 			{ to: "/quality", label: "qualityNav" },
 			{ to: "/follow-up-queue", label: "followUpsQueue" },
+			{ to: "/survey-queue", label: "surveysQueue" },
 		);
 	}
 	const canReadFollowUps =
