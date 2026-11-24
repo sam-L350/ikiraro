@@ -295,6 +295,13 @@
       "when": 1795466000000,
       "tag": "0041_phase8_mentors",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1795467000000,
+      "tag": "0042_phase8_opportunities",
+      "breakpoints": true
     }
   ]
 }

@@ -138,6 +138,9 @@
 			"name": "operations"
 		},
 		{
+			"name": "opportunities"
+		},
+		{
 			"name": "passport"
 		},
 		{
@@ -169,6 +172,9 @@
 		},
 		{
 			"name": "recovery"
+		},
+		{
+			"name": "referrals"
 		},
 		{
 			"name": "registrations"
@@ -22432,6 +22438,299 @@
 				}
 			}
 		},
+		"/api/v1/opportunities/create": {
+			"post": {
+				"operationId": "createOpportunity",
+				"summary": "An approved partner posts a job, apprenticeship, contract, or training.",
+				"tags": [
+					"opportunities"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									},
+									"skill": {
+										"type": "string"
+									},
+									"body": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"title",
+									"skill",
+									"body"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/opportunities": {
+			"get": {
+				"operationId": "getOpportunities",
+				"summary": "Opportunities whose skill matches a badge this learner holds.",
+				"tags": [
+					"opportunities"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"matches": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"partnerName": {
+																"type": "string"
+															},
+															"kind": {
+																"type": "string",
+																"enum": [
+																	"job",
+																	"apprenticeship",
+																	"contract",
+																	"training"
+																]
+															},
+															"title": {
+																"type": "string"
+															},
+															"skill": {
+																"type": "string"
+															},
+															"body": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"partnerName",
+															"kind",
+															"title",
+															"skill",
+															"body"
+														],
+														"additionalProperties": false
+													}
+												},
+												"posted": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"partnerName": {
+																"type": "string"
+															},
+															"kind": {
+																"type": "string",
+																"enum": [
+																	"job",
+																	"apprenticeship",
+																	"contract",
+																	"training"
+																]
+															},
+															"title": {
+																"type": "string"
+															},
+															"skill": {
+																"type": "string"
+															},
+															"body": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"partnerName",
+															"kind",
+															"title",
+															"skill",
+															"body"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"matches",
+												"posted"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/passport": {
 			"get": {
 				"operationId": "getPassport",
@@ -22538,6 +22837,29 @@
 														],
 														"additionalProperties": false
 													}
+												},
+												"referrals": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"authorName": {
+																"type": "string"
+															},
+															"note": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"authorName",
+															"note"
+														],
+														"additionalProperties": false
+													}
 												}
 											},
 											"required": [
@@ -22546,7 +22868,8 @@
 												"points",
 												"level",
 												"badges",
-												"tasks"
+												"tasks",
+												"referrals"
 											],
 											"additionalProperties": false
 										},
@@ -23549,6 +23872,29 @@
 														],
 														"additionalProperties": false
 													}
+												},
+												"referrals": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"authorName": {
+																"type": "string"
+															},
+															"note": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"authorName",
+															"note"
+														],
+														"additionalProperties": false
+													}
 												}
 											},
 											"required": [
@@ -23563,7 +23909,8 @@
 												"village",
 												"badges",
 												"tasks",
-												"evidence"
+												"evidence",
+												"referrals"
 											],
 											"additionalProperties": false
 										},
@@ -26825,6 +27172,456 @@
 											},
 											"required": [
 												"grants"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/referrals/{id}/allow": {
+			"post": {
+				"operationId": "createReferralAllowance",
+				"summary": "The learner puts this recommendation on the passport.",
+				"tags": [
+					"referrals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/referrals/create": {
+			"post": {
+				"operationId": "createReferral",
+				"summary": "Write a recommendation. It stays off the passport until the learner allows it.",
+				"tags": [
+					"referrals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"learnerId": {
+										"type": "number"
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"learnerId",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/referrals": {
+			"get": {
+				"operationId": "getReferrals",
+				"summary": "Recommendations written about the signed-in learner.",
+				"tags": [
+					"referrals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"authorName": {
+																"type": "string"
+															},
+															"note": {
+																"type": "string"
+															},
+															"shown": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"authorName",
+															"note",
+															"shown"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/referrals/learners": {
+			"get": {
+				"operationId": "getReferralLearners",
+				"summary": "Learners a trainer or coordinator can recommend.",
+				"tags": [
+					"referrals"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
 											],
 											"additionalProperties": false
 										},

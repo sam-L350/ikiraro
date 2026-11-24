@@ -74,6 +74,7 @@ export {
 	notifications,
 	notificationTemplates,
 } from "./notifications";
+export { opportunities, referrals } from "./opportunities";
 export { grantExceptions, hardwareRecoveries } from "./recovery";
 export {
 	consents,

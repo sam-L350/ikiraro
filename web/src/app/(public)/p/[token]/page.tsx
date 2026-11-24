@@ -126,6 +126,16 @@ export default function PublicPassportPage() {
 					);
 				})}
 			</ul>
+			{(data.referrals ?? []).length > 0 ? (
+				<ul className="flex flex-col gap-4">
+					{(data.referrals ?? []).map((row) => (
+						<li key={row.id}>
+							<p className="text-lg text-fg">{row.note}</p>
+							<p className="text-lg text-fg-muted">{row.authorName}</p>
+						</li>
+					))}
+				</ul>
+			) : null}
 			{data.tasks.length > 0 ? (
 				<ul className="flex flex-col">
 					{data.tasks.map((task) => (

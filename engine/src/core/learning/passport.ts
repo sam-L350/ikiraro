@@ -7,8 +7,10 @@ import {
 	earnedBadges,
 	enrollments,
 	pointTransactions,
+	referrals,
 	taskProgress,
 	taskTranslations,
+	users,
 } from "../../db/schema";
 
 export type PassportBadge = {
@@ -28,6 +30,12 @@ export type PassportTask = {
 	completedAt: string | null;
 };
 
+export type PassportReferral = {
+	id: string;
+	authorName: string;
+	note: string;
+};
+
 export type LearnerPassport = {
 	verifiedMinutes: number;
 	hours: number;
@@ -35,6 +43,7 @@ export type LearnerPassport = {
 	level: number | null;
 	badges: PassportBadge[];
 	tasks: PassportTask[];
+	referrals: PassportReferral[];
 };
 
 type PassportDb = Pick<Database, "select">;
@@ -100,6 +109,32 @@ function pinnedTask(
 
 function prefer(pinned: string, live: string): string {
 	return pinned.trim() ? pinned : live;
+}
+
+/** Recommendations the learner has allowed onto the passport. */
+export async function shownReferrals(
+	database: PassportDb,
+	userId: number,
+): Promise<PassportReferral[]> {
+	const rows = await database
+		.select({
+			id: referrals.id,
+			authorName: users.name,
+			note: referrals.note,
+		})
+		.from(referrals)
+		.innerJoin(users, eq(users.id, referrals.authorUserId))
+		.where(
+			and(
+				eq(referrals.learnerUserId, userId),
+				sql`${referrals.shownAt} is not null`,
+			),
+		);
+	return rows.map((row) => ({
+		id: row.id,
+		authorName: row.authorName ?? "",
+		note: row.note,
+	}));
 }
 
 /** The signed-in learner's passport. A revoked badge is left out. */
@@ -225,5 +260,6 @@ export async function readPassport(
 		level,
 		badges: badgesHeld,
 		tasks,
+		referrals: await shownReferrals(database, userId),
 	};
 }

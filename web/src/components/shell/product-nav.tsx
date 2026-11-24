@@ -58,6 +58,8 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/follow-ups", label: "followUpsNav" },
 			{ to: "/surveys", label: "surveysNav" },
 			{ to: "/mentors", label: "mentorsNav" },
+			{ to: "/opportunities", label: "opportunitiesNav" },
+			{ to: "/referrals", label: "referralsNav" },
 		);
 	}
 	const canReadPoints =
@@ -136,6 +138,13 @@ function useProductNavItems(): NavItem[] {
 		) ?? false;
 	if (canReadDormancy) {
 		items.push({ to: "/dormancy", label: "dormancyNav" });
+	}
+	const canWriteReferral =
+		user?.roles.some(
+			(role) => role.code === "trainer" || role.code === "district_coordinator",
+		) ?? false;
+	if (canWriteReferral) {
+		items.push({ to: "/referral-write", label: "referralsWriteNav" });
 	}
 	const canDiscover =
 		user?.roles.some((role) => role.code === "mentor") ?? false;

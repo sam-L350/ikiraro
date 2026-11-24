@@ -18,7 +18,7 @@ import { errors } from "../api/error";
 import { writeAudit } from "../audit/write";
 import { isUnder18 } from "../identity/age";
 import { currentConsents } from "../identity/consent";
-import { readPassport } from "./passport";
+import { readPassport, shownReferrals } from "./passport";
 
 const NOT_FOUND = "This passport link is not valid.";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -76,6 +76,7 @@ export type PublicPassport = {
 	badges: PublicBadge[];
 	tasks: PublicTask[];
 	evidence: PublicEvidence[];
+	referrals: { id: string; authorName: string; note: string }[];
 };
 
 export type ShareItem = {
@@ -537,6 +538,7 @@ export async function readPublicPassport(
 		badges,
 		tasks,
 		evidence,
+		referrals: await shownReferrals(database, row.userId),
 	};
 }
 

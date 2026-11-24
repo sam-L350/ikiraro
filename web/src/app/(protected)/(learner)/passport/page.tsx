@@ -50,6 +50,11 @@ export default function PassportPage() {
 	const data = passport.data;
 	const badges = data.badges as PassportBadge[];
 	const tasks = data.tasks as PassportTask[];
+	const referrals = (data.referrals ?? []) as {
+		id: string;
+		authorName: string;
+		note: string;
+	}[];
 
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8">
@@ -95,6 +100,21 @@ export default function PassportPage() {
 					</ul>
 				)}
 			</section>
+			{referrals.length > 0 ? (
+				<section className="flex flex-col gap-3">
+					<h2 className="font-meta text-xs uppercase text-fg-muted">
+						{t("referralsTitle")}
+					</h2>
+					<ul className="flex flex-col gap-4">
+						{referrals.map((row) => (
+							<li key={row.id}>
+								<p className="text-lg text-fg">{row.note}</p>
+								<p className="text-lg text-fg-muted">{row.authorName}</p>
+							</li>
+						))}
+					</ul>
+				</section>
+			) : null}
 			<section className="flex flex-col gap-3">
 				<h2 className="font-meta text-xs uppercase text-fg-muted">
 					{t("passportTasks")}
