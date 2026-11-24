@@ -108,6 +108,12 @@ export {
 	digitalPassports,
 	otpChallenges,
 } from "./registration";
+export {
+	backlogCounts,
+	reportSchedules,
+	reportSends,
+	warningRules,
+} from "./reports";
 export { allocationRounds, roundApplications } from "./rounds";
 export { smsCharges } from "./sms";
 export { successStories } from "./stories";

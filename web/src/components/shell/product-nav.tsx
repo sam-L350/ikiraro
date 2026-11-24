@@ -268,6 +268,8 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/equity", label: "equityNav" },
 			{ to: "/donor-report", label: "donorNav" },
+			{ to: "/scheduled-report", label: "scheduledReportNav" },
+			{ to: "/warnings", label: "warningsNav" },
 			{ to: "/story-report", label: "storyReportNav" },
 		);
 	}

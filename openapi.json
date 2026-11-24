@@ -222,6 +222,9 @@
 			"name": "schedule"
 		},
 		{
+			"name": "scheduled-report"
+		},
+		{
 			"name": "second-reviews"
 		},
 		{
@@ -247,6 +250,9 @@
 		},
 		{
 			"name": "verifications"
+		},
+		{
+			"name": "warnings"
 		}
 	],
 	"paths": {
@@ -35090,6 +35096,259 @@
 				}
 			}
 		},
+		"/api/v1/scheduled-report": {
+			"get": {
+				"operationId": "getScheduledReport",
+				"summary": "Districts this person can email, and the interval already stored for each.",
+				"tags": [
+					"scheduled-report"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"districts": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												},
+												"schedules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"districtId": {
+																"type": "string"
+															},
+															"districtName": {
+																"type": "string"
+															},
+															"intervalDays": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"districtId",
+															"districtName",
+															"intervalDays"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"districts",
+												"schedules"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/scheduled-report/schedule": {
+			"post": {
+				"operationId": "createScheduledReport",
+				"summary": "Store how many days pass before this district's report is emailed again.",
+				"tags": [
+					"scheduled-report"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"districtId": {
+										"type": "string"
+									},
+									"intervalDays": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"districtId",
+									"intervalDays"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"districtId": {
+													"type": "string"
+												},
+												"districtName": {
+													"type": "string"
+												},
+												"intervalDays": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"districtId",
+												"districtName",
+												"intervalDays"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/second-reviews/{id}/close": {
 			"post": {
 				"operationId": "createSecondReviewClose",
@@ -41559,6 +41818,287 @@
 												"points",
 												"verifiedMinutes",
 												"badgeId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/warnings": {
+			"get": {
+				"operationId": "getWarnings",
+				"summary": "Learners who have gone quiet, and centers whose waiting evidence has grown.",
+				"tags": [
+					"warnings"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"districts": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												},
+												"rules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"districtId": {
+																"type": "string"
+															},
+															"districtName": {
+																"type": "string"
+															},
+															"quietDays": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"districtId",
+															"districtName",
+															"quietDays"
+														],
+														"additionalProperties": false
+													}
+												},
+												"rows": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"who": {
+																"type": "string"
+															},
+															"kind": {
+																"type": "string",
+																"enum": [
+																	"dropout",
+																	"backlog"
+																]
+															},
+															"ageDays": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"who",
+															"kind",
+															"ageDays"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"districts",
+												"rules",
+												"rows"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/warnings/rule": {
+			"post": {
+				"operationId": "createWarningRuleForDistrict",
+				"summary": "How many quiet days count as a drop-out warning in this district.",
+				"tags": [
+					"warnings"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"districtId": {
+										"type": "string"
+									},
+									"quietDays": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"districtId",
+									"quietDays"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"districtId": {
+													"type": "string"
+												},
+												"districtName": {
+													"type": "string"
+												},
+												"quietDays": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"districtId",
+												"districtName",
+												"quietDays"
 											],
 											"additionalProperties": false
 										},
