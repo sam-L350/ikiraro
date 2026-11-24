@@ -541,6 +541,24 @@ export default function TaskPage() {
 						{t("practiceLink")}
 					</a>
 				) : null}
+				<Link
+					to={`/tasks/${enrollmentId}/${taskId}/practice`}
+					className="inline-flex min-h-11 items-center text-lg text-fg"
+				>
+					{t("taskPracticeLink")}
+				</Link>
+				<Link
+					to={`/tasks/${enrollmentId}/${taskId}/questions`}
+					className="inline-flex min-h-11 items-center text-lg text-fg"
+				>
+					{t("taskQuestionsLink")}
+				</Link>
+				<Link
+					to={`/tasks/${enrollmentId}/${taskId}/group`}
+					className="inline-flex min-h-11 items-center text-lg text-fg"
+				>
+					{t("taskGroupLink")}
+				</Link>
 			</div>
 			{criteria.length > 0 ? (
 				<section className="flex flex-col gap-2 border-t border-line pt-4">

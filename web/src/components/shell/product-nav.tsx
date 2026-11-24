@@ -138,6 +138,7 @@ function useProductNavItems(): NavItem[] {
 	if (canReviewEvidence) {
 		items.push(
 			{ to: "/evidence", label: "evidenceQueueTitle" },
+			{ to: "/questions", label: "taskQuestionsNav" },
 			{ to: "/sessions", label: "sessionsNav" },
 			{ to: "/devices", label: "devicesNav" },
 			{ to: "/second-reviews", label: "secondReviewsNav" },

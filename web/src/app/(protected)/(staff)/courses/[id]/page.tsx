@@ -1,5 +1,6 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { TaskRehearsalFields } from "@/components/content/task-rehearsal-fields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -999,6 +1000,7 @@ function TaskFields({
 					</div>
 				) : null}
 			</form>
+			<TaskRehearsalFields taskId={task.id} />
 			<div className="mt-6 flex flex-col gap-4">
 				<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 					{t("rubricLabel")}

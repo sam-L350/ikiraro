@@ -9,6 +9,7 @@ import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
  *
  * - `endpoints`  — generated from `src/api/**` (typed RPC, OpenAPI, client).
  *   A pathway is an ordered list of courses. A short check suggests where to start.
+ *   A task question waits for a trainer. Group credit records what each person did. A sample is not evidence.
  * - `rawRoutes`  — explicit routes for things that are not JSON function calls
  * - `onError`    — hook unexpected failures into your error tracker
  */

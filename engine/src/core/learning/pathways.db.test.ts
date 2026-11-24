@@ -94,7 +94,7 @@ describe.serial("pathways and placement", () => {
 				throw error;
 		}
 
-		async function exercise(db: NonNullable<typeof suite>["db"]) {
+		async function exercise(db: Parameters<typeof createPathway>[0]) {
 			const stamp = Date.now().toString(36);
 			const author = await createUserWithPassport(db, {
 				email: `path-author-${stamp}@demo.ikiraro.test`,

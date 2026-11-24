@@ -91,6 +91,16 @@ export {
 	placementQuestions,
 	placementResults,
 } from "./pathways";
+export {
+	taskAnswerDecisions,
+	taskAnswers,
+	taskGroupCredits,
+	taskGroupMembers,
+	taskGroupRules,
+	taskGroups,
+	taskQuestions,
+	taskSamples,
+} from "./peer";
 export { grantExceptions, hardwareRecoveries } from "./recovery";
 export {
 	consents,
