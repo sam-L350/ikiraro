@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "../../db";
 import {
+	badgeCredentials,
 	badges,
 	contentVersions,
 	digitalPassports,
@@ -21,6 +22,7 @@ export type PassportBadge = {
 	skillRw: string;
 	level: number;
 	awardedAt: string;
+	credentialToken: string | null;
 };
 
 export type PassportTask = {
@@ -195,7 +197,34 @@ export async function readPassport(
 			skillRw: prefer(pinned?.skillRw ?? "", row.skillRw ?? ""),
 			level,
 			awardedAt: row.awardedAt.toISOString(),
+			credentialToken: null,
 		});
+	}
+	if (badgesHeld.length > 0) {
+		const credentials = await database
+			.select({
+				badgeId: earnedBadges.badgeId,
+				token: badgeCredentials.token,
+			})
+			.from(badgeCredentials)
+			.innerJoin(
+				earnedBadges,
+				eq(earnedBadges.id, badgeCredentials.earnedBadgeId),
+			)
+			.where(
+				and(
+					eq(earnedBadges.userId, userId),
+					eq(earnedBadges.entry, "awarded"),
+					inArray(
+						earnedBadges.badgeId,
+						badgesHeld.map((badge) => badge.id),
+					),
+				),
+			);
+		const tokens = new Map(credentials.map((row) => [row.badgeId, row.token]));
+		for (const badge of badgesHeld) {
+			badge.credentialToken = tokens.get(badge.id) ?? null;
+		}
 	}
 	const level = badgesHeld.reduce<number | null>(
 		(highest, badge) =>

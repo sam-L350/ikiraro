@@ -58,6 +58,12 @@ export default function HomePage() {
 					>
 						{t("leaderboardNav")}
 					</Link>
+					<Link
+						to="/verify"
+						className="mt-3 font-sans text-sm font-semibold text-fg"
+					>
+						{t("credentialsNav")}
+					</Link>
 				</div>
 			</section>
 

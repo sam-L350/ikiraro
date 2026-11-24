@@ -48,6 +48,8 @@ export type Env = {
 	readonly devRoleSwitch: boolean;
 	/** Pepper for one-time codes. Required in production. */
 	readonly otpPepper: string;
+	/** Server key that signs an earned badge. Required in production. */
+	readonly credentialSigningKey: string;
 	readonly sms: {
 		readonly username: string | undefined;
 		readonly apiKey: string | undefined;
@@ -262,6 +264,10 @@ export function parseEnv(source: Source): Env {
 		maxBodyBytes: read.int("MAX_BODY_BYTES", 1024 * 1024, { min: 1024 }),
 		devRoleSwitch: !isProduction && read.bool("DEV_ROLE_SWITCH", true),
 		otpPepper: read.string("OTP_PEPPER", isProduction ? "" : "dev-only-pepper"),
+		credentialSigningKey: read.string(
+			"CREDENTIAL_SIGNING_KEY",
+			isProduction ? "" : "dev-only-credential-key",
+		),
 		sms: {
 			username: smsUsername,
 			apiKey: smsApiKey,
@@ -277,6 +283,11 @@ export function parseEnv(source: Source): Env {
 	if (isProduction && env.otpPepper.length < 16) {
 		read.problems.push(
 			"OTP_PEPPER must be at least 16 characters in production",
+		);
+	}
+	if (isProduction && env.credentialSigningKey.length < 16) {
+		read.problems.push(
+			"CREDENTIAL_SIGNING_KEY must be at least 16 characters in production",
 		);
 	}
 

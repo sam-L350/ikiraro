@@ -12,6 +12,7 @@ import {
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { awardSubmission } from "./award";
+import { signAwardedBadge } from "./credentials";
 import { type InPersonInput, requiredVisit } from "./in-person";
 import { reviewCenters } from "./review-queue";
 import { openSecondReviewIfSampled } from "./second-review";
@@ -336,6 +337,12 @@ export async function createVerification(
 				reviewerId: input.reviewerId,
 				ip: input.ip,
 			});
+			if (awarded.badgeId) {
+				await signAwardedBadge(tx, {
+					verificationId: awarded.id,
+					ip: input.ip,
+				});
+			}
 			return awarded;
 		});
 	}

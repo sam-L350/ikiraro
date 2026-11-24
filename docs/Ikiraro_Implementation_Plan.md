@@ -96,7 +96,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/8.4-mentors`
   - [x] `phase/8.5-opportunities-and-referrals`
   - [x] `phase/8.6-mentor-messaging`
-  - [ ] `phase/8.7-signed-credentials-and-api`
+  - [x] `phase/8.7-signed-credentials-and-api`
   - [ ] `phase/8.8-donor-reports`
   - [ ] `phase/8.9-offline-content-packs`
   - [ ] `phase/8.10-maker-checker-and-support`

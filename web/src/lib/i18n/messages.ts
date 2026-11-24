@@ -1148,6 +1148,19 @@ export const en = {
 	messagesMentor: "Mentor",
 	messagesCheckNote: "What did you check?",
 	messagesCheckSend: "Record the check",
+	credentialsNav: "Check a badge",
+	credentialsTitle: "Check a badge",
+	credentialsSentence:
+		"Paste a passport link token or a badge token. The answer is whether it is authentic and whether it was revoked.",
+	credentialsToken: "Token",
+	credentialsSend: "Check this token",
+	credentialsAuthentic: "Authentic",
+	credentialsNotAuthentic: "Not authentic",
+	credentialsRevoked: "Revoked",
+	credentialsNotRevoked: "Not revoked",
+	credentialsUnknown: "This token does not match a passport or a badge.",
+	credentialsLimited: "Too many checks. Wait and try again.",
+	passportCredential: "Check token",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -2313,4 +2326,17 @@ export const rw: Record<MessageKey, string> = {
 	messagesMentor: "Umujyanama",
 	messagesCheckNote: "Wasuzumye iki?",
 	messagesCheckSend: "Andika isuzuma",
+	credentialsNav: "Suzuma ikirango",
+	credentialsTitle: "Suzuma ikirango",
+	credentialsSentence:
+		"Shyiramo ikimenyetso cya pasiporo cyangwa icy'ikirango. Igisubizo ni niba ari nyabyo n'iba cyakuweho.",
+	credentialsToken: "Ikimenyetso",
+	credentialsSend: "Suzuma iki kimenyetso",
+	credentialsAuthentic: "Ni nyabyo",
+	credentialsNotAuthentic: "Si nyabyo",
+	credentialsRevoked: "Cyakuweho",
+	credentialsNotRevoked: "Nticyakuweho",
+	credentialsUnknown: "Iki kimenyetso ntigihuye na pasiporo cyangwa ikirango.",
+	credentialsLimited: "Ibisuzuma byarenze. Tegereza hanyuma wongere.",
+	passportCredential: "Ikimenyetso cyo gusuzuma",
 };

@@ -29,6 +29,7 @@ export {
 	tasks,
 	taskTranslations,
 } from "./content";
+export { badgeCredentials } from "./credentials";
 export { deviceBookings, devices } from "./devices";
 export { dormancyAlerts } from "./dormancy";
 export {

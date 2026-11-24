@@ -10,6 +10,7 @@ type PassportBadge = {
 	skillEn: string;
 	skillRw: string;
 	awardedAt: string;
+	credentialToken: string | null;
 };
 
 type PassportTask = {
@@ -94,6 +95,11 @@ export default function PassportPage() {
 											date: when(badge.awardedAt, locale),
 										})}
 									</p>
+									{badge.credentialToken ? (
+										<p className="font-meta text-sm text-fg">
+											{t("passportCredential")}: {badge.credentialToken}
+										</p>
+									) : null}
 								</li>
 							);
 						})}
