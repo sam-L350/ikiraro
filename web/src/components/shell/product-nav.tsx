@@ -60,6 +60,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/mentors", label: "mentorsNav" },
 			{ to: "/opportunities", label: "opportunitiesNav" },
 			{ to: "/referrals", label: "referralsNav" },
+			{ to: "/messages", label: "messagesNav" },
 		);
 	}
 	const canReadPoints =
@@ -149,12 +150,19 @@ function useProductNavItems(): NavItem[] {
 	const canDiscover =
 		user?.roles.some((role) => role.code === "mentor") ?? false;
 	if (canDiscover) {
-		items.push({ to: "/mentor-discover", label: "mentorsDiscoverNav" });
+		items.push(
+			{ to: "/mentor-discover", label: "mentorsDiscoverNav" },
+			{ to: "/messages", label: "messagesNav" },
+		);
 	}
 	const canApproveMentors =
 		user?.roles.some((role) => role.code === "platform_admin") ?? false;
 	if (canApproveMentors) {
-		items.push({ to: "/mentor-approvals", label: "mentorsApprovalsNav" });
+		items.push(
+			{ to: "/mentor-approvals", label: "mentorsApprovalsNav" },
+			{ to: "/mentor-review", label: "messagesReviewNav" },
+			{ to: "/mentor-safeguarding", label: "messagesCheckNav" },
+		);
 	}
 	const canAnnounce =
 		user?.roles.some(

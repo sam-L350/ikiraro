@@ -1115,6 +1115,39 @@ export const en = {
 	referralsStored:
 		"Stored. It stays off the passport until the learner allows it.",
 	referralsDenied: "A trainer or a coordinator writes a referral.",
+	messagesNav: "Messages",
+	messagesTitle: "Messages",
+	messagesSentence:
+		"Messages stay on the match. Phone and email stay hidden until you both agree.",
+	messagesEmpty: "No match is open for messages.",
+	messagesBody: "Message",
+	messagesSend: "Send the message",
+	messagesHidden: "Contact details stay hidden until you both agree.",
+	messagesShare: "Share contact details",
+	messagesShareSentence:
+		"Your phone and email stay hidden until the other person agrees too.",
+	messagesShareSend: "Share my phone and email",
+	messagesShared: "You have agreed. Their details appear when they agree too.",
+	messagesBlock: "Block",
+	messagesBlockSend: "Block this match",
+	messagesBlocked: "This match is blocked.",
+	messagesReport: "Report",
+	messagesReportSentence: "The message stays stored for review.",
+	messagesReportSend: "Send the report",
+	messagesNeedCheck:
+		"A mentor needs an extra check before contacting a learner under 18.",
+	messagesReview: "Message review",
+	messagesReviewNav: "Message review",
+	messagesReviewEmpty: "No message is stored.",
+	messagesReviewDenied: "An admin reviews these messages.",
+	messagesCheck: "Extra check",
+	messagesCheckNav: "Extra check",
+	messagesCheckSentence:
+		"Record the check before this mentor contacts a learner under 18.",
+	messagesCheckDenied: "An admin records the extra check.",
+	messagesMentor: "Mentor",
+	messagesCheckNote: "What did you check?",
+	messagesCheckSend: "Record the check",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -2247,4 +2280,37 @@ export const rw: Record<MessageKey, string> = {
 		"Byanditswe. Biguma bitagaragara ku pasiporo kugeza umunyeshuri abyemeye.",
 	referralsDenied:
 		"Umwarimu cyangwa umuyobozi w'akarere ni we wandika icyifuzo.",
+	messagesNav: "Ubutumwa",
+	messagesTitle: "Ubutumwa",
+	messagesSentence:
+		"Ubutumwa buguma ku guhuza. Telefoni na imeri biguma bihishwe kugeza mwemeye mwembi.",
+	messagesEmpty: "Nta guhuza gufunguye ku butumwa.",
+	messagesBody: "Ubutumwa",
+	messagesSend: "Ohereza ubutumwa",
+	messagesHidden: "Telefoni na imeri biguma bihishwe kugeza mwemeye mwembi.",
+	messagesShare: "Sangiza telefoni na imeri",
+	messagesShareSentence:
+		"Telefoni yawe na imeri biguma bihishwe kugeza undi muntu na we yemeye.",
+	messagesShareSend: "Sangiza telefoni yanjye na imeri",
+	messagesShared: "Wemeye. Izabo zigaragara iyo na bo bemeye.",
+	messagesBlock: "Funga",
+	messagesBlockSend: "Funga iri huza",
+	messagesBlocked: "Iri huza rirafunze.",
+	messagesReport: "Menyesha",
+	messagesReportSentence: "Ubutumwa buguma bubitswe kugira ngo busuzumwe.",
+	messagesReportSend: "Ohereza raporo",
+	messagesNeedCheck:
+		"Umujyanama akeneye isuzuma ry'inyongera mbere yo kuvugana n'umunyeshuri uri munsi y'imyaka 18.",
+	messagesReview: "Isuzuma ry'ubutumwa",
+	messagesReviewNav: "Isuzuma ry'ubutumwa",
+	messagesReviewEmpty: "Nta butumwa bubitswe.",
+	messagesReviewDenied: "Umuyobozi w'urubuga ni we usuzuma ubu butumwa.",
+	messagesCheck: "Isuzuma ry'inyongera",
+	messagesCheckNav: "Isuzuma ry'inyongera",
+	messagesCheckSentence:
+		"Andika isuzuma mbere y'uko uyu mujyanama avugana n'umunyeshuri uri munsi y'imyaka 18.",
+	messagesCheckDenied: "Umuyobozi w'urubuga ni we wandika iri suzuma.",
+	messagesMentor: "Umujyanama",
+	messagesCheckNote: "Wasuzumye iki?",
+	messagesCheckSend: "Andika isuzuma",
 };

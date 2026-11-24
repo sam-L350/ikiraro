@@ -68,6 +68,13 @@ export {
 } from "./learning";
 export { mediaObjects } from "./media";
 export { mentorOptIns, mentorRequests, mentors } from "./mentors";
+export {
+	mentorBlocks,
+	mentorContactShares,
+	mentorMessageReports,
+	mentorMessages,
+	mentorSafeguarding,
+} from "./messages";
 export { misconductReports } from "./misconduct";
 export {
 	notificationPreferences,
