@@ -1181,6 +1181,18 @@ export const en = {
 	donorBatches: "Batches",
 	donorOutcomeLine:
 		"{paired} pairs. Confidence {confidence}. Tasks {tasks}. Income {income}. Jobs {jobs}.",
+	contentPacksNav: "Course pack",
+	contentPacksTitle: "Course pack",
+	contentPacksSentence:
+		"Download a published course for this center. It stays on the device when the network is gone.",
+	contentPacksCenter: "Center",
+	contentPacksCourse: "Course",
+	contentPacksDownload: "Download the course",
+	contentPacksEmpty: "No published course is ready.",
+	contentPacksDenied: "A trainer at the center downloads a course pack.",
+	offlineReview:
+		"This decision waits on this device. The time is the time you make it, and it stays when the network returns.",
+	offlineReviewStored: "Stored on this device. It will sync with this time.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -2379,4 +2391,17 @@ export const rw: Record<MessageKey, string> = {
 	donorBatches: "Itsinda",
 	donorOutcomeLine:
 		"Impuza {paired}. Icyizere {confidence}. Imirimo {tasks}. Amafaranga {income}. Akazi {jobs}.",
+	contentPacksNav: "Isomo ryo hanze",
+	contentPacksTitle: "Isomo ryo hanze",
+	contentPacksSentence:
+		"Kuramo isomo risohowe ry'iki kigo. Riguma ku gikoresho igihe umuyoboro utariho.",
+	contentPacksCenter: "Ikigo",
+	contentPacksCourse: "Isomo",
+	contentPacksDownload: "Kuramo isomo",
+	contentPacksEmpty: "Nta somo risohowe.",
+	contentPacksDenied: "Umwarimu w'iki kigo ni we akura iri somo.",
+	offlineReview:
+		"Iki cyemezo kiguma kuri iki gikoresho. Igihe ni igihe ukigize, kandi kiragumaho iyo umuyoboro ugarutse.",
+	offlineReviewStored:
+		"Byabitswe kuri iki gikoresho. Bizoherezwa hamwe n'iki gihe.",
 };

@@ -35,7 +35,23 @@ export type ProgressQueuePayload = {
 	taskId: string;
 };
 
-export type QueuePayload = SubmissionQueuePayload | ProgressQueuePayload;
+/** A trainer decision made on this device. `reviewedAt` is that moment. */
+export type ReviewQueuePayload = {
+	kind: "review";
+	id: string;
+	submissionId: string;
+	decision: "approved" | "needs_revision" | "rejected";
+	note: string;
+	reasonCode?: "not_the_task" | "not_the_learner" | "unreadable" | "incomplete";
+	scores?: { criterionId: string; score: number }[];
+	inPerson?: { location: string; observedAt: string };
+	reviewedAt: string;
+};
+
+export type QueuePayload =
+	| SubmissionQueuePayload
+	| ProgressQueuePayload
+	| ReviewQueuePayload;
 
 type QueueItem = {
 	id: string;
@@ -133,6 +149,45 @@ export function enqueueSubmission(
 		});
 	}
 	if (banner === "capped") banner = null;
+	notify();
+	remember();
+	return "queued";
+}
+
+/**
+ * One waiting decision per submission. A later edit keeps the first time
+ * and the first idempotency key.
+ */
+export function enqueueReview(
+	payload: ReviewQueuePayload,
+): "queued" | "capped" {
+	const existing = items.find(
+		(item) =>
+			item.payload.kind === "review" &&
+			item.payload.submissionId === payload.submissionId,
+	);
+	if (existing && existing.payload.kind === "review") {
+		existing.payload = {
+			...payload,
+			id: existing.payload.id,
+			reviewedAt: existing.payload.reviewedAt,
+		};
+		notify();
+		remember();
+		return "queued";
+	}
+	const nextBytes = weight(payload);
+	if (!queueFits(items.length, usedBytes(), nextBytes)) {
+		banner = "capped";
+		notify();
+		return "capped";
+	}
+	items.push({
+		id: payload.id,
+		enqueuedAt: payload.reviewedAt,
+		attempts: 0,
+		payload,
+	});
 	notify();
 	remember();
 	return "queued";

@@ -109,6 +109,13 @@ function useProductNavItems(): NavItem[] {
 	if (canReviewCourses) {
 		items.push({ to: "/reviews", label: "reviewsNav" });
 	}
+	const canPack =
+		user?.roles.some(
+			(role) => role.code === "trainer" || role.code === "center_manager",
+		) ?? false;
+	if (canPack) {
+		items.push({ to: "/content-packs", label: "contentPacksNav" });
+	}
 	if (canReviewEvidence) {
 		items.push(
 			{ to: "/evidence", label: "evidenceQueueTitle" },

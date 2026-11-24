@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-/** True while the browser can reach the network. Reviews and points stay disabled when it is false. */
+/** True while the browser can reach the network. A review can still be stored for later. */
 export function useOnline(): boolean {
 	const [online, setOnline] = useState(() =>
 		typeof navigator === "undefined" ? true : navigator.onLine,

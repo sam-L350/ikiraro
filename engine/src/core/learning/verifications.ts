@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, or } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import type { Database } from "../../db";
 import {
 	declaredRelationships,
@@ -29,6 +29,40 @@ export type RejectReason = (typeof REJECT_REASONS)[number];
 export type VerificationDecision = "approved" | "needs_revision" | "rejected";
 
 const NOTE_LIMIT = 2_000;
+const REVIEW_SKEW_MS = 2 * 60 * 1000;
+
+function reviewTime(
+	value: string | undefined,
+	submittedAt: Date | null,
+): Date | null {
+	if (value === undefined) return null;
+	const trimmed = value.trim();
+	if (!trimmed || Number.isNaN(new Date(trimmed).getTime())) {
+		throw errors.badRequest("The review time is missing.", { reason: "time" });
+	}
+	const reviewed = new Date(trimmed);
+	if (reviewed.getTime() > Date.now() + REVIEW_SKEW_MS) {
+		throw errors.badRequest("The review time is still in the future.", {
+			reason: "time",
+		});
+	}
+	if (submittedAt && reviewed.getTime() < submittedAt.getTime()) {
+		throw errors.badRequest("The review time is before the work was sent.", {
+			reason: "time",
+		});
+	}
+	return reviewed;
+}
+
+async function rememberReviewTime(
+	database: Pick<Database, "execute">,
+	reviewedAt: Date | null,
+): Promise<void> {
+	if (!reviewedAt) return;
+	await database.execute(
+		sql`select set_config('ikiraro.reviewed_at', ${reviewedAt.toISOString()}, true)`,
+	);
+}
 
 type VerificationDb = Pick<
 	Database,
@@ -195,6 +229,7 @@ export async function createVerification(
 		scores?: ScoreInput[];
 		inPerson?: InPersonInput;
 		idempotencyKey?: string;
+		reviewedAt?: string;
 		ip: string;
 	},
 ): Promise<VerificationResult> {
@@ -212,6 +247,7 @@ export async function createVerification(
 			ownerUserId: taskSubmissions.ownerUserId,
 			centerId: enrollments.centerId,
 			contentVersionId: taskSubmissions.contentVersionId,
+			submittedAt: taskSubmissions.submittedAt,
 		})
 		.from(taskSubmissions)
 		.innerJoin(enrollments, eq(enrollments.id, taskSubmissions.enrollmentId))
@@ -286,6 +322,7 @@ export async function createVerification(
 		.where(eq(rubricCriteria.taskId, row.taskId));
 	const scoreTotal = weightedScore(criteria, input.scores ?? []);
 	const scores = input.scores ?? [];
+	const reviewedAt = reviewTime(input.reviewedAt, row.submittedAt);
 	const now = new Date();
 	const visit = await requiredVisit(database, {
 		contentVersionId: row.contentVersionId,
@@ -301,6 +338,7 @@ export async function createVerification(
 			});
 		}
 		return database.transaction(async (tx) => {
+			await rememberReviewTime(tx, reviewedAt);
 			const awarded = await awardSubmission(tx, {
 				reviewerId: input.reviewerId,
 				submissionId: row.id,
@@ -348,6 +386,7 @@ export async function createVerification(
 	}
 
 	return database.transaction(async (tx) => {
+		await rememberReviewTime(tx, reviewedAt);
 		const [updated] = await tx
 			.update(taskSubmissions)
 			.set({ status: decision })

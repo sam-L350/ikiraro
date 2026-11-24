@@ -4,10 +4,12 @@ import {
 	classifyFailure,
 	clearOutbox,
 	endSharedSession,
+	enqueueReview,
 	enqueueSubmission,
 	flushQueue,
 	OUTBOX_STORAGE_KEY,
 	queueCount,
+	type ReviewQueuePayload,
 	type SubmissionQueuePayload,
 } from "./outbox";
 
@@ -79,6 +81,39 @@ test("a dropped connection keeps the attempt and a refusal drops it", async () =
 	expect(queueCount()).toBe(3);
 	expect(classifyFailure(api(500))).toBe("retry");
 	expect(classifyFailure(api(400))).toBe("drop");
+	clearOutbox({ removeItem() {} });
+	expect(queueCount()).toBe(0);
+});
+
+test("a later edit keeps the first review time", async () => {
+	clearOutbox({ removeItem() {} });
+	const first: ReviewQueuePayload = {
+		kind: "review",
+		id: "first-key",
+		submissionId: "submission",
+		decision: "approved",
+		note: "Seen",
+		reviewedAt: "2026-01-01T00:00:00.000Z",
+	};
+	enqueueReview(first);
+	enqueueReview({
+		...first,
+		id: "second-key",
+		decision: "needs_revision",
+		note: "Change it",
+		reviewedAt: "2026-02-01T00:00:00.000Z",
+	});
+	const seen: ReviewQueuePayload[] = [];
+	await flushQueue(async (item) => {
+		if (item.kind === "review") seen.push(item);
+	});
+	expect(seen).toEqual([
+		{
+			...first,
+			decision: "needs_revision",
+			note: "Change it",
+		},
+	]);
 	clearOutbox({ removeItem() {} });
 	expect(queueCount()).toBe(0);
 });

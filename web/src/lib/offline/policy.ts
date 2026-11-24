@@ -90,13 +90,16 @@ export function queueFits(
 	return existingBytes + nextBytes <= OUTBOX_BYTE_LIMIT;
 }
 
-/** Course text and this learner's progress. Points and reviews stay on the server. */
+/** Course text, the learner's progress, a center pack, and a trainer's open queue. */
 export function isCourseRead(pathname: string): boolean {
 	return (
 		pathname === "/api/v1/enrollments" ||
 		/^\/api\/v1\/enrollments\/[^/]+$/.test(pathname) ||
 		pathname === "/api/v1/catalog" ||
-		/^\/api\/v1\/catalog\/[^/]+$/.test(pathname)
+		/^\/api\/v1\/catalog\/[^/]+$/.test(pathname) ||
+		pathname === "/api/v1/content-packs" ||
+		pathname === "/api/v1/evidence-queue" ||
+		/^\/api\/v1\/evidence-queue\/[^/]+$/.test(pathname)
 	);
 }
 

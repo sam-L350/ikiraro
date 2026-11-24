@@ -11,6 +11,7 @@ import {
 } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { enqueueReview } from "@/lib/offline/outbox";
 import { useOnline } from "@/lib/offline/use-online";
 
 type WaitingStatus = "pending" | "in_review";
@@ -186,11 +187,13 @@ export default function EvidenceReviewPage() {
 	const [note, setNote] = useState("");
 	const [scores, setScores] = useState<Record<string, string>>({});
 	const [formError, setFormError] = useState<string | null>(null);
+	const [queued, setQueued] = useState(false);
 	const [place, setPlace] = useState("");
 	const [seenAt, setSeenAt] = useState("");
 	const claimed = useRef(false);
 	const sheet = useRef<HTMLDialogElement>(null);
 	const approveKey = useRef(crypto.randomUUID());
+	const sendKey = useRef(crypto.randomUUID());
 	const review = useEngine(
 		"/evidence-queue/:id",
 		{ query: { id } },
@@ -263,6 +266,32 @@ export default function EvidenceReviewPage() {
 	const file =
 		item.evidenceUrl !== null && item.evidenceContentType === "application/pdf";
 
+	function storeOffline(input: {
+		id: string;
+		decision: "approved" | "needs_revision" | "rejected";
+		note: string;
+		reasonCode?:
+			| "not_the_task"
+			| "not_the_learner"
+			| "unreadable"
+			| "incomplete";
+		scores?: { criterionId: string; score: number }[];
+		inPerson?: { location: string; observedAt: string };
+	}) {
+		const result = enqueueReview({
+			kind: "review",
+			reviewedAt: new Date().toISOString(),
+			submissionId: id,
+			...input,
+		});
+		if (result === "capped") {
+			setFormError(t("uploadCapped"));
+			return;
+		}
+		setFormError(null);
+		setQueued(true);
+	}
+
 	async function onApprove() {
 		const parsed = parsedScores(item.criteria, scores);
 		if (parsed === "invalid") {
@@ -274,6 +303,23 @@ export default function EvidenceReviewPage() {
 			return;
 		}
 		setFormError(null);
+		if (!online) {
+			storeOffline({
+				id: approveKey.current,
+				decision: "approved",
+				note: t("approvedNote"),
+				...(parsed.length > 0 ? { scores: parsed } : {}),
+				...(item.requiresInPerson
+					? {
+							inPerson: {
+								location: place.trim(),
+								observedAt: new Date(seenAt).toISOString(),
+							},
+						}
+					: {}),
+			});
+			return;
+		}
 		try {
 			await decide.mutateAsync({
 				body: {
@@ -321,6 +367,17 @@ export default function EvidenceReviewPage() {
 			return;
 		}
 		setFormError(null);
+		if (!online) {
+			storeOffline({
+				id: sendKey.current,
+				decision: kind,
+				note: text,
+				...(kind === "rejected" ? { reasonCode: reason } : {}),
+				...(parsed.length > 0 ? { scores: parsed } : {}),
+			});
+			sheet.current?.close();
+			return;
+		}
 		try {
 			await decide.mutateAsync({
 				body: {
@@ -457,8 +514,10 @@ export default function EvidenceReviewPage() {
 					)}
 				</section>
 			</div>
-			{online ? null : (
-				<p className="font-sans text-lg text-fg">{t("offlineDecision")}</p>
+			{queued ? (
+				<p className="font-sans text-lg text-fg">{t("offlineReviewStored")}</p>
+			) : online ? null : (
+				<p className="font-sans text-lg text-fg">{t("offlineReview")}</p>
 			)}
 			{item.duplicate === "same" ? (
 				<p className="font-sans text-lg text-fg">{t("duplicateSame")}</p>
@@ -500,7 +559,7 @@ export default function EvidenceReviewPage() {
 					type="button"
 					variant="ink"
 					className="w-fit"
-					disabled={!online || decide.isPending}
+					disabled={queued || decide.isPending}
 					onClick={() => void onApprove()}
 				>
 					{t("approveEvidence")}
@@ -513,7 +572,7 @@ export default function EvidenceReviewPage() {
 					type="button"
 					variant="quiet"
 					className="w-fit text-ink-fg"
-					disabled={!online}
+					disabled={queued}
 					onClick={openSheet}
 				>
 					{t("sendBackEvidence")}

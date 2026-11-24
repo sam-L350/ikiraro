@@ -83,8 +83,10 @@ test("course reads are cached and data saver skips pictures", () => {
 	expect(isCourseRead("/api/v1/enrollments")).toBe(true);
 	expect(isCourseRead("/api/v1/enrollments/abc")).toBe(true);
 	expect(isCourseRead("/api/v1/catalog/abc")).toBe(true);
+	expect(isCourseRead("/api/v1/content-packs")).toBe(true);
+	expect(isCourseRead("/api/v1/evidence-queue")).toBe(true);
+	expect(isCourseRead("/api/v1/evidence-queue/abc")).toBe(true);
 	expect(isCourseRead("/api/v1/points/statement")).toBe(false);
-	expect(isCourseRead("/api/v1/evidence-queue")).toBe(false);
 	expect(isMediaRequest("image", "application/json")).toBe(true);
 	expect(shouldCacheMedia(true, "image", "image/jpeg")).toBe(false);
 	expect(shouldCacheMedia(false, "image", "image/jpeg")).toBe(true);

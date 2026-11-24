@@ -94,6 +94,28 @@ export async function deliverQueued(
 	payload: QueuePayload,
 	hint: SyncHint = {},
 ): Promise<void> {
+	if (payload.kind === "review") {
+		try {
+			await callEngine("/verifications/create", {
+				body: {
+					submissionId: payload.submissionId,
+					decision: payload.decision,
+					note: payload.note,
+					reviewedAt: payload.reviewedAt,
+					idempotencyKey: payload.id,
+					...(payload.reasonCode ? { reasonCode: payload.reasonCode } : {}),
+					...(payload.scores ? { scores: payload.scores } : {}),
+					...(payload.inPerson ? { inPerson: payload.inPerson } : {}),
+				},
+			});
+			await invalidateEngine("/evidence-queue");
+			await invalidateEngine("/evidence-queue/:id");
+		} catch (error) {
+			if (decisionFor(error) === "server") throw new OutboxDecision("server");
+			throw error;
+		}
+		return;
+	}
 	if (payload.kind === "progress") {
 		await callEngine("/enrollments/:id/start", {
 			body: { id: payload.enrollmentId, taskId: payload.taskId },
