@@ -241,6 +241,8 @@ export const badges = pgTable(
 		skillEn: text("skill_en"),
 		skillRw: text("skill_rw"),
 		level: integer("level").notNull().default(1),
+		/** Days the skill stays current. Null means this badge does not expire. */
+		validDays: integer("valid_days"),
 		/** The trainer records where and when they saw the work. */
 		requiresInPerson: boolean("requires_in_person").notNull().default(false),
 		rule: jsonb("rule")
@@ -256,6 +258,10 @@ export const badges = pgTable(
 	(table) => [
 		uniqueIndex("badges_course").on(table.courseId),
 		check("badges_level", sql`${table.level} > 0`),
+		check(
+			"badges_valid_days",
+			sql`${table.validDays} is null or ${table.validDays} between 1 and 3650`,
+		),
 	],
 );
 

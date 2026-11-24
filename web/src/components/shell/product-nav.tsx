@@ -243,6 +243,7 @@ function useProductNavItems(): NavItem[] {
 	if (canManageHardware) {
 		items.push(
 			{ to: "/inventory", label: "inventoryNav" },
+			{ to: "/licences", label: "licencesNav" },
 			{ to: "/handovers", label: "handoverNav" },
 			{ to: "/recovery", label: "recoveryNav" },
 		);

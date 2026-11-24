@@ -14,7 +14,12 @@ import {
 import type { BadgeRule, ContentStatus } from "../../db/schema/content";
 import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
-import { readBadgeRule, requireBadgeRule, requireLevel } from "./badge";
+import {
+	readBadgeRule,
+	requireBadgeRule,
+	requireLevel,
+	requireValidDays,
+} from "./badge";
 import { storeMediaKey, storeOutboundUrl } from "./media";
 import { requirePassThreshold } from "./rubric";
 
@@ -69,6 +74,7 @@ export type BadgeView = {
 	skillEn: string;
 	skillRw: string;
 	level: number;
+	validDays: number | null;
 	missingKinyarwanda: boolean;
 	requiresInPerson: boolean;
 	rule: BadgeRule;
@@ -497,6 +503,7 @@ async function readBadge(
 		skillEn,
 		skillRw,
 		level: row.level,
+		validDays: row.validDays,
 		missingKinyarwanda: gap(row.titleEn, titleRw) || gap(skillEn, skillRw),
 		requiresInPerson: row.requiresInPerson,
 		rule: readBadgeRule(row.rule),
@@ -944,6 +951,7 @@ export async function saveBadge(
 		skillEn?: string;
 		skillRw?: string;
 		level: number;
+		validDays?: number | null;
 		allRequiredTasksApproved: boolean;
 		minimumScore?: number | null;
 		minimumHours?: number | null;
@@ -959,6 +967,7 @@ export async function saveBadge(
 	const skillRw = cleanSkill(input.skillRw);
 	const rule = requireBadgeRule(input);
 	const level = requireLevel(input.level);
+	const validDays = requireValidDays(input.validDays);
 	const requiresInPerson = input.requiresInPerson === true;
 	const [saved] = await database
 		.insert(badges)
@@ -969,6 +978,7 @@ export async function saveBadge(
 			skillEn,
 			skillRw,
 			level,
+			validDays,
 			requiresInPerson,
 			rule,
 		})
@@ -980,6 +990,7 @@ export async function saveBadge(
 				skillEn,
 				skillRw,
 				level,
+				validDays,
 				requiresInPerson,
 				rule,
 			},

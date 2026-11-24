@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { isApiClientError, useEngine } from "@/lib/engine";
+import { Button } from "@/components/ui/button";
+import { callEngine, isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import { PassportShare } from "./share";
 
@@ -9,7 +11,9 @@ type PassportBadge = {
 	titleRw: string;
 	skillEn: string;
 	skillRw: string;
+	level: number;
 	awardedAt: string;
+	expiresAt: string | null;
 	credentialToken: string | null;
 };
 
@@ -20,9 +24,31 @@ type PassportTask = {
 	completedAt: string | null;
 };
 
+function levelLabel(
+	level: number,
+	t: (
+		key:
+			| "badgeLevelFoundation"
+			| "badgeLevelPractitioner"
+			| "badgeLevelAdvanced",
+	) => string,
+): string {
+	switch (level) {
+		case 1:
+			return t("badgeLevelFoundation");
+		case 2:
+			return t("badgeLevelPractitioner");
+		case 3:
+			return t("badgeLevelAdvanced");
+		default:
+			return String(level);
+	}
+}
+
 export default function PassportPage() {
 	const { locale, t } = useI18n();
 	const passport = useEngine("/passport");
+	const [error, setError] = useState<string | null>(null);
 
 	if (passport.isPending) {
 		return (
@@ -50,6 +76,24 @@ export default function PassportPage() {
 
 	const data = passport.data;
 	const badges = data.badges as PassportBadge[];
+
+	async function onDownload(id: string) {
+		setError(null);
+		try {
+			const result = await callEngine("/passport/open-badge", {
+				query: { id },
+			});
+			const blob = new Blob([result.json], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = "open-badge.json";
+			link.click();
+			URL.revokeObjectURL(url);
+		} catch (caught) {
+			setError(caught instanceof Error ? caught.message : t("tryAgain"));
+		}
+	}
 	const tasks = data.tasks as PassportTask[];
 	const referrals = (data.referrals ?? []) as {
 		id: string;
@@ -80,31 +124,69 @@ export default function PassportPage() {
 				{badges.length === 0 ? (
 					<p className="text-lg text-fg">{t("passportBadgesEmpty")}</p>
 				) : (
-					<ul className="flex flex-col gap-4">
-						{badges.map((badge) => {
-							const title = textFor(locale, badge.titleRw, badge.titleEn);
-							const skill = textFor(locale, badge.skillRw, badge.skillEn);
-							return (
-								<li key={badge.id} className="flex flex-col gap-2">
-									<Badge variant="verified" className="w-fit">
-										{title}
-									</Badge>
-									<p className="text-lg text-fg">{skill || title}</p>
-									<p className="text-lg text-fg-muted">
-										{t("passportAwarded", {
-											date: when(badge.awardedAt, locale),
-										})}
-									</p>
-									{badge.credentialToken ? (
-										<p className="font-meta text-sm text-fg">
-											{t("passportCredential")}: {badge.credentialToken}
-										</p>
-									) : null}
-								</li>
-							);
-						})}
-					</ul>
+					<table className="w-full border-collapse text-left">
+						<thead>
+							<tr className="font-meta text-xs uppercase text-fg-muted">
+								<th className="border-b border-line py-2 font-semibold">
+									{t("passportBadges")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("badgeLevel")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("licencesExpiry")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold" />
+							</tr>
+						</thead>
+						<tbody>
+							{badges.map((badge) => {
+								const title = textFor(locale, badge.titleRw, badge.titleEn);
+								const expired =
+									badge.expiresAt !== null &&
+									new Date(badge.expiresAt).getTime() < Date.now();
+								return (
+									<tr key={badge.id}>
+										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+											{title}
+										</td>
+										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+											{levelLabel(badge.level, t)}
+										</td>
+										<td className="border-b border-line py-3">
+											{badge.expiresAt ? (
+												<span className="flex items-center gap-2">
+													{expired ? (
+														<Badge variant="danger">{t("badgeExpired")}</Badge>
+													) : null}
+													<span className="font-sans text-lg text-fg">
+														{when(badge.expiresAt, locale)}
+													</span>
+												</span>
+											) : (
+												<span className="font-sans text-lg text-fg">
+													{t("badgeNoExpiry")}
+												</span>
+											)}
+										</td>
+										<td className="border-b border-line py-3">
+											{badge.credentialToken ? (
+												<Button
+													type="button"
+													variant="quiet"
+													onClick={() => void onDownload(badge.id)}
+												>
+													{t("openBadgeDownload")}
+												</Button>
+											) : null}
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
 				)}
+				{error ? <p className="text-lg text-destructive">{error}</p> : null}
 			</section>
 			{referrals.length > 0 ? (
 				<section className="flex flex-col gap-3">

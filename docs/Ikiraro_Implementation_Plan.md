@@ -105,7 +105,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/9.1-pathways-and-placement`
   - [x] `phase/9.2-peer-and-group-work`
   - [x] `phase/9.3-scheduled-reports-and-warnings`
-  - [ ] `phase/9.4-portable-credentials`
+  - [x] `phase/9.4-portable-credentials`
   - [ ] `phase/9.5-coverage-and-tours`
   - [ ] `phase/9.6-remaining-could-haves`
   - [ ] `phase/9.7-account-hardening`

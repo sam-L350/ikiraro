@@ -57,6 +57,7 @@ export function publishedSnapshot(course: CourseView): JsonValue {
 					skillEn: course.badge.skillEn,
 					skillRw: course.badge.skillRw,
 					level: course.badge.level,
+					validDays: course.badge.validDays,
 					requiresInPerson: course.badge.requiresInPerson,
 					rule: {
 						allRequiredTasksApproved:

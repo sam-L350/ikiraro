@@ -48,6 +48,7 @@ type CourseBadge = {
 	skillEn: string;
 	skillRw: string;
 	level: number;
+	validDays?: number | null;
 	missingKinyarwanda: boolean;
 	requiresInPerson?: boolean;
 	rule: BadgeRule;
@@ -628,6 +629,9 @@ function BadgeFields({
 	const [skillEn, setSkillEn] = useState(badge?.skillEn ?? "");
 	const [skillRw, setSkillRw] = useState(badge?.skillRw ?? "");
 	const [level, setLevel] = useState(String(badge?.level ?? 1));
+	const [validDays, setValidDays] = useState(
+		badge?.validDays ? String(badge.validDays) : "",
+	);
 	const [allRequired, setAllRequired] = useState(
 		badge?.rule.allRequiredTasksApproved ?? true,
 	);
@@ -659,6 +663,7 @@ function BadgeFields({
 		skillEn !== (badge?.skillEn ?? "") ||
 		skillRw !== (badge?.skillRw ?? "") ||
 		level !== String(badge?.level ?? 1) ||
+		validDays !== (badge?.validDays ? String(badge.validDays) : "") ||
 		allRequired !== (badge?.rule.allRequiredTasksApproved ?? true) ||
 		minimumScore !== savedScore ||
 		minimumHours !== savedHours ||
@@ -679,6 +684,7 @@ function BadgeFields({
 					skillEn,
 					skillRw,
 					level: Number(level),
+					validDays: validDays.trim() ? Number(validDays) : null,
 					allRequiredTasksApproved: allRequired,
 					minimumScore: minimumScore.trim() ? Number(minimumScore) : null,
 					minimumHours: minimumHours.trim() ? Number(minimumHours) : null,
@@ -733,6 +739,13 @@ function BadgeFields({
 					value={level}
 					disabled={!editable}
 					onChange={setLevel}
+				/>
+				<Field
+					id={`${courseId}-badge-days`}
+					label={t("badgeValidDays")}
+					value={validDays}
+					disabled={!editable}
+					onChange={setValidDays}
 				/>
 				<label
 					className="flex items-center gap-3"

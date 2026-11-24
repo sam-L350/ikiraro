@@ -22,6 +22,7 @@ export type PassportBadge = {
 	skillRw: string;
 	level: number;
 	awardedAt: string;
+	expiresAt: string | null;
 	credentialToken: string | null;
 };
 
@@ -71,11 +72,13 @@ function pinnedBadge(
 	skillEn: string;
 	skillRw: string;
 	level: number;
+	validDays: number | null;
 } | null {
 	const record = asRecord(snapshot);
 	const badge = asRecord(record?.badge);
 	if (!badge || badge.id !== badgeId) return null;
 	const level = badge.level;
+	const validDays = badge.validDays;
 	return {
 		titleEn: textOf(badge, "titleEn"),
 		titleRw: textOf(badge, "titleRw"),
@@ -85,6 +88,12 @@ function pinnedBadge(
 			typeof level === "number" && Number.isInteger(level) && level > 0
 				? level
 				: 0,
+		validDays:
+			typeof validDays === "number" &&
+			Number.isInteger(validDays) &&
+			validDays > 0
+				? validDays
+				: null,
 	};
 }
 
@@ -189,6 +198,7 @@ export async function readPassport(
 		if (row.entry !== "awarded" || revoked.has(row.badgeId)) continue;
 		const pinned = pinnedBadge(row.snapshot, row.badgeId);
 		const level = pinned && pinned.level > 0 ? pinned.level : row.level;
+		const validDays = pinned?.validDays ?? null;
 		badgesHeld.push({
 			id: row.badgeId,
 			titleEn: prefer(pinned?.titleEn ?? "", row.titleEn),
@@ -197,6 +207,11 @@ export async function readPassport(
 			skillRw: prefer(pinned?.skillRw ?? "", row.skillRw ?? ""),
 			level,
 			awardedAt: row.awardedAt.toISOString(),
+			expiresAt: validDays
+				? new Date(
+						row.awardedAt.getTime() + validDays * 24 * 60 * 60 * 1000,
+					).toISOString()
+				: null,
 			credentialToken: null,
 		});
 	}

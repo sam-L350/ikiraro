@@ -120,6 +120,9 @@
 			"name": "leaderboard"
 		},
 		{
+			"name": "licences"
+		},
+		{
 			"name": "media"
 		},
 		{
@@ -6488,6 +6491,10 @@
 									"level": {
 										"type": "number"
 									},
+									"validDays": {
+										"type": "number",
+										"nullable": true
+									},
 									"allRequiredTasksApproved": {
 										"type": "boolean"
 									},
@@ -6591,6 +6598,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -6627,6 +6638,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -7127,6 +7139,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -7163,6 +7179,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -7524,6 +7541,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -7560,6 +7581,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -7949,6 +7971,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -7985,6 +8011,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -8359,6 +8386,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -8395,6 +8426,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -8793,6 +8825,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -8829,6 +8865,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -9208,6 +9245,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -9244,6 +9285,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -9855,6 +9897,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -9891,6 +9937,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -19643,6 +19690,553 @@
 				}
 			}
 		},
+		"/api/v1/licences/create": {
+			"post": {
+				"operationId": "createSoftwareLicence",
+				"summary": "Store a donated program with a seat count and an end date.",
+				"tags": [
+					"licences"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"seats": {
+										"type": "number"
+									},
+									"expiresOn": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name",
+									"seats",
+									"expiresOn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"seats": {
+													"type": "number"
+												},
+												"seatsUsed": {
+													"type": "number"
+												},
+												"expiresOn": {
+													"type": "string"
+												},
+												"holders": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"grantId": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"grantId",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"seats",
+												"seatsUsed",
+												"expiresOn",
+												"holders"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/licences/grant": {
+			"post": {
+				"operationId": "createLicenceGrant",
+				"summary": "Give one free seat to a learner.",
+				"tags": [
+					"licences"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"licenceId": {
+										"type": "string"
+									},
+									"userId": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"licenceId",
+									"userId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"grantId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"grantId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/licences": {
+			"get": {
+				"operationId": "getLicences",
+				"summary": "Donated programs, the seats in use, and the learners an officer can choose.",
+				"tags": [
+					"licences"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"licences": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"seats": {
+																"type": "number"
+															},
+															"seatsUsed": {
+																"type": "number"
+															},
+															"expiresOn": {
+																"type": "string"
+															},
+															"holders": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"grantId": {
+																			"type": "string"
+																		},
+																		"name": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"grantId",
+																		"name"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"seats",
+															"seatsUsed",
+															"expiresOn",
+															"holders"
+														],
+														"additionalProperties": false
+													}
+												},
+												"learners": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "number"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"licences",
+												"learners"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/licences/revoke": {
+			"post": {
+				"operationId": "createLicenceRevocation",
+				"summary": "Free a seat. The grant stays in the record.",
+				"tags": [
+					"licences"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"grantId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"grantId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"grantId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"grantId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/media/{id}/finalize": {
 			"post": {
 				"operationId": "createMediaFinalize",
@@ -23300,6 +23894,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -23336,6 +23934,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -23731,6 +24330,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -23767,6 +24370,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -25459,6 +26063,10 @@
 															"awardedAt": {
 																"type": "string"
 															},
+															"expiresAt": {
+																"type": "string",
+																"nullable": true
+															},
 															"credentialToken": {
 																"type": "string",
 																"nullable": true
@@ -25472,6 +26080,7 @@
 															"skillRw",
 															"level",
 															"awardedAt",
+															"expiresAt",
 															"credentialToken"
 														],
 														"additionalProperties": false
@@ -25563,6 +26172,112 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/passport/open-badge": {
+			"get": {
+				"operationId": "getPassportOpenBadge",
+				"summary": "An Open Badges file for one badge on this person's passport.",
+				"tags": [
+					"passport"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"json": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"json"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}
@@ -32002,6 +32717,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -32038,6 +32757,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -32403,6 +33123,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -32439,6 +33163,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -32817,6 +33542,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -32853,6 +33582,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -33231,6 +33961,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -33267,6 +34001,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -33651,6 +34386,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -33687,6 +34426,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -38890,6 +39630,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -38926,6 +39670,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"
@@ -40645,6 +41390,10 @@
 														"level": {
 															"type": "number"
 														},
+														"validDays": {
+															"type": "number",
+															"nullable": true
+														},
 														"missingKinyarwanda": {
 															"type": "boolean"
 														},
@@ -40681,6 +41430,7 @@
 														"skillEn",
 														"skillRw",
 														"level",
+														"validDays",
 														"missingKinyarwanda",
 														"requiresInPerson",
 														"rule"

@@ -37,6 +37,20 @@ function optionalHours(value: unknown): number | null {
 	return value;
 }
 
+/** Blank or zero means the badge does not expire. */
+export function requireValidDays(
+	value: number | null | undefined,
+): number | null {
+	if (value === null || value === undefined || value === 0) return null;
+	if (!Number.isInteger(value) || value < 1 || value > 3650) {
+		throw errors.badRequest(
+			"Write a whole number of days, or leave it empty.",
+			{ reason: "invalid_days" },
+		);
+	}
+	return value;
+}
+
 export function requireLevel(value: number): number {
 	if (!Number.isInteger(value) || value < 1) {
 		throw errors.badRequest("Enter a badge level of 1 or more.", {

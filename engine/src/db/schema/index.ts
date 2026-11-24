@@ -67,6 +67,11 @@ export {
 	taskClarity,
 	taskProgress,
 } from "./learning";
+export {
+	softwareLicenceGrants,
+	softwareLicenceRevocations,
+	softwareLicences,
+} from "./licences";
 export { mediaObjects } from "./media";
 export { mentorOptIns, mentorRequests, mentors } from "./mentors";
 export {
