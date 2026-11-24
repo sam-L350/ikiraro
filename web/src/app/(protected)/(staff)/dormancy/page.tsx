@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -46,24 +48,26 @@ export default function DormancyPage() {
 				</p>
 			</div>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("dormancyEmpty")}
-				</p>
+				<EmptyState sentence={t("dormancyEmpty")} />
 			) : (
-				<ul>
-					{items.map((row) => (
-						<li key={row.id} className="border-t border-ink/15 py-4">
-							<p className="font-sans text-lg font-medium text-fg">
-								{row.recipientName}
-							</p>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{t(reasonKey(row.reason))} ·{" "}
-								{t("followUpsDay", { day: String(row.day) })} ·{" "}
-								{row.districtName}
-							</p>
-						</li>
-					))}
-				</ul>
+				<RecordTable
+					caption={t("dormancyTitle")}
+					columns={[
+						t("nameLabel"),
+						t("waitingTitle"),
+						t("districtLabel"),
+						t("status"),
+					]}
+					rows={items.map((row) => ({
+						key: row.id,
+						cells: [
+							row.recipientName,
+							t("followUpsDay", { day: String(row.day) }),
+							row.districtName,
+							t(reasonKey(row.reason)),
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

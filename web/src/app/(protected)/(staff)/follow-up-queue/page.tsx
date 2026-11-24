@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -46,44 +48,54 @@ export default function FollowUpQueuePage() {
 					{t("followUpsQueue")}
 				</h1>
 			</div>
-			{evidence.length === 0 && reviews.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("followUpsQueueEmpty")}
-				</p>
-			) : null}
-			<ul>
-				{evidence.map((row) => (
-					<li key={row.evidenceId} className="border-t border-ink/15 py-4">
-						<Link
-							to={`/follow-up-queue/${row.evidenceId}`}
-							className="font-sans text-lg font-medium text-fg"
-						>
-							{row.recipientName}
-						</Link>
-						<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("followUpsDay", { day: String(row.day) })} · {row.centerName}
-						</p>
-						<p className="font-sans text-lg font-medium text-fg">{row.note}</p>
-					</li>
-				))}
-				{reviews
-					.filter((row) => row.open)
-					.map((row) => (
-						<li key={row.reviewId} className="border-t border-ink/15 py-4">
-							<Link
-								to={`/follow-up-queue/close/${row.reviewId}`}
-								className="font-sans text-lg font-medium text-fg"
-							>
-								{row.recipientName}
-							</Link>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{t("followUpsSilent")} ·{" "}
-								{t("followUpsDay", { day: String(row.day) })} ·{" "}
-								{row.districtName}
-							</p>
-						</li>
-					))}
-			</ul>
+			{evidence.length === 0 &&
+			reviews.filter((row) => row.open).length === 0 ? (
+				<EmptyState sentence={t("followUpsQueueEmpty")} />
+			) : (
+				<RecordTable
+					caption={t("followUpsQueue")}
+					columns={[
+						t("nameLabel"),
+						t("waitingTitle"),
+						t("centerLabel"),
+						t("openRow"),
+					]}
+					rows={[
+						...evidence.map((row) => ({
+							key: row.evidenceId,
+							cells: [
+								row.recipientName,
+								t("followUpsDay", { day: String(row.day) }),
+								row.centerName,
+								<Link
+									key="open"
+									to={`/follow-up-queue/${row.evidenceId}`}
+									className="underline"
+								>
+									{t("openRow")}
+								</Link>,
+							],
+						})),
+						...reviews
+							.filter((row) => row.open)
+							.map((row) => ({
+								key: row.reviewId,
+								cells: [
+									row.recipientName,
+									t("followUpsDay", { day: String(row.day) }),
+									row.districtName,
+									<Link
+										key="open"
+										to={`/follow-up-queue/close/${row.reviewId}`}
+										className="underline"
+									>
+										{t("openRow")}
+									</Link>,
+								],
+							})),
+					]}
+				/>
+			)}
 		</section>
 	);
 }

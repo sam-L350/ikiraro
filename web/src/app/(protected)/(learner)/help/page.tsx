@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { PageTabs } from "@/components/ui/page-tabs";
 import {
 	callEngine,
 	invalidateEngine,
@@ -61,6 +62,7 @@ const KINDS: { value: Ticket["kind"]; label: MessageKey; route: MessageKey }[] =
 
 export default function HelpPage() {
 	const { locale, t } = useI18n();
+	const [tab, setTab] = useState<"search" | "report">("search");
 	const [q, setQ] = useState("");
 	const [applied, setApplied] = useState("");
 	const guides = useEngine("/help-guides", { query: { q: applied } });
@@ -145,126 +147,145 @@ export default function HelpPage() {
 					{t("helpSentence")}
 				</p>
 			</div>
-			<form
-				className="flex flex-col gap-3"
-				onSubmit={(event) => {
-					event.preventDefault();
-					setApplied(q.trim());
-				}}
-			>
-				<label className="flex flex-col gap-2" htmlFor="help-search">
-					<span className="font-meta text-xs uppercase text-fg-muted">
-						{t("helpSearch")}
-					</span>
-					<input
-						id="help-search"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={q}
-						onChange={(event) => setQ(event.target.value)}
-					/>
-				</label>
-				<Button type="submit" variant="quiet" className="w-fit">
-					{t("helpSearch")}
-				</Button>
-			</form>
-			{guides.isPending ? (
-				<div className="h-16 animate-pulse rounded-md bg-surface" />
-			) : guideRows.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("helpSearchEmpty")}
-				</p>
-			) : (
-				<ul className="flex flex-col gap-4">
-					{guideRows.map((guide) => (
-						<li key={guide.id} className="flex flex-col gap-2">
-							<h2 className="font-sans text-2xl font-semibold text-fg">
-								{locale === "rw" && guide.titleRw
-									? guide.titleRw
-									: guide.titleEn}
-							</h2>
-							<p className="font-sans text-lg text-fg">
-								{locale === "rw" && guide.bodyRw ? guide.bodyRw : guide.bodyEn}
-							</p>
-						</li>
-					))}
-				</ul>
-			)}
-			<form
-				className="flex flex-col gap-4"
-				onSubmit={(event) => void onSend(event)}
-			>
-				<label className="flex flex-col gap-2" htmlFor="help-kind">
-					<span className="font-meta text-xs uppercase text-fg-muted">
-						{t("helpKind")}
-					</span>
-					<select
-						id="help-kind"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={kind}
-						onChange={(event) => setKind(event.target.value)}
+			<PageTabs
+				label={t("helpTitle")}
+				value={tab}
+				onChange={setTab}
+				tabs={[
+					{ value: "search", label: t("helpTabSearch") },
+					{ value: "report", label: t("helpTabReport") },
+				]}
+			/>
+			{tab === "search" ? (
+				<>
+					<form
+						className="flex flex-col gap-3"
+						onSubmit={(event) => {
+							event.preventDefault();
+							setApplied(q.trim());
+						}}
 					>
-						<option value="">{t("helpKind")}</option>
-						{KINDS.map((item) => (
-							<option key={item.value} value={item.value}>
-								{t(item.label)}
-							</option>
-						))}
-					</select>
-				</label>
-				{route ? (
-					<p className="font-sans text-lg text-fg">{t(route.route)}</p>
-				) : null}
-				<label className="flex flex-col gap-2" htmlFor="help-body">
-					<span className="font-meta text-xs uppercase text-fg-muted">
-						{t("helpBody")}
-					</span>
-					<textarea
-						id="help-body"
-						className="min-h-28 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
-						value={body}
-						onChange={(event) => setBody(event.target.value)}
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="help-photo">
-					<span className="font-meta text-xs uppercase text-fg-muted">
-						{t("helpScreenshot")}
-					</span>
-					<input
-						id="help-photo"
-						type="file"
-						accept="image/*"
-						onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-					/>
-				</label>
-				{formError ? (
-					<p className="font-sans text-lg text-destructive">{formError}</p>
-				) : null}
-				{ready ? (
-					<Button type="submit" variant="ink" className="w-fit">
-						{t("helpSend")}
-					</Button>
-				) : null}
-			</form>
-			<section className="flex flex-col gap-3">
-				<h2 className="font-sans text-2xl font-semibold text-fg">
-					{t("helpMine")}
-				</h2>
-				{mine.length === 0 ? null : (
-					<ul className="flex flex-col gap-3">
-						{mine.map((ticket) => (
-							<li key={ticket.id} className="font-sans text-lg text-fg">
-								{ticket.body} ·{" "}
-								{ticket.minutes !== null
-									? t("helpAnswered", { minutes: String(ticket.minutes) })
-									: ticket.status === "closed"
-										? t("helpClosedQuiet")
-										: t("helpWaiting")}
-							</li>
-						))}
-					</ul>
-				)}
-			</section>
-			{guides.data?.canWrite ? (
+						<label className="flex flex-col gap-2" htmlFor="help-search">
+							<span className="font-meta text-xs uppercase text-fg-muted">
+								{t("helpSearch")}
+							</span>
+							<input
+								id="help-search"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={q}
+								onChange={(event) => setQ(event.target.value)}
+							/>
+						</label>
+						<Button type="submit" variant="quiet" className="w-fit">
+							{t("helpSearch")}
+						</Button>
+					</form>
+					{guides.isPending ? (
+						<div className="h-16 animate-pulse rounded-md bg-surface" />
+					) : guideRows.length === 0 ? (
+						<p className="font-sans text-lg font-medium text-fg">
+							{t("helpSearchEmpty")}
+						</p>
+					) : (
+						<ul className="flex flex-col gap-4">
+							{guideRows.map((guide) => (
+								<li key={guide.id} className="flex flex-col gap-2">
+									<h2 className="font-sans text-2xl font-semibold text-fg">
+										{locale === "rw" && guide.titleRw
+											? guide.titleRw
+											: guide.titleEn}
+									</h2>
+									<p className="font-sans text-lg text-fg">
+										{locale === "rw" && guide.bodyRw
+											? guide.bodyRw
+											: guide.bodyEn}
+									</p>
+								</li>
+							))}
+						</ul>
+					)}
+				</>
+			) : null}
+			{tab === "report" ? (
+				<>
+					<form
+						className="flex flex-col gap-4"
+						onSubmit={(event) => void onSend(event)}
+					>
+						<label className="flex flex-col gap-2" htmlFor="help-kind">
+							<span className="font-meta text-xs uppercase text-fg-muted">
+								{t("helpKind")}
+							</span>
+							<select
+								id="help-kind"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={kind}
+								onChange={(event) => setKind(event.target.value)}
+							>
+								<option value="">{t("helpKind")}</option>
+								{KINDS.map((item) => (
+									<option key={item.value} value={item.value}>
+										{t(item.label)}
+									</option>
+								))}
+							</select>
+						</label>
+						{route ? (
+							<p className="font-sans text-lg text-fg">{t(route.route)}</p>
+						) : null}
+						<label className="flex flex-col gap-2" htmlFor="help-body">
+							<span className="font-meta text-xs uppercase text-fg-muted">
+								{t("helpBody")}
+							</span>
+							<textarea
+								id="help-body"
+								className="min-h-28 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
+								value={body}
+								onChange={(event) => setBody(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="help-photo">
+							<span className="font-meta text-xs uppercase text-fg-muted">
+								{t("helpScreenshot")}
+							</span>
+							<input
+								id="help-photo"
+								type="file"
+								accept="image/*"
+								onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+							/>
+						</label>
+						{formError ? (
+							<p className="font-sans text-lg text-destructive">{formError}</p>
+						) : null}
+						{ready ? (
+							<Button type="submit" variant="ink" className="w-fit">
+								{t("helpSend")}
+							</Button>
+						) : null}
+					</form>
+					<section className="flex flex-col gap-3">
+						<h2 className="font-sans text-2xl font-semibold text-fg">
+							{t("helpMine")}
+						</h2>
+						{mine.length === 0 ? null : (
+							<ul className="flex flex-col gap-3">
+								{mine.map((ticket) => (
+									<li key={ticket.id} className="font-sans text-lg text-fg">
+										{ticket.body} ·{" "}
+										{ticket.minutes !== null
+											? t("helpAnswered", { minutes: String(ticket.minutes) })
+											: ticket.status === "closed"
+												? t("helpClosedQuiet")
+												: t("helpWaiting")}
+									</li>
+								))}
+							</ul>
+						)}
+					</section>
+				</>
+			) : null}
+			{tab === "search" && guides.data?.canWrite ? (
 				<form
 					className="flex flex-col gap-4"
 					onSubmit={(event) => void onPublish(event)}

@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -57,24 +59,24 @@ export default function ConcernsPage() {
 				<p className="text-lg text-fg">{t("concernsLead")}</p>
 			</div>
 			{rows.length === 0 ? (
-				<p className="text-lg text-fg">{t("concernsEmpty")}</p>
+				<EmptyState sentence={t("concernsEmpty")} />
 			) : (
-				<ul className="flex flex-col">
-					{rows.map((row) => (
-						<li key={row.id} className="border-t border-ink/15 py-4">
-							<Link
-								to={`/concerns/${row.id}`}
-								className="flex flex-col gap-1 font-sans text-lg font-semibold text-fg"
-							>
-								<span>{t(kindKey(row.kind))}</span>
-								<span className="text-sm font-medium">
-									{row.centerName}
-									{row.reporterName ? ` · ${row.reporterName}` : ""}
-								</span>
-							</Link>
-						</li>
-					))}
-				</ul>
+				<RecordTable
+					caption={t("concernsTitle")}
+					columns={[t("nameLabel"), t("centerLabel"), t("openRow")]}
+					rows={rows.map((row) => ({
+						key: row.id,
+						cells: [
+							t(kindKey(row.kind)),
+							row.reporterName
+								? `${row.centerName} · ${row.reporterName}`
+								: row.centerName,
+							<Link key="open" to={`/concerns/${row.id}`} className="underline">
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</div>
 	);

@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { PageTabs } from "@/components/ui/page-tabs";
+import { RecordTable } from "@/components/ui/record-table";
 import { callEngine, isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -54,39 +57,43 @@ const FUNNEL: { key: keyof Funnel; label: MessageKey }[] = [
 	{ key: "activeAt90Days", label: "equityActive" },
 ];
 
-function SliceList({ title, rows }: { title: string; rows: Slice[] }) {
+function SliceTable({ title, rows }: { title: string; rows: Slice[] }) {
 	const { t } = useI18n();
+	if (rows.length === 0) {
+		return (
+			<p className="font-sans text-lg font-medium text-fg">
+				{t("equityHidden")}
+			</p>
+		);
+	}
 	return (
-		<div className="flex flex-col gap-3">
-			<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-				{title}
-			</h2>
-			{rows.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("equityHidden")}
-				</p>
-			) : (
-				<ul>
-					{rows.map((row) => (
-						<li key={row.label} className="border-t border-ink/15 py-4">
-							<p className="font-sans text-lg font-medium text-fg">
-								{row.label}
-							</p>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{row.registered} · {row.enrolled} · {row.applicants} ·{" "}
-								{row.recipients}
-							</p>
-						</li>
-					))}
-				</ul>
-			)}
-		</div>
+		<RecordTable
+			caption={title}
+			columns={[
+				t("nameLabel"),
+				t("equityRegistered"),
+				t("equityEnrolled"),
+				t("equityApplicants"),
+				t("equityRecipients"),
+			]}
+			rows={rows.map((row) => ({
+				key: row.label,
+				cells: [
+					row.label,
+					String(row.registered),
+					String(row.enrolled),
+					String(row.applicants),
+					String(row.recipients),
+				],
+			}))}
+		/>
 	);
 }
 
 export default function EquityPage() {
 	const { t } = useI18n();
 	const report = useEngine("/equity");
+	const [tab, setTab] = useState<"funnel" | "decisions" | "outcomes">("funnel");
 
 	async function onDownload() {
 		const result = await callEngine("/equity/export");
@@ -133,58 +140,65 @@ export default function EquityPage() {
 			>
 				{t("equityDownload")}
 			</Button>
-			<div className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-					{t("equityFunnel")}
-				</h2>
-				<ul>
-					{FUNNEL.map((row) => (
-						<li key={row.key} className="border-t border-ink/15 py-4">
-							<p className="font-sans text-lg font-medium text-fg">
-								{t(row.label)}
-							</p>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{data.funnel[row.key]}
-							</p>
-						</li>
-					))}
-				</ul>
-			</div>
-			<SliceList title={t("equityDistricts")} rows={data.districts} />
-			<SliceList title={t("equityAges")} rows={data.ages} />
-			<SliceList title={t("equitySectors")} rows={data.sectors} />
-			<SliceList title={t("equityGenders")} rows={data.genders} />
-			<div className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-					{t("equityBatches")}
-				</h2>
-				{data.batches.length === 0 ? (
+			<PageTabs
+				label={t("equityTitle")}
+				value={tab}
+				onChange={setTab}
+				tabs={[
+					{ value: "funnel", label: t("equityFunnel") },
+					{ value: "decisions", label: t("equityDecisions") },
+					{ value: "outcomes", label: t("equityOutcomes") },
+				]}
+			/>
+			{tab === "funnel" ? (
+				<RecordTable
+					caption={t("equityFunnel")}
+					columns={[t("nameLabel"), t("status")]}
+					rows={FUNNEL.map((row) => ({
+						key: row.key,
+						cells: [t(row.label), String(data.funnel[row.key])],
+					}))}
+				/>
+			) : null}
+			{tab === "decisions" ? (
+				<div className="flex flex-col gap-8">
+					<SliceTable title={t("equityDistricts")} rows={data.districts} />
+					<SliceTable title={t("equityAges")} rows={data.ages} />
+					<SliceTable title={t("equitySectors")} rows={data.sectors} />
+					<SliceTable title={t("equityGenders")} rows={data.genders} />
+				</div>
+			) : null}
+			{tab === "outcomes" ? (
+				data.batches.length === 0 ? (
 					<p className="font-sans text-lg font-medium text-fg">
 						{t("equityBatchEmpty")}
 					</p>
 				) : (
 					data.batches.map((batch) => (
-						<div key={batch.donor} className="flex flex-col gap-2">
-							<p className="font-sans text-lg font-medium text-fg">
-								{batch.donor}
-							</p>
-							<ul>
-								{batch.items.map((item) => (
-									<li key={item.serial} className="border-t border-ink/15 py-4">
-										<p className="font-sans text-lg font-medium text-fg">
-											{item.name}
-										</p>
-										<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-											{item.serial} · {item.centerName} · {item.districtName} ·{" "}
-											{item.outcome}
-										</p>
-									</li>
-								))}
-							</ul>
-						</div>
+						<RecordTable
+							key={batch.donor}
+							caption={batch.donor}
+							columns={[
+								t("nameLabel"),
+								t("inventorySerial"),
+								t("centerLabel"),
+								t("districtLabel"),
+								t("equityOutcomes"),
+							]}
+							rows={batch.items.map((item) => ({
+								key: item.serial,
+								cells: [
+									item.name,
+									item.serial,
+									item.centerName,
+									item.districtName,
+									item.outcome,
+								],
+							}))}
+						/>
 					))
-				)}
-			</div>
+				)
+			) : null}
 		</section>
 	);
 }

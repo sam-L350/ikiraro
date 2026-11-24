@@ -2,6 +2,9 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageTabs } from "@/components/ui/page-tabs";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -143,6 +146,7 @@ export default function InventoryPage() {
 	const [badges, setBadges] = useState("");
 	const [months, setMonths] = useState("");
 	const [error, setError] = useState<MessageKey | null>(null);
+	const [panel, setPanel] = useState<"list" | "add">("list");
 	const centers = (list.data?.centers ?? []) as InventoryCenter[];
 
 	useEffect(() => {
@@ -248,188 +252,213 @@ export default function InventoryPage() {
 					{t("inventorySentence")}
 				</p>
 			</div>
-			<form
-				className="flex flex-col gap-4"
-				onSubmit={(event) => void onSave(event)}
-			>
-				<label className="flex flex-col gap-2" htmlFor="inventory-center">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("inventoryCenter")}
-					</span>
-					<select
-						id="inventory-center"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={centerId}
-						onChange={(event) => setCenterId(event.target.value)}
-					>
-						{centers.map((center) => (
-							<option key={center.id} value={center.id}>
-								{center.name}
-							</option>
-						))}
-					</select>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="inventory-name">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("inventoryName")}
-					</span>
-					<input
-						id="inventory-name"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={name}
-						maxLength={120}
-						onChange={(event) => setName(event.target.value)}
-					/>
-				</label>
-				<div className="grid gap-4 sm:grid-cols-2">
-					<label className="flex flex-col gap-2" htmlFor="inventory-category">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryCategory")}
-						</span>
-						<input
-							id="inventory-category"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={category}
-							maxLength={60}
-							onChange={(event) => setCategory(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="inventory-serial">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventorySerial")}
-						</span>
-						<input
-							id="inventory-serial"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={serial}
-							maxLength={80}
-							onChange={(event) => setSerial(event.target.value)}
-						/>
-					</label>
-				</div>
-				<label className="flex flex-col gap-2" htmlFor="inventory-condition">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("inventoryCondition")}
-					</span>
-					<select
-						id="inventory-condition"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={condition}
-						onChange={(event) => {
-							if (isCondition(event.target.value))
-								setCondition(event.target.value);
-						}}
-					>
-						{CONDITIONS.map((item) => (
-							<option key={item} value={item}>
-								{t(conditionKey(item))}
-							</option>
-						))}
-					</select>
-				</label>
-				<div className="grid gap-4 sm:grid-cols-2">
-					<label className="flex flex-col gap-2" htmlFor="inventory-donor">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryDonor")}
-						</span>
-						<input
-							id="inventory-donor"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={donor}
-							maxLength={120}
-							onChange={(event) => setDonor(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="inventory-acquired">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryAcquired")}
-						</span>
-						<input
-							id="inventory-acquired"
-							type="date"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={acquiredOn}
-							onChange={(event) => setAcquiredOn(event.target.value)}
-						/>
-					</label>
-				</div>
-				<div className="grid gap-4 sm:grid-cols-3">
-					<label className="flex flex-col gap-2" htmlFor="inventory-points">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryPoints")}
-						</span>
-						<input
-							id="inventory-points"
-							inputMode="numeric"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={points}
-							onChange={(event) => setPoints(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="inventory-badges">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryBadges")}
-						</span>
-						<input
-							id="inventory-badges"
-							inputMode="numeric"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={badges}
-							onChange={(event) => setBadges(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="inventory-months">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryMonths")}
-						</span>
-						<input
-							id="inventory-months"
-							inputMode="numeric"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={months}
-							onChange={(event) => setMonths(event.target.value)}
-						/>
-					</label>
-				</div>
-				{error ? (
-					<p className="font-sans text-sm font-medium text-danger" role="alert">
-						{t(error)}
-					</p>
-				) : null}
-				<Button
-					type="submit"
-					variant="sticker"
-					className="w-fit"
-					disabled={create.isPending || !centerId}
+			<PageTabs
+				label={t("inventoryTitle")}
+				value={panel}
+				onChange={setPanel}
+				tabs={[
+					{ value: "list", label: t("listTab") },
+					{ value: "add", label: t("addTab") },
+				]}
+			/>
+			{panel === "add" ? (
+				<form
+					className="flex flex-col gap-4"
+					onSubmit={(event) => void onSave(event)}
 				>
-					{t("inventorySave")}
-				</Button>
-			</form>
-			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("inventoryEmpty")}
-				</p>
+					<label className="flex flex-col gap-2" htmlFor="inventory-center">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("inventoryCenter")}
+						</span>
+						<select
+							id="inventory-center"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={centerId}
+							onChange={(event) => setCenterId(event.target.value)}
+						>
+							{centers.map((center) => (
+								<option key={center.id} value={center.id}>
+									{center.name}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="flex flex-col gap-2" htmlFor="inventory-name">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("inventoryName")}
+						</span>
+						<input
+							id="inventory-name"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={name}
+							maxLength={120}
+							onChange={(event) => setName(event.target.value)}
+						/>
+					</label>
+					<div className="grid gap-4 sm:grid-cols-2">
+						<label className="flex flex-col gap-2" htmlFor="inventory-category">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryCategory")}
+							</span>
+							<input
+								id="inventory-category"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={category}
+								maxLength={60}
+								onChange={(event) => setCategory(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="inventory-serial">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventorySerial")}
+							</span>
+							<input
+								id="inventory-serial"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={serial}
+								maxLength={80}
+								onChange={(event) => setSerial(event.target.value)}
+							/>
+						</label>
+					</div>
+					<label className="flex flex-col gap-2" htmlFor="inventory-condition">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("inventoryCondition")}
+						</span>
+						<select
+							id="inventory-condition"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={condition}
+							onChange={(event) => {
+								if (isCondition(event.target.value))
+									setCondition(event.target.value);
+							}}
+						>
+							{CONDITIONS.map((item) => (
+								<option key={item} value={item}>
+									{t(conditionKey(item))}
+								</option>
+							))}
+						</select>
+					</label>
+					<div className="grid gap-4 sm:grid-cols-2">
+						<label className="flex flex-col gap-2" htmlFor="inventory-donor">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryDonor")}
+							</span>
+							<input
+								id="inventory-donor"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={donor}
+								maxLength={120}
+								onChange={(event) => setDonor(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="inventory-acquired">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryAcquired")}
+							</span>
+							<input
+								id="inventory-acquired"
+								type="date"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={acquiredOn}
+								onChange={(event) => setAcquiredOn(event.target.value)}
+							/>
+						</label>
+					</div>
+					<div className="grid gap-4 sm:grid-cols-3">
+						<label className="flex flex-col gap-2" htmlFor="inventory-points">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryPoints")}
+							</span>
+							<input
+								id="inventory-points"
+								inputMode="numeric"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={points}
+								onChange={(event) => setPoints(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="inventory-badges">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryBadges")}
+							</span>
+							<input
+								id="inventory-badges"
+								inputMode="numeric"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={badges}
+								onChange={(event) => setBadges(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="inventory-months">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryMonths")}
+							</span>
+							<input
+								id="inventory-months"
+								inputMode="numeric"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={months}
+								onChange={(event) => setMonths(event.target.value)}
+							/>
+						</label>
+					</div>
+					{error ? (
+						<p
+							className="font-sans text-sm font-medium text-danger"
+							role="alert"
+						>
+							{t(error)}
+						</p>
+					) : null}
+					{name.trim() &&
+					category.trim() &&
+					serial.trim() &&
+					centerId &&
+					/^\d{4}-\d{2}-\d{2}$/.test(acquiredOn) ? (
+						<Button
+							type="submit"
+							variant="sticker"
+							className="w-fit"
+							disabled={create.isPending}
+						>
+							{t("inventorySave")}
+						</Button>
+					) : null}
+				</form>
+			) : items.length === 0 ? (
+				<EmptyState sentence={t("inventoryEmpty")} />
 			) : (
-				<ul>
-					{items.map((item) => (
-						<li key={item.id} className="border-t border-ink/15 py-4">
+				<RecordTable
+					caption={t("inventoryTitle")}
+					columns={[
+						t("nameLabel"),
+						t("inventorySerial"),
+						t("status"),
+						t("centerLabel"),
+						t("openRow"),
+					]}
+					rows={items.map((item) => ({
+						key: item.id,
+						cells: [
+							item.name,
+							item.serial,
+							<Badge key="status" variant={statusTone(item.status)}>
+								{t(statusKey(item.status))}
+							</Badge>,
+							item.centerName,
 							<Link
+								key="open"
 								to={`/inventory/${item.id}`}
-								className="flex flex-col gap-2"
+								className="underline"
 							>
-								<Badge variant={statusTone(item.status)}>
-									{t(statusKey(item.status))}
-								</Badge>
-								<p className="font-sans text-lg font-medium text-fg">
-									{item.name}
-								</p>
-								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{item.category} · {item.serial} · {item.centerName}
-								</p>
-							</Link>
-						</li>
-					))}
-				</ul>
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

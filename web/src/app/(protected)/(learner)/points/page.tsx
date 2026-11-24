@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/ui/empty-state";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -59,7 +60,7 @@ export default function PointsPage() {
 				{t("pointsTitle")}
 			</h1>
 			{entries.length === 0 ? (
-				<p className="text-lg text-fg">{t("pointsEmpty")}</p>
+				<EmptyState sentence={t("pointsEmpty")} />
 			) : (
 				<>
 					<p className="text-lg text-fg">

@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -37,9 +38,7 @@ export default function ConditionsPage() {
 				</p>
 			</div>
 			{grants.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("conditionsEmpty")}
-				</p>
+				<EmptyState sentence={t("conditionsEmpty")} />
 			) : (
 				<ul>
 					{grants.map((grant) => (

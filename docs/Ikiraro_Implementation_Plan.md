@@ -109,7 +109,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/9.5-coverage-and-tours`
   - [x] `phase/9.6-remaining-could-haves`
   - [x] `phase/9.7-account-hardening`
-  - [ ] `phase/9.8-interface-polish`
+  - [x] `phase/9.8-interface-polish`
 
 ---
 

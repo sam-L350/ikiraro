@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -36,31 +38,34 @@ export default function SurveyQueuePage() {
 				{t("surveysQueue")}
 			</h1>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("surveysQueueEmpty")}
-				</p>
+				<EmptyState sentence={t("surveysQueueEmpty")} />
 			) : (
-				<ul>
-					{items.map((row) => (
-						<li key={row.id} className="border-t border-ink/15 py-4">
+				<RecordTable
+					caption={t("surveysQueue")}
+					columns={[
+						t("nameLabel"),
+						t("taskLabel"),
+						t("centerLabel"),
+						t("openRow"),
+					]}
+					rows={items.map((row) => ({
+						key: row.id,
+						cells: [
+							row.learnerName,
+							row.kind === "baseline"
+								? t("surveysBaseline")
+								: t("surveysEndline"),
+							row.centerName,
 							<Link
+								key="open"
 								to={`/survey-queue/${row.id}`}
-								className="font-sans text-lg font-medium text-fg"
+								className="underline"
 							>
-								{row.learnerName}
-							</Link>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{row.kind === "baseline"
-									? t("surveysBaseline")
-									: t("surveysEndline")}{" "}
-								· {row.centerName}
-							</p>
-							<p className="font-sans text-lg font-medium text-fg">
-								{row.services}
-							</p>
-						</li>
-					))}
-				</ul>
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

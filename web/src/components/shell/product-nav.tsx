@@ -1,3 +1,40 @@
+import {
+	Activity,
+	BadgeCheck,
+	Bell,
+	BookOpen,
+	Briefcase,
+	Calendar,
+	CircleHelp,
+	ClipboardList,
+	Compass,
+	Copy,
+	FileSearch,
+	Flag,
+	Gift,
+	Home,
+	Inbox,
+	KeyRound,
+	type LucideIcon,
+	Map as MapIcon,
+	MapPin,
+	Megaphone,
+	MessageSquare,
+	Monitor,
+	Package,
+	PenLine,
+	PieChart,
+	Route,
+	Scale,
+	ScrollText,
+	Settings,
+	Share2,
+	Shield,
+	User,
+	UserPlus,
+	Users,
+	Webhook,
+} from "lucide-react";
 import type { Ref } from "react";
 import { NavLink } from "react-router";
 import { OpenPreviewButton } from "@/components/dev/role-preview";
@@ -7,6 +44,87 @@ import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
+
+const NAV_ICONS: Record<string, LucideIcon> = {
+	"/home": Home,
+	"/profile": User,
+	"/inbox": Inbox,
+	"/help": CircleHelp,
+	"/tickets": CircleHelp,
+	"/catalog": BookOpen,
+	"/schedule": Calendar,
+	"/practice": Monitor,
+	"/allocation": Gift,
+	"/conditions": ScrollText,
+	"/follow-ups": ClipboardList,
+	"/surveys": ClipboardList,
+	"/stories": BookOpen,
+	"/pathways": Route,
+	"/placement": Compass,
+	"/mentors": Users,
+	"/opportunities": Briefcase,
+	"/referrals": Share2,
+	"/messages": MessageSquare,
+	"/passport": BadgeCheck,
+	"/points": BadgeCheck,
+	"/pulse": Activity,
+	"/report": Flag,
+	"/operations": Activity,
+	"/staff": Users,
+	"/register/assisted": UserPlus,
+	"/staff/new": UserPlus,
+	"/courses": PenLine,
+	"/templates": Copy,
+	"/reviews": FileSearch,
+	"/content-packs": Package,
+	"/field-guide": BookOpen,
+	"/evidence": FileSearch,
+	"/questions": MessageSquare,
+	"/sessions": Calendar,
+	"/tours": MapIcon,
+	"/devices": Monitor,
+	"/second-reviews": FileSearch,
+	"/appeals": Scale,
+	"/feedback": MessageSquare,
+	"/quality": Activity,
+	"/follow-up-queue": ClipboardList,
+	"/survey-queue": ClipboardList,
+	"/dormancy": Bell,
+	"/coverage": MapPin,
+	"/referral-write": PenLine,
+	"/mentor-discover": Users,
+	"/mentor-approvals": Users,
+	"/mentor-review": Shield,
+	"/mentor-safeguarding": Shield,
+	"/announcements": Megaphone,
+	"/approvals": Scale,
+	"/adjustments": Settings,
+	"/exceptions": Flag,
+	"/notification-templates": Copy,
+	"/privacy-tools": Shield,
+	"/settings": Settings,
+	"/webhooks": Webhook,
+	"/duplicates": Users,
+	"/retention": ScrollText,
+	"/audit": ScrollText,
+	"/concerns": Flag,
+	"/inventory": Package,
+	"/licences": KeyRound,
+	"/handovers": Package,
+	"/recovery": Package,
+	"/rounds": Scale,
+	"/equity": PieChart,
+	"/donor-report": PieChart,
+	"/scheduled-report": Calendar,
+	"/warnings": Bell,
+	"/story-report": BookOpen,
+	"/decisions": Scale,
+};
+
+function NavIcon({ to }: { to: string }) {
+	const Icon = NAV_ICONS[to] ?? CircleHelp;
+	return <Icon aria-hidden="true" className="size-4 shrink-0" />;
+}
 
 type NavItem = {
 	to: string;
@@ -357,8 +475,10 @@ export function ProductIdentity({
 
 export function ProductNavLinks({
 	layout = "rail",
+	onNavigate,
 }: {
 	layout?: "rail" | "row";
+	onNavigate?: () => void;
 }) {
 	const { t } = useI18n();
 	const items = useProductNavItems();
@@ -376,13 +496,15 @@ export function ProductNavLinks({
 						<NavLink
 							to={item.to}
 							end={item.end}
+							onClick={onNavigate}
 							className={({ isActive }) =>
 								cn(
-									"inline-flex min-h-11 items-center rounded-full px-4 font-sans text-sm font-semibold",
-									isActive ? "bg-ink text-ink-fg" : "text-fg hover:bg-surface",
+									"inline-flex min-h-11 items-center gap-2 rounded-full px-4 font-sans text-sm font-semibold",
+									isActive ? "bg-ink text-ink-fg" : "text-ink hover:bg-surface",
 								)
 							}
 						>
+							<NavIcon to={item.to} />
 							{t(item.label)}
 						</NavLink>
 					</li>
@@ -392,7 +514,7 @@ export function ProductNavLinks({
 	);
 }
 
-/** Desktop rail. On a narrow screen the same identity and links sit under the header. */
+/** Desktop rail. The wordmark and the person stay put. The links scroll on their own. */
 export function ProductNav({
 	nameRef,
 	onPreview,
@@ -401,10 +523,14 @@ export function ProductNav({
 	onPreview: () => void;
 }) {
 	return (
-		<aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-8 border-r border-line bg-canvas px-5 py-6 lg:flex">
-			<Wordmark />
-			<ProductIdentity nameRef={nameRef} onPreview={onPreview} />
-			<ProductNavLinks />
+		<aside className="hidden h-full w-60 shrink-0 flex-col border-r border-line bg-canvas lg:flex">
+			<div className="flex shrink-0 flex-col gap-6 px-5 pt-6">
+				<Wordmark />
+				<ProductIdentity nameRef={nameRef} onPreview={onPreview} />
+			</div>
+			<div className="min-h-0 flex-1 overflow-y-auto px-5 py-6">
+				<ProductNavLinks />
+			</div>
 		</aside>
 	);
 }

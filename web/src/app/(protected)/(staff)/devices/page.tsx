@@ -2,6 +2,9 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageTabs } from "@/components/ui/page-tabs";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -98,6 +101,7 @@ export default function DevicesPage() {
 	const [availability, setAvailability] =
 		useState<DeviceAvailability>("available");
 	const [error, setError] = useState<MessageKey | null>(null);
+	const [panel, setPanel] = useState<"list" | "add">("list");
 	const centers = (list.data?.centers ?? []) as DeviceCenter[];
 
 	useEffect(() => {
@@ -153,6 +157,7 @@ export default function DevicesPage() {
 
 	const items = (list.data.items ?? []) as CenterDevice[];
 	const canCreate = list.data.canCreate === true;
+	const canSave = label.trim() !== "" && centerId !== "";
 
 	return (
 		<section className="flex max-w-3xl flex-col gap-8">
@@ -165,6 +170,17 @@ export default function DevicesPage() {
 				</p>
 			</div>
 			{canCreate ? (
+				<PageTabs
+					label={t("devicesTitle")}
+					value={panel}
+					onChange={setPanel}
+					tabs={[
+						{ value: "list", label: t("listTab") },
+						{ value: "add", label: t("addTab") },
+					]}
+				/>
+			) : null}
+			{canCreate && panel === "add" ? (
 				<form
 					className="flex flex-col gap-4"
 					onSubmit={(event) => void onSave(event)}
@@ -268,50 +284,64 @@ export default function DevicesPage() {
 							{t(error)}
 						</p>
 					) : null}
-					<Button
-						type="submit"
-						variant="sticker"
-						className="w-fit"
-						disabled={create.isPending}
-					>
-						{t("deviceSave")}
-					</Button>
+					{canSave ? (
+						<Button
+							type="submit"
+							variant="sticker"
+							className="w-fit"
+							disabled={create.isPending}
+						>
+							{t("deviceSave")}
+						</Button>
+					) : null}
 				</form>
 			) : null}
-			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("devicesEmpty")}
-				</p>
-			) : (
-				<ul>
-					{items.map((item) => (
-						<li key={item.id} className="border-t border-ink/15 py-4">
-							<Link to={`/devices/${item.id}`} className="flex flex-col gap-2">
-								<div className="flex flex-wrap items-center gap-3">
-									<Badge
-										variant={item.condition === "broken" ? "danger" : "neutral"}
-									>
-										{t(conditionKey(item.condition))}
-									</Badge>
-									<Badge
-										variant={
-											item.availability === "available" ? "pending" : "neutral"
-										}
-									>
-										{t(availabilityKey(item.availability))}
-									</Badge>
-								</div>
-								<p className="font-sans text-lg font-medium text-fg">
-									{item.label}
-								</p>
-								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{t(kindKey(item.kind))} · {item.centerName}
-								</p>
-							</Link>
-						</li>
-					))}
-				</ul>
-			)}
+			{panel === "list" || !canCreate ? (
+				items.length === 0 ? (
+					<EmptyState sentence={t("devicesEmpty")} />
+				) : (
+					<RecordTable
+						caption={t("devicesTitle")}
+						columns={[
+							t("centerLabel"),
+							t("nameLabel"),
+							t("deviceKind"),
+							t("deviceCondition"),
+							t("deviceAvailability"),
+							t("openRow"),
+						]}
+						rows={items.map((item) => ({
+							key: item.id,
+							cells: [
+								item.centerName,
+								item.label,
+								t(kindKey(item.kind)),
+								<Badge
+									key="condition"
+									variant={item.condition === "broken" ? "danger" : "neutral"}
+								>
+									{t(conditionKey(item.condition))}
+								</Badge>,
+								<Badge
+									key="free"
+									variant={
+										item.availability === "available" ? "pending" : "neutral"
+									}
+								>
+									{t(availabilityKey(item.availability))}
+								</Badge>,
+								<Link
+									key="open"
+									to={`/devices/${item.id}`}
+									className="underline"
+								>
+									{t("openRow")}
+								</Link>,
+							],
+						}))}
+					/>
+				)
+			) : null}
 		</section>
 	);
 }

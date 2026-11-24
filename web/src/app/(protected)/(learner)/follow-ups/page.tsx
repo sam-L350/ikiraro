@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -48,9 +49,7 @@ export default function FollowUpsPage() {
 				</p>
 			</div>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("followUpsEmpty")}
-				</p>
+				<EmptyState sentence={t("followUpsEmpty")} />
 			) : (
 				<ul>
 					{items.map((row) => (

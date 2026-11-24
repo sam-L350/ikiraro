@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -28,9 +29,7 @@ export default function MessagesPage() {
 				</p>
 			</div>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("messagesEmpty")}
-				</p>
+				<EmptyState sentence={t("messagesEmpty")} />
 			) : (
 				<ul>
 					{items.map((row) => (

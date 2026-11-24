@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -261,9 +262,9 @@ export default function EvidenceQueuePage() {
 				</label>
 			) : null}
 			{items.length === 0 ? (
-				<p className="mt-10 font-sans text-lg font-medium text-fg">
-					{t("evidenceQueueEmpty")}
-				</p>
+				<div className="mt-10">
+					<EmptyState sentence={t("evidenceQueueEmpty")} />
+				</div>
 			) : (
 				<div className="mt-10 flex flex-col gap-6">
 					<div className="flex max-w-xl flex-col gap-4">
@@ -343,10 +344,22 @@ export default function EvidenceQueuePage() {
 									<span className="sr-only">{t("bulkDecision")}</span>
 								</th>
 								<th className="border-b border-line py-2 font-semibold">
-									{t("evidenceQueueTitle")}
+									{t("nameLabel")}
 								</th>
 								<th className="border-b border-line py-2 font-semibold">
-									{t("submissionPending")}
+									{t("taskLabel")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("centerLabel")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("waitingTitle")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("status")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("openRow")}
 								</th>
 							</tr>
 						</thead>
@@ -367,19 +380,20 @@ export default function EvidenceQueuePage() {
 												onChange={() => toggle(item.id)}
 											/>
 										</td>
-										<td className="border-b border-line py-3">
-											<p className="font-sans text-lg font-semibold text-fg">
-												{textFor(locale, item.taskTitleRw, item.taskTitleEn)}
-											</p>
-											<p className="font-sans text-lg text-fg">
-												{learner} · {item.centerName}
-											</p>
+										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+											{learner}
+										</td>
+										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+											{textFor(locale, item.taskTitleRw, item.taskTitleEn)}
+										</td>
+										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+											{item.centerName}
+										</td>
+										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+											{waitingCopy(item.submittedAt, t)}
 										</td>
 										<td className="border-b border-line py-3">
 											<div className="flex flex-wrap items-center gap-2">
-												<p className="font-sans text-lg text-fg">
-													{waitingCopy(item.submittedAt, t)}
-												</p>
 												<Badge variant="neutral">
 													{t(statusKey(item.status))}
 												</Badge>
@@ -404,13 +418,15 @@ export default function EvidenceQueuePage() {
 														{t(duplicate)}
 													</Badge>
 												) : null}
-												<Link
-													to={`/evidence/${item.id}`}
-													className="font-sans text-lg text-fg underline"
-												>
-													{t("startReview")}
-												</Link>
 											</div>
+										</td>
+										<td className="border-b border-line py-3">
+											<Link
+												to={`/evidence/${item.id}`}
+												className="font-sans text-lg text-fg underline"
+											>
+												{t("openRow")}
+											</Link>
 										</td>
 									</tr>
 								);

@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -18,9 +20,14 @@ export default function MentorDiscoverPage() {
 	}
 	if (isApiClientError(list.error) && list.error.status === 403) {
 		return (
-			<p className="font-sans text-2xl font-semibold text-fg">
-				{t("mentorsDiscoverDenied")}
-			</p>
+			<section className="flex max-w-3xl flex-col gap-4">
+				<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
+					{t("mentorsDiscover")}
+				</h1>
+				<p className="font-sans text-lg font-medium text-fg">
+					{t("mentorsDiscoverDenied")}
+				</p>
+			</section>
 		);
 	}
 	if (list.error || !list.data) {
@@ -43,25 +50,26 @@ export default function MentorDiscoverPage() {
 				</p>
 			</div>
 			{data.items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("mentorsDiscoverEmpty")}
-				</p>
+				<EmptyState sentence={t("mentorsDiscoverEmpty")} />
 			) : (
-				<ul>
-					{data.items.map((row) => (
-						<li key={row.id} className="border-t border-ink/15 py-4">
+				<RecordTable
+					caption={t("mentorsDiscover")}
+					columns={[t("nameLabel"), t("districtLabel"), t("openRow")]}
+					rows={data.items.map((row) => ({
+						key: row.id,
+						cells: [
+							row.name,
+							`${row.skill} · ${row.districtName}`,
 							<Link
+								key="open"
 								to={`/mentor-discover/${row.id}`}
-								className="font-sans text-lg font-medium text-fg underline"
+								className="underline"
 							>
-								{row.name}
-							</Link>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{row.skill} · {row.districtName}
-							</p>
-						</li>
-					))}
-				</ul>
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

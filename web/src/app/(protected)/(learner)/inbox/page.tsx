@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -105,7 +107,7 @@ export default function InboxPage() {
 				<p className="text-lg text-fg">{t("inboxLead")}</p>
 				<Button
 					type="button"
-					variant="sticker"
+					variant="quiet"
 					className="w-fit"
 					onClick={() => void refresh()}
 				>
@@ -113,20 +115,43 @@ export default function InboxPage() {
 				</Button>
 			</div>
 			{items.length === 0 ? (
-				<p className="text-lg text-fg">{t("inboxEmpty")}</p>
+				<EmptyState sentence={t("inboxEmpty")} />
 			) : (
+				<RecordTable
+					caption={t("inboxTitle")}
+					columns={[t("nameLabel"), t("inboxUnread"), t("inboxMarkRead")]}
+					rows={items.map((item) => ({
+						key: item.id,
+						cells: [
+							item.title,
+							item.readAt ? null : (
+								<Badge key="unread" variant="pending">
+									{t("inboxUnread")}
+								</Badge>
+							),
+							item.readAt ? null : (
+								<Button
+									key="read"
+									type="button"
+									variant="quiet"
+									className="w-fit"
+									disabled={busy}
+									onClick={() => void onRead(item.id)}
+								>
+									{t("inboxMarkRead")}
+								</Button>
+							),
+						],
+					}))}
+				/>
+			)}
+			{items.length === 0 ? null : (
 				<ul className="flex flex-col">
 					{items.map((item) => (
 						<li
 							key={item.id}
 							className="flex flex-col gap-2 border-b border-line py-4"
 						>
-							<div className="flex flex-wrap items-center gap-3">
-								<p className="text-lg text-fg">{item.title}</p>
-								{item.readAt ? null : (
-									<Badge variant="pending">{t("inboxUnread")}</Badge>
-								)}
-							</div>
 							<p className="text-lg text-fg">{item.body}</p>
 							{item.sms === "queued" ? (
 								<p className="text-lg text-fg-muted">{t("inboxSmsQueued")}</p>
@@ -152,17 +177,6 @@ export default function InboxPage() {
 									{t("inboxEmailFailed")}
 								</p>
 							) : null}
-							{item.readAt ? null : (
-								<Button
-									type="button"
-									variant="quiet"
-									className="w-fit"
-									disabled={busy}
-									onClick={() => void onRead(item.id)}
-								>
-									{t("inboxMarkRead")}
-								</Button>
-							)}
 						</li>
 					))}
 				</ul>

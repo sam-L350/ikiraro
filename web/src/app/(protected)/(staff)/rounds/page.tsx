@@ -2,6 +2,9 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageTabs } from "@/components/ui/page-tabs";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -18,10 +21,6 @@ type AllocationRound = {
 	closesAt: string;
 	open: boolean;
 };
-
-function when(value: string): string {
-	return value.slice(0, 16).replace("T", " ");
-}
 
 function optionalCount(value: string): number | null {
 	const text = value.trim();
@@ -52,6 +51,8 @@ export default function RoundsPage() {
 	const [badges, setBadges] = useState("");
 	const [months, setMonths] = useState("");
 	const [error, setError] = useState<MessageKey | null>(null);
+	const [panel, setPanel] = useState<"list" | "add">("list");
+	const [filterDistrict, setFilterDistrict] = useState("");
 	const districts = (list.data?.districts ?? []) as RoundDistrict[];
 
 	useEffect(() => {
@@ -142,6 +143,12 @@ export default function RoundsPage() {
 	}
 
 	const rounds = (list.data.rounds ?? []) as AllocationRound[];
+	const districtName = districts.find(
+		(item) => item.id === filterDistrict,
+	)?.name;
+	const shown = districtName
+		? rounds.filter((round) => round.districtName === districtName)
+		: rounds;
 
 	return (
 		<section className="flex max-w-3xl flex-col gap-8">
@@ -153,153 +160,208 @@ export default function RoundsPage() {
 					{t("roundsSentence")}
 				</p>
 			</div>
-			<form
-				className="flex flex-col gap-4"
-				onSubmit={(event) => void onSave(event)}
-			>
-				<label className="flex flex-col gap-2" htmlFor="round-district">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("roundsDistrict")}
-					</span>
-					<select
-						id="round-district"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={districtId}
-						onChange={(event) => setDistrictId(event.target.value)}
-					>
-						{districts.map((district) => (
-							<option key={district.id} value={district.id}>
-								{district.name}
-							</option>
-						))}
-					</select>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="round-title">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("roundsName")}
-					</span>
-					<input
-						id="round-title"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={title}
-						maxLength={120}
-						onChange={(event) => setTitle(event.target.value)}
-					/>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="round-quantity">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("roundsQuantity")}
-					</span>
-					<input
-						id="round-quantity"
-						inputMode="numeric"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={quantity}
-						onChange={(event) => setQuantity(event.target.value)}
-					/>
-				</label>
-				<div className="grid gap-4 sm:grid-cols-2">
-					<label className="flex flex-col gap-2" htmlFor="round-opens">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("roundsOpens")}
-						</span>
-						<input
-							id="round-opens"
-							type="datetime-local"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={opensAt}
-							onChange={(event) => setOpensAt(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="round-closes">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("roundsCloses")}
-						</span>
-						<input
-							id="round-closes"
-							type="datetime-local"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={closesAt}
-							onChange={(event) => setClosesAt(event.target.value)}
-						/>
-					</label>
-				</div>
-				<div className="grid gap-4 sm:grid-cols-3">
-					<label className="flex flex-col gap-2" htmlFor="round-points">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryPoints")}
-						</span>
-						<input
-							id="round-points"
-							inputMode="numeric"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={points}
-							onChange={(event) => setPoints(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="round-badges">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryBadges")}
-						</span>
-						<input
-							id="round-badges"
-							inputMode="numeric"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={badges}
-							onChange={(event) => setBadges(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="round-months">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("inventoryMonths")}
-						</span>
-						<input
-							id="round-months"
-							inputMode="numeric"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-							value={months}
-							onChange={(event) => setMonths(event.target.value)}
-						/>
-					</label>
-				</div>
-				{error ? (
-					<p className="font-sans text-sm font-medium text-danger" role="alert">
-						{t(error)}
-					</p>
-				) : null}
-				<Button
-					type="submit"
-					variant="sticker"
-					className="w-fit"
-					disabled={create.isPending || !districtId}
+			<PageTabs
+				label={t("roundsTitle")}
+				value={panel}
+				onChange={setPanel}
+				tabs={[
+					{ value: "list", label: t("listTab") },
+					{ value: "add", label: t("addTab") },
+				]}
+			/>
+			{panel === "add" ? (
+				<form
+					className="flex flex-col gap-4"
+					onSubmit={(event) => void onSave(event)}
 				>
-					{t("roundsSave")}
-				</Button>
-			</form>
-			{rounds.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("roundsEmpty")}
-				</p>
+					<label className="flex flex-col gap-2" htmlFor="round-district">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("roundsDistrict")}
+						</span>
+						<select
+							id="round-district"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={districtId}
+							onChange={(event) => setDistrictId(event.target.value)}
+						>
+							{districts.map((district) => (
+								<option key={district.id} value={district.id}>
+									{district.name}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="flex flex-col gap-2" htmlFor="round-title">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("roundsName")}
+						</span>
+						<input
+							id="round-title"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={title}
+							maxLength={120}
+							onChange={(event) => setTitle(event.target.value)}
+						/>
+					</label>
+					<label className="flex flex-col gap-2" htmlFor="round-quantity">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("roundsQuantity")}
+						</span>
+						<input
+							id="round-quantity"
+							inputMode="numeric"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={quantity}
+							onChange={(event) => setQuantity(event.target.value)}
+						/>
+					</label>
+					<div className="grid gap-4 sm:grid-cols-2">
+						<label className="flex flex-col gap-2" htmlFor="round-opens">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("roundsOpens")}
+							</span>
+							<input
+								id="round-opens"
+								type="datetime-local"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={opensAt}
+								onChange={(event) => setOpensAt(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="round-closes">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("roundsCloses")}
+							</span>
+							<input
+								id="round-closes"
+								type="datetime-local"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={closesAt}
+								onChange={(event) => setClosesAt(event.target.value)}
+							/>
+						</label>
+					</div>
+					<div className="grid gap-4 sm:grid-cols-3">
+						<label className="flex flex-col gap-2" htmlFor="round-points">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryPoints")}
+							</span>
+							<input
+								id="round-points"
+								inputMode="numeric"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={points}
+								onChange={(event) => setPoints(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="round-badges">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryBadges")}
+							</span>
+							<input
+								id="round-badges"
+								inputMode="numeric"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={badges}
+								onChange={(event) => setBadges(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="round-months">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("inventoryMonths")}
+							</span>
+							<input
+								id="round-months"
+								inputMode="numeric"
+								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								value={months}
+								onChange={(event) => setMonths(event.target.value)}
+							/>
+						</label>
+					</div>
+					{error ? (
+						<p
+							className="font-sans text-sm font-medium text-danger"
+							role="alert"
+						>
+							{t(error)}
+						</p>
+					) : null}
+					{districtId &&
+					title.trim() &&
+					quantity.trim() &&
+					opensAt &&
+					closesAt ? (
+						<Button
+							type="submit"
+							variant="sticker"
+							className="w-fit"
+							disabled={create.isPending}
+						>
+							{t("roundsSave")}
+						</Button>
+					) : null}
+				</form>
 			) : (
-				<ul>
-					{rounds.map((round) => (
-						<li key={round.id} className="border-t border-ink/15 py-4">
-							<Link to={`/rounds/${round.id}`} className="flex flex-col gap-2">
-								<Badge variant={round.open ? "pending" : "neutral"}>
-									{round.open ? t("roundsOpen") : t("roundsClosed")}
-								</Badge>
-								<p className="font-sans text-lg font-medium text-fg">
-									{round.title}
-								</p>
-								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{round.districtName} ·{" "}
-									{t("allocationItems", { count: String(round.quantity) })} ·{" "}
-									{when(round.opensAt)} – {when(round.closesAt)}
-								</p>
-							</Link>
-						</li>
-					))}
-				</ul>
+				<>
+					<label
+						className="flex max-w-xs flex-col gap-2"
+						htmlFor="round-filter"
+					>
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("roundsDistrict")}
+						</span>
+						<select
+							id="round-filter"
+							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							value={filterDistrict}
+							onChange={(event) => setFilterDistrict(event.target.value)}
+						>
+							<option value="">{t("roundsDistrict")}</option>
+							{districts.map((district) => (
+								<option key={district.id} value={district.id}>
+									{district.name}
+								</option>
+							))}
+						</select>
+					</label>
+					{shown.length === 0 ? (
+						<EmptyState sentence={t("roundsEmpty")} />
+					) : (
+						<RecordTable
+							caption={t("roundsTitle")}
+							columns={[
+								t("nameLabel"),
+								t("districtLabel"),
+								t("status"),
+								t("openRow"),
+							]}
+							rows={shown.map((round) => ({
+								key: round.id,
+								cells: [
+									<span
+										key="title"
+										className="flex flex-wrap items-center gap-2"
+									>
+										{round.title}
+										<Badge variant={round.open ? "pending" : "neutral"}>
+											{round.open ? t("roundsOpen") : t("roundsClosed")}
+										</Badge>
+									</span>,
+									round.districtName,
+									String(round.quantity),
+									<Link
+										key="open"
+										to={`/rounds/${round.id}`}
+										className="underline"
+									>
+										{t("openRow")}
+									</Link>,
+								],
+							}))}
+						/>
+					)}
+				</>
 			)}
 		</section>
 	);

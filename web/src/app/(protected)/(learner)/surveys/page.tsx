@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router";
+import { PageTabs } from "@/components/ui/page-tabs";
 import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -47,6 +49,7 @@ function Line({ survey }: { survey: Survey | null }) {
 export default function SurveysPage() {
 	const { t } = useI18n();
 	const surveys = useEngine("/surveys");
+	const [tab, setTab] = useState<"baseline" | "endline">("baseline");
 
 	if (surveys.isPending) {
 		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
@@ -67,24 +70,36 @@ export default function SurveysPage() {
 					{t("surveysSentence")}
 				</p>
 			</div>
-			<div>
-				<Link
-					to="/surveys/baseline"
-					className="font-sans text-lg font-medium text-fg"
-				>
-					{t("surveysBaseline")}
-				</Link>
-				<Line survey={pair.baseline} />
-			</div>
-			<div>
-				<Link
-					to="/surveys/endline"
-					className="font-sans text-lg font-medium text-fg"
-				>
-					{t("surveysEndline")}
-				</Link>
-				<Line survey={pair.endline} />
-			</div>
+			<PageTabs
+				label={t("surveysTitle")}
+				value={tab}
+				onChange={setTab}
+				tabs={[
+					{ value: "baseline", label: t("surveysBaseline") },
+					{ value: "endline", label: t("surveysEndline") },
+				]}
+			/>
+			{tab === "baseline" ? (
+				<div>
+					<Link
+						to="/surveys/baseline"
+						className="font-sans text-lg font-medium text-fg underline"
+					>
+						{t("openRow")}
+					</Link>
+					<Line survey={pair.baseline} />
+				</div>
+			) : (
+				<div>
+					<Link
+						to="/surveys/endline"
+						className="font-sans text-lg font-medium text-fg underline"
+					>
+						{t("openRow")}
+					</Link>
+					<Line survey={pair.endline} />
+				</div>
+			)}
 			{pair.change ? (
 				<p className="font-sans text-lg font-medium text-fg">
 					{t("surveysChange")}: {pair.change.digitalConfidence} ·{" "}

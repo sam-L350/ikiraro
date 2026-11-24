@@ -1,6 +1,7 @@
 import { type FormEvent, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -140,9 +141,7 @@ export default function PracticePage() {
 				</p>
 			</div>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("practiceEmpty")}
-				</p>
+				<EmptyState sentence={t("practiceEmpty")} />
 			) : (
 				<form
 					className="flex flex-col gap-4"

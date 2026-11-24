@@ -2,6 +2,8 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { useAuth } from "@/lib/auth";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
@@ -30,18 +32,79 @@ type Enrollment = {
 	}[];
 };
 
+type QueueItem = {
+	id: string;
+	status: "pending" | "in_review";
+	submittedAt: string;
+	learnerName: string;
+	centerName: string;
+	taskTitleRw: string;
+	taskTitleEn: string;
+};
+
+type SessionItem = {
+	id: string;
+	topic: string;
+	centerName: string;
+	open: boolean;
+	taken: number;
+	capacity: number;
+};
+
 export default function LearnerHomePage() {
 	const { locale, t } = useI18n();
 	const { user } = useAuth();
-	const list = useEngine("/enrollments");
-	const canCatalog = Boolean(
-		user?.roles.some(
-			(role) =>
-				role.code === "learner" ||
-				role.code === "trainer" ||
-				role.code === "center_manager",
-		),
+	const codes = user?.roles.map((role) => role.code) ?? [];
+	const isLearner = codes.includes("learner");
+	const isTrainer = codes.includes("trainer");
+	const isManager = codes.includes("center_manager");
+	const isCoordinator = codes.includes("district_coordinator");
+	const isVerifier = codes.includes("public_verifier");
+	const isStaff = codes.some((code) => code !== "learner");
+	const canReview = isTrainer || isManager || isCoordinator;
+	const canSessions = isTrainer || isManager;
+	const canCatalog = isLearner || isTrainer || isManager;
+	const list = useEngine("/enrollments", undefined, {
+		enabled: canCatalog,
+	});
+	const evidence = useEngine(
+		"/evidence-queue",
+		{ query: {} },
+		{ enabled: canReview },
 	);
+	const sessions = useEngine(
+		"/center-sessions",
+		{ query: {} },
+		{ enabled: canSessions },
+	);
+
+	if (isStaff && !isLearner) {
+		const evidenceItems = (evidence.data?.items ?? []) as QueueItem[];
+		const sessionItems = (sessions.data?.items ?? []) as SessionItem[];
+		const loading =
+			(canReview && evidence.isPending) || (canSessions && sessions.isPending);
+		if (loading) {
+			return (
+				<div className="mx-auto max-w-3xl px-4 py-8">
+					<div className="h-16 animate-pulse rounded-md bg-surface" />
+				</div>
+			);
+		}
+		const enrollments =
+			list.data && !list.error
+				? ((list.data.enrollments ?? []) as Enrollment[])
+				: [];
+		const focus = pickFocus(enrollments);
+		return (
+			<StaffHome
+				evidenceItems={evidenceItems}
+				sessionItems={sessionItems}
+				focus={focus}
+				verifier={isVerifier}
+				canCatalog={canCatalog}
+			/>
+		);
+	}
 
 	if (list.isPending) {
 		return (
@@ -131,6 +194,140 @@ export default function LearnerHomePage() {
 			) : null}
 		</div>
 	);
+}
+
+function StaffHome({
+	evidenceItems,
+	sessionItems,
+	focus,
+	verifier,
+	canCatalog,
+}: {
+	evidenceItems: readonly QueueItem[];
+	sessionItems: readonly SessionItem[];
+	focus: Enrollment | null;
+	verifier: boolean;
+	canCatalog: boolean;
+}) {
+	const { locale, t } = useI18n();
+	const evidenceRows = evidenceItems.map((item) => ({
+		key: item.id,
+		cells: [
+			item.learnerName.trim() || t("learnerUnnamed"),
+			textFor(locale, item.taskTitleRw, item.taskTitleEn),
+			item.centerName,
+			homeWaiting(item.submittedAt, t),
+			t(item.status === "pending" ? "submissionPending" : "submissionInReview"),
+		],
+		href: `/evidence/${item.id}`,
+	}));
+	const sessionRows = sessionItems.map((item) => ({
+		key: item.id,
+		cells: [item.centerName, item.topic, sessionWord(item, t)],
+		href: `/sessions/${item.id}`,
+	}));
+	const rows = evidenceRows.length > 0 ? evidenceRows : sessionRows;
+	const next = focus?.next ? (
+		<Button asChild className="w-fit">
+			<Link to={`/tasks/${focus.enrollmentId}/${focus.next.taskId}`}>
+				{t("continueTask")}
+				<ArrowRight aria-hidden="true" />
+			</Link>
+		</Button>
+	) : canCatalog ? (
+		<Button asChild className="w-fit">
+			<Link to="/catalog">{t("seeCatalog")}</Link>
+		</Button>
+	) : null;
+	const badge = verifier ? (
+		<Button asChild className="w-fit">
+			<Link to="/verify">{t("checkBadge")}</Link>
+		</Button>
+	) : null;
+
+	return (
+		<div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8">
+			<h1 className="font-sans text-4xl font-semibold leading-tight text-fg">
+				{t("staffHomeLead")}
+			</h1>
+			{rows.length === 0 ? (
+				<EmptyState sentence={t("homeNothing")} action={badge ?? next} />
+			) : (
+				<RecordTable
+					caption={t("staffHomeLead")}
+					columns={
+						evidenceItems.length > 0
+							? [
+									t("nameLabel"),
+									t("taskLabel"),
+									t("centerLabel"),
+									t("waitingTitle"),
+									t("status"),
+									t("openRow"),
+								]
+							: [t("centerLabel"), t("nameLabel"), t("status"), t("openRow")]
+					}
+					rows={rows.map((row, index) => ({
+						key: row.key,
+						cells: [
+							...row.cells,
+							index === 0 ? (
+								<Button key="open" asChild className="w-fit">
+									<Link to={row.href}>{t("openRow")}</Link>
+								</Button>
+							) : (
+								<Link
+									key="open"
+									to={row.href}
+									className="font-sans text-lg text-fg underline"
+								>
+									{t("openRow")}
+								</Link>
+							),
+						],
+					}))}
+				/>
+			)}
+		</div>
+	);
+}
+
+function sessionWord(
+	item: SessionItem,
+	t: (key: "sessionFull" | "sessionOpen" | "sessionClosed") => string,
+): string {
+	if (item.taken >= item.capacity) return t("sessionFull");
+	if (item.open) return t("sessionOpen");
+	return t("sessionClosed");
+}
+
+function homeWaiting(
+	submittedAt: string,
+	t: (
+		key:
+			| "waitingJustNow"
+			| "waitingMinute"
+			| "waitingMinutes"
+			| "waitingHour"
+			| "waitingHours"
+			| "waitingDay"
+			| "waitingDays",
+		vars?: { count: string },
+	) => string,
+): string {
+	const minutes = Math.max(
+		0,
+		Math.floor((Date.now() - Date.parse(submittedAt)) / 60_000),
+	);
+	if (minutes < 1) return t("waitingJustNow");
+	if (minutes === 1) return t("waitingMinute");
+	if (minutes < 60) return t("waitingMinutes", { count: String(minutes) });
+	const hours = Math.floor(minutes / 60);
+	if (hours === 1) return t("waitingHour");
+	if (hours < 48) return t("waitingHours", { count: String(hours) });
+	const days = Math.floor(hours / 24);
+	if (days === 1) return t("waitingDay");
+	return t("waitingDays", { count: String(days) });
 }
 
 function pickFocus(enrollments: readonly Enrollment[]): Enrollment | null {

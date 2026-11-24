@@ -96,7 +96,9 @@ function ProfileEditor({
 		profile.locale === "en" ? "en" : "rw",
 	);
 	const [error, setError] = useState<MessageKey | null>(null);
-	const [tab, setTab] = useState<"details" | "sessions">("details");
+	const [tab, setTab] = useState<"details" | "consent" | "record" | "sessions">(
+		"details",
+	);
 	const save = useEngineMutation("/profile/update");
 	const consent = useEngineMutation("/consents");
 
@@ -138,6 +140,8 @@ function ProfileEditor({
 				{(
 					[
 						["details", "detailsTab"],
+						["consent", "consentTab"],
+						["record", "recordTab"],
 						["sessions", "sessionsTab"],
 					] as const
 				).map(([value, label]) => (
@@ -273,13 +277,28 @@ function ProfileEditor({
 								{t(error)}
 							</p>
 						) : null}
-						<div>
-							<Button type="submit" variant="sticker" disabled={save.isPending}>
-								{t("saveProfile")}
-							</Button>
-						</div>
+						{name.trim() &&
+						dateOfBirth &&
+						district.trim() &&
+						sector.trim() &&
+						village.trim() &&
+						economicSector.trim() ? (
+							<div>
+								<Button
+									type="submit"
+									variant="sticker"
+									disabled={save.isPending}
+								>
+									{t("saveProfile")}
+								</Button>
+							</div>
+						) : null}
 					</form>
-					<section className="mt-12">
+				</div>
+			) : null}
+			{tab === "consent" ? (
+				<div role="tabpanel">
+					<section className="mt-8">
 						<h2 className="font-sans text-2xl font-semibold text-fg">
 							{t("consentHeading")}
 						</h2>
@@ -335,7 +354,19 @@ function ProfileEditor({
 								);
 							})}
 						</ul>
+						{error ? (
+							<p
+								className="mt-4 font-sans text-sm font-medium text-danger"
+								role="alert"
+							>
+								{t(error)}
+							</p>
+						) : null}
 					</section>
+				</div>
+			) : null}
+			{tab === "record" ? (
+				<div role="tabpanel" className="mt-8">
 					<SubjectTools />
 					<PrivacyActions />
 				</div>

@@ -2,6 +2,9 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageTabs } from "@/components/ui/page-tabs";
+import { RecordTable } from "@/components/ui/record-table";
 import { useAuth } from "@/lib/auth";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
@@ -32,13 +35,6 @@ function courseTitle(
 	if (locale === "rw" && rw?.trim()) return rw;
 	if (en?.trim()) return en;
 	return rw?.trim() || null;
-}
-
-function when(locale: "rw" | "en", value: string): string {
-	return new Date(value).toLocaleString(locale === "rw" ? "rw-RW" : "en-GB", {
-		dateStyle: "medium",
-		timeStyle: "short",
-	});
 }
 
 function statusOf(item: SessionItem): {
@@ -87,6 +83,7 @@ export default function SessionsPage() {
 	const [minutes, setMinutes] = useState("60");
 	const [capacity, setCapacity] = useState("20");
 	const [error, setError] = useState<MessageKey | null>(null);
+	const [panel, setPanel] = useState<"list" | "add">("list");
 	const centers = (list.data?.centers ?? []) as SessionCenter[];
 
 	useEffect(() => {
@@ -178,6 +175,17 @@ export default function SessionsPage() {
 				</p>
 			</div>
 			{canCreate ? (
+				<PageTabs
+					label={t("centerSessionsTitle")}
+					value={panel}
+					onChange={setPanel}
+					tabs={[
+						{ value: "list", label: t("listTab") },
+						{ value: "add", label: t("addTab") },
+					]}
+				/>
+			) : null}
+			{canCreate && panel === "add" ? (
 				<form
 					className="flex flex-col gap-4"
 					onSubmit={(event) => void onSave(event)}
@@ -259,53 +267,60 @@ export default function SessionsPage() {
 							{t(error)}
 						</p>
 					) : null}
-					<Button
-						type="submit"
-						variant="sticker"
-						className="w-fit"
-						disabled={create.isPending}
-					>
-						{t("sessionSave")}
-					</Button>
+					{topic.trim() && startsAt ? (
+						<Button
+							type="submit"
+							variant="sticker"
+							className="w-fit"
+							disabled={create.isPending}
+						>
+							{t("sessionSave")}
+						</Button>
+					) : null}
 				</form>
 			) : null}
-			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("sessionsEmpty")}
-				</p>
-			) : (
-				<ul>
-					{items.map((item) => {
-						const status = statusOf(item);
-						const course = courseTitle(
-							locale,
-							item.courseTitleRw,
-							item.courseTitleEn,
-						);
-						return (
-							<li key={item.id} className="border-t border-ink/15 py-4">
-								<Link
-									to={`/sessions/${item.id}`}
-									className="flex flex-col gap-2"
-								>
-									<Badge variant={status.variant}>{t(status.key)}</Badge>
-									<p className="font-sans text-lg font-medium text-fg">
-										{item.topic}
-									</p>
-									{course ? (
-										<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-											{course}
-										</p>
-									) : null}
-									<p className="font-sans text-sm text-fg">
-										{when(locale, item.startsAt)} · {item.centerName}
-									</p>
-								</Link>
-							</li>
-						);
-					})}
-				</ul>
-			)}
+			{panel === "list" || !canCreate ? (
+				items.length === 0 ? (
+					<EmptyState sentence={t("sessionsEmpty")} />
+				) : (
+					<RecordTable
+						caption={t("centerSessionsTitle")}
+						columns={[
+							t("centerLabel"),
+							t("nameLabel"),
+							t("deviceKind"),
+							t("status"),
+							t("openRow"),
+						]}
+						rows={items.map((item) => {
+							const status = statusOf(item);
+							const course = courseTitle(
+								locale,
+								item.courseTitleRw,
+								item.courseTitleEn,
+							);
+							return {
+								key: item.id,
+								cells: [
+									item.centerName,
+									item.topic,
+									course ?? t("sessionsNav"),
+									<Badge key="status" variant={status.variant}>
+										{t(status.key)}
+									</Badge>,
+									<Link
+										key="open"
+										to={`/sessions/${item.id}`}
+										className="underline"
+									>
+										{t("openRow")}
+									</Link>,
+								],
+							};
+						})}
+					/>
+				)
+			) : null}
 		</section>
 	);
 }

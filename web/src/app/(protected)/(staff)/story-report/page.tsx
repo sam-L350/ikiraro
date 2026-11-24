@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { callEngine, isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -44,9 +45,7 @@ export default function StoryReportPage() {
 				</p>
 			</div>
 			{stories.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("storyReportEmpty")}
-				</p>
+				<EmptyState sentence={t("storyReportEmpty")} />
 			) : (
 				<ul className="flex flex-col gap-6">
 					{stories.map((item) => (

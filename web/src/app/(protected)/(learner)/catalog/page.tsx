@@ -78,7 +78,10 @@ export default function CatalogPage() {
 			<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
 				{t("catalogSentence")}
 			</p>
-			<form className="mt-8 flex flex-col gap-4" onSubmit={onShow}>
+			<form
+				className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+				onSubmit={onShow}
+			>
 				<label className="flex flex-col gap-2" htmlFor="catalog-language">
 					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 						{t("catalogLanguage")}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -83,9 +84,7 @@ export default function SchedulePage() {
 				</p>
 			</div>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("scheduleEmpty")}
-				</p>
+				<EmptyState sentence={t("scheduleEmpty")} />
 			) : (
 				<ul>
 					{items.map((item) => {
