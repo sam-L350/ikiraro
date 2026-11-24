@@ -1041,6 +1041,14 @@ export const en = {
 	surveysDenied: "A trainer confirms a survey.",
 	surveysConfirm: "Confirm the survey",
 	surveysNote: "What did you check?",
+	dormancyNav: "Dormancy",
+	dormancyTitle: "Dormancy",
+	dormancySentence:
+		"A recipient who stopped answering a check-in, or who has not practiced since the last one.",
+	dormancyEmpty: "No recipient is quiet.",
+	dormancyDenied: "The district coordinator receives this alert.",
+	dormancyAnswering: "Stopped answering",
+	dormancyPracticing: "Stopped practicing",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -2097,4 +2105,12 @@ export const rw: Record<MessageKey, string> = {
 	surveysDenied: "Umwarimu ni we wemeza ubushakashatsi.",
 	surveysConfirm: "Emeza ubushakashatsi",
 	surveysNote: "Wasuzumye iki?",
+	dormancyNav: "Gucika",
+	dormancyTitle: "Gucika",
+	dormancySentence:
+		"Uwahawe ikintu yaretse gusubiza, cyangwa ntarigira imyitozo kuva ku kurikiranwa kwa nyuma.",
+	dormancyEmpty: "Nta wahawe ikintu ucecekeye.",
+	dormancyDenied: "Umuyobozi w'akarere ni we ubona iki kimenyetso.",
+	dormancyAnswering: "Yaretse gusubiza",
+	dormancyPracticing: "Yaretse kwitoza",
 };

@@ -72,6 +72,9 @@
 			"name": "directory"
 		},
 		{
+			"name": "dormancy"
+		},
+		{
 			"name": "enrollments"
 		},
 		{
@@ -11052,6 +11055,124 @@
 				}
 			}
 		},
+		"/api/v1/dormancy": {
+			"get": {
+				"operationId": "getDormancy",
+				"summary": "Recipients who stopped answering or stopped practicing, in this district.",
+				"tags": [
+					"dormancy"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"recipientName": {
+																"type": "string"
+															},
+															"reason": {
+																"type": "string",
+																"enum": [
+																	"unanswered",
+																	"not_practicing"
+																]
+															},
+															"day": {
+																"type": "number"
+															},
+															"districtName": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"recipientName",
+															"reason",
+															"day",
+															"districtName"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/enrollments/{id}/clarity": {
 			"get": {
 				"operationId": "getEnrollmentClarity",
@@ -19896,7 +20017,8 @@
 															"follow_up.due",
 															"learner.stalled",
 															"announcement.posted",
-															"submission.escalated"
+															"submission.escalated",
+															"recipient.dormant"
 														]
 													},
 													"inApp": {
@@ -20037,7 +20159,8 @@
 															"follow_up.due",
 															"learner.stalled",
 															"announcement.posted",
-															"submission.escalated"
+															"submission.escalated",
+															"recipient.dormant"
 														]
 													},
 													"inApp": {
@@ -20164,7 +20287,8 @@
 															"follow_up.due",
 															"learner.stalled",
 															"announcement.posted",
-															"submission.escalated"
+															"submission.escalated",
+															"recipient.dormant"
 														]
 													},
 													"channel": {
@@ -20320,7 +20444,8 @@
 														"follow_up.due",
 														"learner.stalled",
 														"announcement.posted",
-														"submission.escalated"
+														"submission.escalated",
+														"recipient.dormant"
 													]
 												},
 												"channel": {
@@ -20481,7 +20606,8 @@
 														"follow_up.due",
 														"learner.stalled",
 														"announcement.posted",
-														"submission.escalated"
+														"submission.escalated",
+														"recipient.dormant"
 													]
 												},
 												"title": {
@@ -20637,7 +20763,8 @@
 															"follow_up.due",
 															"learner.stalled",
 															"announcement.posted",
-															"submission.escalated"
+															"submission.escalated",
+															"recipient.dormant"
 														]
 													},
 													"title": {

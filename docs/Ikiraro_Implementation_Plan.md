@@ -92,7 +92,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
 - [ ] Phase 8 — Impact and ecosystem (`phase/8-impact-and-ecosystem`)
   - [x] `phase/8.1-follow-ups`
   - [x] `phase/8.2-outcomes-and-surveys`
-  - [ ] `phase/8.3-dormancy`
+  - [x] `phase/8.3-dormancy`
   - [ ] `phase/8.4-mentors`
   - [ ] `phase/8.5-opportunities-and-referrals`
   - [ ] `phase/8.6-mentor-messaging`

@@ -298,6 +298,12 @@ async function planEvent(
 				vars: {},
 			}));
 		}
+		case "recipient.dormant": {
+			const userId = whole(body.userId);
+			const person = text(body.name);
+			if (userId === null || !person) return "retry";
+			return [{ userId, eventName: name, vars: { name: person } }];
+		}
 		case "announcement.posted": {
 			const scope = text(body.scope);
 			const scopeId = text(body.scopeId);

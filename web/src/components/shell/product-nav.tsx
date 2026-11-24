@@ -128,6 +128,14 @@ function useProductNavItems(): NavItem[] {
 	if (canReadFollowUps && !canReviewEvidence) {
 		items.push({ to: "/follow-up-queue", label: "followUpsQueue" });
 	}
+	const canReadDormancy =
+		user?.roles.some(
+			(role) =>
+				role.code === "district_coordinator" || role.code === "platform_admin",
+		) ?? false;
+	if (canReadDormancy) {
+		items.push({ to: "/dormancy", label: "dormancyNav" });
+	}
 	const canAnnounce =
 		user?.roles.some(
 			(role) =>

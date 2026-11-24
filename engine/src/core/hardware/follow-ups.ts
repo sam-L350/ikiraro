@@ -19,6 +19,7 @@ import { errors } from "../api/error";
 import { writeAudit, writeEvent } from "../audit/write";
 import { createBlock, type SubmissionStatus } from "../learning/submissions";
 import { reviewConflict } from "../learning/verifications";
+import { raiseDormancy } from "./dormancy";
 
 /** The check-in days named in the follow-up requirement. */
 export const FOLLOW_UP_DAYS = [30, 90, 180] as const;
@@ -231,6 +232,7 @@ export async function askDueFollowUps(database: FollowDb): Promise<number> {
 		});
 	}
 	await openSilence(database, sweepStart);
+	await raiseDormancy(database, sweepStart);
 	return due.length;
 }
 

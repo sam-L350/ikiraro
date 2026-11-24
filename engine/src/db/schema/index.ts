@@ -30,6 +30,7 @@ export {
 	taskTranslations,
 } from "./content";
 export { deviceBookings, devices } from "./devices";
+export { dormancyAlerts } from "./dormancy";
 export {
 	followUpEvidence,
 	followUpReviews,

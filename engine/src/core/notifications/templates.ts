@@ -14,6 +14,7 @@ export const NOTIFICATION_EVENTS = [
 	"learner.stalled",
 	"announcement.posted",
 	"submission.escalated",
+	"recipient.dormant",
 ] as const;
 
 export type NotificationEvent = (typeof NOTIFICATION_EVENTS)[number];
@@ -136,6 +137,16 @@ const COPY: Record<
 			body: "Ibyemezo byarengeje igihe cyo gusuzuma, ubu biri kuri wowe.",
 		},
 	},
+	"recipient.dormant": {
+		en: {
+			title: "A recipient has gone quiet",
+			body: "{name} needs a visit from the district.",
+		},
+		rw: {
+			title: "Uwahawe ikintu yacecekeye",
+			body: "{name} akeneye isura y'akarere.",
+		},
+	},
 };
 
 export function isNotificationEvent(value: string): value is NotificationEvent {
@@ -151,6 +162,7 @@ export function isNotificationEvent(value: string): value is NotificationEvent {
 		case "learner.stalled":
 		case "announcement.posted":
 		case "submission.escalated":
+		case "recipient.dormant":
 			return true;
 		default:
 			return false;

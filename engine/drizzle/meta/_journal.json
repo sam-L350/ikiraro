@@ -281,6 +281,13 @@
       "when": 1795464000000,
       "tag": "0039_phase8_surveys",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795465000000,
+      "tag": "0040_phase8_dormancy",
+      "breakpoints": true
     }
   ]
 }
