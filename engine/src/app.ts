@@ -8,7 +8,7 @@ import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
  * Assembles the HTTP application:
  *
  * - `endpoints`  — generated from `src/api/**` (typed RPC, OpenAPI, client).
- *   Signed badge credentials and the public authenticity check are included.
+ *   The donor report packs totals, decisions, and outcomes without personal data.
  * - `rawRoutes`  — explicit routes for things that are not JSON function calls
  * - `onError`    — hook unexpected failures into your error tracker
  */

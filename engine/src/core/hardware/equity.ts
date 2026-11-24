@@ -114,6 +114,22 @@ function isGlobal(assignments: readonly Assignment[]): boolean {
 	});
 }
 
+/** Null means every district. An empty list means no district is in scope. */
+export async function readableDistricts(
+	database: EquityDb,
+	assignments: readonly Assignment[],
+): Promise<string[] | null> {
+	if (!canRead(assignments)) {
+		throw errors.forbidden(
+			"These counts are for a coordinator or an auditor.",
+			{ reason: "scope" },
+		);
+	}
+	if (isGlobal(assignments)) return null;
+	const ids = await districtIdsFor(database, assignments);
+	return ids ?? [];
+}
+
 async function districtIdsFor(
 	database: EquityDb,
 	assignments: readonly Assignment[],

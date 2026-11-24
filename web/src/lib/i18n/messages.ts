@@ -1161,6 +1161,26 @@ export const en = {
 	credentialsUnknown: "This token does not match a passport or a badge.",
 	credentialsLimited: "Too many checks. Wait and try again.",
 	passportCredential: "Check token",
+	donorNav: "Donor report",
+	donorTitle: "Donor report",
+	donorSentence:
+		"Totals, decisions, and outcomes. Names, phones, and villages stay out. A group under 10 is left out.",
+	donorDenied: "A coordinator or an auditor reads this report.",
+	donorDownload: "Download the report",
+	donorTotals: "Totals",
+	donorItems: "Donated items",
+	donorAwarded: "Awarded",
+	donorDeclined: "Declined",
+	donorInUse: "In use",
+	donorNotInUse: "Not in use",
+	donorUnresponsive: "Unresponsive",
+	donorBaselines: "Baselines",
+	donorEndlines: "Endlines",
+	donorDecisions: "Decisions",
+	donorOutcomes: "Outcomes",
+	donorBatches: "Batches",
+	donorOutcomeLine:
+		"{paired} pairs. Confidence {confidence}. Tasks {tasks}. Income {income}. Jobs {jobs}.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -2339,4 +2359,24 @@ export const rw: Record<MessageKey, string> = {
 	credentialsUnknown: "Iki kimenyetso ntigihuye na pasiporo cyangwa ikirango.",
 	credentialsLimited: "Ibisuzuma byarenze. Tegereza hanyuma wongere.",
 	passportCredential: "Ikimenyetso cyo gusuzuma",
+	donorNav: "Raporo y'umutunzi",
+	donorTitle: "Raporo y'umutunzi",
+	donorSentence:
+		"Imibare, ibyemezo, n'ibisubizo. Amazina, telefoni, n'imidugudu biguma hanze. Itsinda riri munsi ya 10 ntiragaragara.",
+	donorDenied: "Umuyobozi cyangwa umugenzuzi ni we usoma iyi raporo.",
+	donorDownload: "Kuramo raporo",
+	donorTotals: "Imibare",
+	donorItems: "Ibintu byatanzwe",
+	donorAwarded: "Byatanzwe",
+	donorDeclined: "Byanzwe",
+	donorInUse: "Birakoreshwa",
+	donorNotInUse: "Ntabwo bikoreshwa",
+	donorUnresponsive: "Ntabwo bisubijwe",
+	donorBaselines: "Ibanze",
+	donorEndlines: "Ibisubizo bya nyuma",
+	donorDecisions: "Ibyemezo",
+	donorOutcomes: "Ibisubizo",
+	donorBatches: "Itsinda",
+	donorOutcomeLine:
+		"Impuza {paired}. Icyizere {confidence}. Imirimo {tasks}. Amafaranga {income}. Akazi {jobs}.",
 };

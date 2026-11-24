@@ -237,7 +237,10 @@ function useProductNavItems(): NavItem[] {
 				role.code === "hardware_officer",
 		) ?? false;
 	if (canReadEquity) {
-		items.push({ to: "/equity", label: "equityNav" });
+		items.push(
+			{ to: "/equity", label: "equityNav" },
+			{ to: "/donor-report", label: "donorNav" },
+		);
 	}
 	const canDecideGrants =
 		user?.roles.some((role) => role.code === "committee_member") ?? false;

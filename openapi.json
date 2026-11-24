@@ -75,6 +75,9 @@
 			"name": "directory"
 		},
 		{
+			"name": "donor-report"
+		},
+		{
 			"name": "dormancy"
 		},
 		{
@@ -11169,6 +11172,321 @@
 					},
 					"400": {
 						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/donor-report/export": {
+			"get": {
+				"operationId": "getDonorReportExport",
+				"summary": "One file. Names, phones, villages, and images are not in it.",
+				"tags": [
+					"donor-report"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"csv": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"csv"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/donor-report": {
+			"get": {
+				"operationId": "getDonorReport",
+				"summary": "Totals, decisions, and outcomes inside this person's scope.",
+				"tags": [
+					"donor-report"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"totals": {
+													"type": "object",
+													"properties": {
+														"items": {
+															"type": "number"
+														},
+														"awarded": {
+															"type": "number"
+														},
+														"declined": {
+															"type": "number"
+														},
+														"inUse": {
+															"type": "number"
+														},
+														"notInUse": {
+															"type": "number"
+														},
+														"unresponsive": {
+															"type": "number"
+														},
+														"baselines": {
+															"type": "number"
+														},
+														"endlines": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"items",
+														"awarded",
+														"declined",
+														"inUse",
+														"notInUse",
+														"unresponsive",
+														"baselines",
+														"endlines"
+													],
+													"additionalProperties": false
+												},
+												"decisions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"district": {
+																"type": "string"
+															},
+															"awarded": {
+																"type": "number"
+															},
+															"declined": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"district",
+															"awarded",
+															"declined"
+														],
+														"additionalProperties": false
+													}
+												},
+												"outcome": {
+													"type": "object",
+													"properties": {
+														"paired": {
+															"type": "number"
+														},
+														"confidence": {
+															"type": "number"
+														},
+														"tasks": {
+															"type": "number"
+														},
+														"income": {
+															"type": "number"
+														},
+														"jobs": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"paired",
+														"confidence",
+														"tasks",
+														"income",
+														"jobs"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"batches": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"donor": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"serial": {
+																"type": "string"
+															},
+															"center": {
+																"type": "string"
+															},
+															"district": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string"
+															},
+															"outcome": {
+																"type": "string"
+															},
+															"day30": {
+																"type": "string"
+															},
+															"day90": {
+																"type": "string"
+															},
+															"day180": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"donor",
+															"name",
+															"serial",
+															"center",
+															"district",
+															"status",
+															"outcome",
+															"day30",
+															"day90",
+															"day180"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"totals",
+												"decisions",
+												"outcome",
+												"batches"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
 						"content": {
 							"application/json": {
 								"schema": {
