@@ -1,5 +1,7 @@
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -43,33 +45,34 @@ export default function RecoveryPage() {
 				</p>
 			</div>
 			{grants.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("recoveryEmpty")}
-				</p>
+				<EmptyState sentence={t("recoveryEmpty")} />
 			) : (
-				<ul>
-					{grants.map((grant) => (
-						<li key={grant.id} className="border-t border-ink/15 py-4">
-							<Link
-								to={`/recovery/${grant.id}`}
-								className="flex flex-col gap-2"
-							>
-								<p className="font-sans text-lg font-medium text-fg">
-									{grant.itemName}
-								</p>
-								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{grant.recipientName}
-								</p>
+				<RecordTable
+					caption={t("recoveryTitle")}
+					columns={[t("nameLabel"), t("status"), t("openRow")]}
+					rows={grants.map((grant) => ({
+						key: grant.id,
+						cells: [
+							grant.itemName,
+							<span key="status" className="flex flex-wrap gap-2">
 								{grant.recovered ? (
 									<Badge variant="neutral">{t("recoveryDone")}</Badge>
 								) : null}
 								{grant.agreed ? (
 									<Badge variant="neutral">{t("recoveryAgreed")}</Badge>
 								) : null}
-							</Link>
-						</li>
-					))}
-				</ul>
+								{grant.recovered || grant.agreed ? null : t("helpWaiting")}
+							</span>,
+							<Link
+								key="open"
+								to={`/recovery/${grant.id}`}
+								className="underline"
+							>
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

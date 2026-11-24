@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
 	callEngine,
 	invalidateEngine,
@@ -78,19 +79,25 @@ export default function StoriesPage() {
 		}
 	}
 
+	const emptySentence = story.data.minor
+		? t("storiesMinor")
+		: t("storiesSentence");
+
 	return (
 		<section className="flex max-w-3xl flex-col gap-8">
 			<div>
 				<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
 					{t("storiesTitle")}
 				</h1>
-				<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
+			</div>
+			{story.data.body ? (
+				<p className="max-w-xl font-sans text-lg font-medium text-fg">
 					{t("storiesSentence")}
 				</p>
-			</div>
-			{story.data.minor ? (
-				<p className="font-sans text-lg text-fg">{t("storiesMinor")}</p>
-			) : story.data.allowed ? (
+			) : (
+				<EmptyState sentence={emptySentence} />
+			)}
+			{story.data.minor ? null : story.data.allowed ? (
 				<Button
 					type="button"
 					variant="quiet"

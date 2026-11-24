@@ -2,6 +2,7 @@ import { type FormEvent, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -147,31 +148,35 @@ export default function PracticePage() {
 					className="flex flex-col gap-4"
 					onSubmit={(event) => void onBook(event)}
 				>
-					<fieldset className="flex flex-col gap-3">
-						<legend className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("devicesTitle")}
-						</legend>
-						{items.map((item) => (
-							<label
-								key={item.id}
-								className="flex items-center gap-3 font-sans text-lg text-fg"
-							>
-								<input
-									type="radio"
-									name="device"
-									value={item.id}
-									checked={selected === item.id}
-									onChange={() => setDeviceId(item.id)}
-								/>
-								<span>
-									{item.label}
-									<span className="mt-1 block font-meta text-xs font-semibold uppercase tracking-wide">
-										{t(kindKey(item.kind))} · {item.centerName}
-									</span>
-								</span>
-							</label>
-						))}
-					</fieldset>
+					<RecordTable
+						caption={t("practiceTitle")}
+						columns={[
+							t("centerLabel"),
+							t("nameLabel"),
+							t("deviceKind"),
+							t("deviceAvailability"),
+							t("openRow"),
+						]}
+						rows={items.map((item) => ({
+							key: item.id,
+							cells: [
+								item.centerName,
+								item.label,
+								t(kindKey(item.kind)),
+								t("deviceAvailable"),
+								<label key="pick" className="inline-flex items-center gap-2">
+									<input
+										type="radio"
+										name="device"
+										value={item.id}
+										checked={selected === item.id}
+										onChange={() => setDeviceId(item.id)}
+									/>
+									{t("openRow")}
+								</label>,
+							],
+						}))}
+					/>
 					<label className="flex flex-col gap-2" htmlFor="practice-when">
 						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 							{t("sessionWhen")}
@@ -204,14 +209,16 @@ export default function PracticePage() {
 							{t(error)}
 						</p>
 					) : null}
-					<Button
-						type="submit"
-						variant="sticker"
-						className="w-fit"
-						disabled={book.isPending}
-					>
-						{t("practiceBook")}
-					</Button>
+					{selected && startsAt && minutes.trim() ? (
+						<Button
+							type="submit"
+							variant="sticker"
+							className="w-fit"
+							disabled={book.isPending}
+						>
+							{t("practiceBook")}
+						</Button>
+					) : null}
 				</form>
 			)}
 			{bookings.length > 0 ? (
@@ -219,20 +226,20 @@ export default function PracticePage() {
 					<h2 className="font-sans text-2xl font-semibold text-fg">
 						{t("practiceBooked")}
 					</h2>
-					<ul>
-						{bookings.map((item) => (
-							<li
-								key={item.id}
-								className="flex flex-col gap-2 border-t border-ink/15 py-4"
-							>
-								<Badge variant="pending">{t(kindKey(item.kind))}</Badge>
-								<p className="font-sans text-lg text-fg">{item.label}</p>
-								<p className="font-sans text-sm text-fg">
-									{when(locale, item.startsAt)}
-								</p>
-							</li>
-						))}
-					</ul>
+					<RecordTable
+						caption={t("practiceBooked")}
+						columns={[t("nameLabel"), t("deviceKind"), t("sessionWhen")]}
+						rows={bookings.map((item) => ({
+							key: item.id,
+							cells: [
+								item.label,
+								<Badge key="kind" variant="pending">
+									{t(kindKey(item.kind))}
+								</Badge>,
+								when(locale, item.startsAt),
+							],
+						}))}
+					/>
 				</div>
 			) : null}
 		</section>

@@ -1,6 +1,8 @@
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { RecordTable } from "@/components/ui/record-table";
 import { callEngine, isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import { useOnline } from "@/lib/offline/use-online";
@@ -83,7 +85,7 @@ export default function AuditPage() {
 					<p className="text-lg text-fg">{t("offlineDecision")}</p>
 				)}
 			</div>
-			<form className="flex flex-col gap-4" onSubmit={onSearch}>
+			<form className="grid gap-4 sm:grid-cols-2" onSubmit={onSearch}>
 				<label className="flex flex-col gap-2" htmlFor="audit-action">
 					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 						{t("auditAction")}
@@ -121,25 +123,26 @@ export default function AuditPage() {
 				</div>
 			</form>
 			{rows.length === 0 ? (
-				<p className="text-lg text-fg">{t("auditEmpty")}</p>
+				<EmptyState sentence={t("auditEmpty")} />
 			) : (
-				<ul className="flex flex-col">
-					{rows.map((row) => (
-						<li
-							key={row.id}
-							className="flex flex-col gap-1 border-t border-ink/15 py-4"
-						>
-							<p className="font-sans text-lg font-semibold text-fg">
-								{row.action}
-							</p>
-							<p className="font-sans text-sm text-fg">
-								{whenLabel(row.createdAt)}
-								{row.actorName ? ` · ${row.actorName}` : ""}
-								{row.targetType ? ` · ${row.targetType}` : ""}
-							</p>
-						</li>
-					))}
-				</ul>
+				<RecordTable
+					caption={t("auditTitle")}
+					columns={[
+						t("sessionWhen"),
+						t("auditAction"),
+						t("nameLabel"),
+						t("auditTarget"),
+					]}
+					rows={rows.map((row) => ({
+						key: row.id,
+						cells: [
+							whenLabel(row.createdAt),
+							row.action,
+							row.actorName ?? "",
+							row.targetType ?? "",
+						],
+					}))}
+				/>
 			)}
 		</div>
 	);

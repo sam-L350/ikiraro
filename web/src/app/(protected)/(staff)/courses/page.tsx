@@ -94,11 +94,17 @@ export default function CoursesPage() {
 					) : (
 						<RecordTable
 							caption={t("coursesTitle")}
-							columns={[t("nameLabel"), t("status"), t("openRow")]}
+							columns={[
+								t("nameLabel"),
+								t("catalogLanguage"),
+								t("status"),
+								t("openRow"),
+							]}
 							rows={shown.map((course) => ({
 								key: course.id,
 								cells: [
 									course.title,
+									course.missingKinyarwanda ? t("english") : t("kinyarwanda"),
 									<span key="status" className="flex flex-wrap gap-2">
 										<Badge variant="neutral">
 											{t(statusKey(course.status))}

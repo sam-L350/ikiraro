@@ -1,5 +1,7 @@
 import { Link } from "react-router";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -51,21 +53,32 @@ export default function FollowUpsPage() {
 			{items.length === 0 ? (
 				<EmptyState sentence={t("followUpsEmpty")} />
 			) : (
-				<ul>
-					{items.map((row) => (
-						<li key={row.id} className="border-t border-ink/15 py-4">
+				<RecordTable
+					caption={t("followUpsTitle")}
+					columns={[
+						t("waitingTitle"),
+						t("sessionWhen"),
+						t("status"),
+						t("openRow"),
+					]}
+					rows={items.map((row) => ({
+						key: row.id,
+						cells: [
+							t("followUpsDay", { day: String(row.day) }),
+							row.dueOn,
+							<Badge key="status" variant="neutral">
+								{t(statusKey(row))}
+							</Badge>,
 							<Link
+								key="open"
 								to={`/follow-ups/${row.id}`}
-								className="font-sans text-lg font-medium text-fg"
+								className="underline"
 							>
-								{t("followUpsDay", { day: String(row.day) })}
-							</Link>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{row.dueOn} · {t(statusKey(row))}
-							</p>
-						</li>
-					))}
-				</ul>
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

@@ -1,5 +1,9 @@
 import { type FormEvent, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageTabs } from "@/components/ui/page-tabs";
+import { RecordTable } from "@/components/ui/record-table";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -54,6 +58,7 @@ export default function ApprovalsPage() {
 	const [rows, setRows] = useState<Change[]>([blank(), blank()]);
 	const [notes, setNotes] = useState<Record<string, string>>({});
 	const [formError, setFormError] = useState<string | null>(null);
+	const [panel, setPanel] = useState<"list" | "add">("list");
 
 	if (list.isPending) {
 		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
@@ -70,7 +75,6 @@ export default function ApprovalsPage() {
 	}
 
 	const pending = list.data.filter((item) => item.status === "pending");
-	const actionable = pending.some((item) => !item.mine);
 	const ready =
 		reason.trim() !== "" &&
 		rows.every((row) => {
@@ -142,219 +146,225 @@ export default function ApprovalsPage() {
 					{t("approvalsSentence")}
 				</p>
 			</div>
-			{pending.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("approvalsEmpty")}
-				</p>
-			) : (
-				<ul className="flex flex-col gap-4">
-					{pending.map((item) => {
-						const ink = !item.mine && !approveShown;
-						if (ink) approveShown = true;
-						return (
-							<li
-								key={item.id}
-								className="flex flex-col gap-3 rounded-md border border-line bg-card p-4"
-							>
-								<p className="font-sans text-lg text-fg">{item.reason}</p>
-								<p className="font-meta text-xs uppercase text-fg-muted">
-									{item.requestedByName}
-								</p>
-								<ul className="flex flex-col gap-1">
-									{item.changes.map((change) => (
-										<li
-											key={`${change.email}-${change.role}-${change.scopeId}`}
-											className="font-sans text-lg text-fg"
-										>
-											{change.name} · {change.role}
-										</li>
-									))}
-								</ul>
-								{item.mine ? (
-									<p className="font-sans text-lg text-fg">
-										{t("approvalsWaiting")}
-									</p>
-								) : (
-									<div className="flex flex-col gap-3">
-										<Button
-											type="button"
-											variant={ink ? "ink" : "quiet"}
-											className="w-fit"
-											onClick={() => void onApprove(item.id)}
-										>
-											{t("approvalsApprove")}
-										</Button>
-										<label
-											className="flex flex-col gap-2"
-											htmlFor={`note-${item.id}`}
-										>
-											<span className="font-meta text-xs uppercase text-fg-muted">
-												{t("approvalsNote")}
-											</span>
-											<textarea
-												id={`note-${item.id}`}
-												className="min-h-20 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
-												value={notes[item.id] ?? ""}
-												onChange={(event) =>
-													setNotes((current) => ({
-														...current,
-														[item.id]: event.target.value,
-													}))
-												}
-											/>
-										</label>
-										{(notes[item.id]?.trim() ?? "") !== "" ? (
+			<PageTabs
+				label={t("approvalsTitle")}
+				value={panel}
+				onChange={setPanel}
+				tabs={[
+					{ value: "list", label: t("listTab") },
+					{ value: "add", label: t("addTab") },
+				]}
+			/>
+			{panel === "list" ? (
+				pending.length === 0 ? (
+					<EmptyState sentence={t("approvalsEmpty")} />
+				) : (
+					<RecordTable
+						caption={t("approvalsTitle")}
+						columns={[t("nameLabel"), t("status"), t("openRow")]}
+						rows={pending.map((item) => {
+							const ink = !item.mine && !approveShown;
+							if (ink) approveShown = true;
+							return {
+								key: item.id,
+								cells: [
+									<div key="who">
+										<p>{item.reason}</p>
+										<p>
+											{item.changes
+												.map((change) => `${change.name} · ${change.role}`)
+												.join(", ")}
+										</p>
+									</div>,
+									<Badge key="status" variant="pending">
+										{item.mine ? t("approvalsWaiting") : item.requestedByName}
+									</Badge>,
+									item.mine ? null : (
+										<div key="action" className="flex flex-col gap-3">
 											<Button
 												type="button"
-												variant="quiet"
+												variant={ink ? "ink" : "quiet"}
 												className="w-fit"
-												onClick={() => void onDecline(item.id)}
+												onClick={() => void onApprove(item.id)}
 											>
-												{t("approvalsDecline")}
+												{t("approvalsApprove")}
 											</Button>
-										) : null}
-									</div>
-								)}
-							</li>
-						);
-					})}
-				</ul>
-			)}
-			<form
-				className="flex flex-col gap-4"
-				onSubmit={(event) => void onAsk(event)}
-			>
-				<label className="flex flex-col gap-2" htmlFor="approval-reason">
-					<span className="font-meta text-xs uppercase text-fg-muted">
-						{t("approvalsReason")}
-					</span>
-					<textarea
-						id="approval-reason"
-						className="min-h-20 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
-						value={reason}
-						onChange={(event) => setReason(event.target.value)}
+											<label
+												className="flex flex-col gap-2"
+												htmlFor={`note-${item.id}`}
+											>
+												<span className="font-meta text-xs uppercase text-fg-muted">
+													{t("approvalsNote")}
+												</span>
+												<textarea
+													id={`note-${item.id}`}
+													className="min-h-20 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
+													value={notes[item.id] ?? ""}
+													onChange={(event) =>
+														setNotes((current) => ({
+															...current,
+															[item.id]: event.target.value,
+														}))
+													}
+												/>
+											</label>
+											{(notes[item.id]?.trim() ?? "") !== "" ? (
+												<Button
+													type="button"
+													variant="quiet"
+													className="w-fit"
+													onClick={() => void onDecline(item.id)}
+												>
+													{t("approvalsDecline")}
+												</Button>
+											) : null}
+										</div>
+									),
+								],
+							};
+						})}
 					/>
-				</label>
-				{rows.map((row, index) => {
-					const scope = scopeOf(row.role);
-					return (
-						<div key={row.key} className="flex flex-col gap-3">
-							<label className="flex flex-col gap-2" htmlFor={`email-${index}`}>
-								<span className="font-meta text-xs uppercase text-fg-muted">
-									{t("approvalsEmail")}
-								</span>
-								<input
-									id={`email-${index}`}
-									className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-									value={row.email}
-									onChange={(event) =>
-										setRows((current) =>
-											current.map((item, itemIndex) =>
-												itemIndex === index
-													? { ...item, email: event.target.value }
-													: item,
-											),
-										)
-									}
-								/>
-							</label>
-							<label className="flex flex-col gap-2" htmlFor={`role-${index}`}>
-								<span className="font-meta text-xs uppercase text-fg-muted">
-									{t("approvalsRole")}
-								</span>
-								<select
-									id={`role-${index}`}
-									className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-									value={row.role}
-									onChange={(event) =>
-										setRows((current) =>
-											current.map((item, itemIndex) =>
-												itemIndex === index
-													? { ...item, role: event.target.value, scopeId: "" }
-													: item,
-											),
-										)
-									}
-								>
-									<option value="">{t("approvalsRole")}</option>
-									{ROLES.map((role) => (
-										<option key={role.code} value={role.code}>
-											{t(role.label)}
-										</option>
-									))}
-								</select>
-							</label>
-							{scope === "center" ? (
+				)
+			) : null}
+			{panel === "add" ? (
+				<form
+					className="flex flex-col gap-4"
+					onSubmit={(event) => void onAsk(event)}
+				>
+					<label className="flex flex-col gap-2" htmlFor="approval-reason">
+						<span className="font-meta text-xs uppercase text-fg-muted">
+							{t("approvalsReason")}
+						</span>
+						<textarea
+							id="approval-reason"
+							className="min-h-20 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
+							value={reason}
+							onChange={(event) => setReason(event.target.value)}
+						/>
+					</label>
+					{rows.map((row, index) => {
+						const scope = scopeOf(row.role);
+						return (
+							<div key={row.key} className="flex flex-col gap-3">
 								<label
 									className="flex flex-col gap-2"
-									htmlFor={`place-${index}`}
+									htmlFor={`email-${index}`}
 								>
 									<span className="font-meta text-xs uppercase text-fg-muted">
-										{t("approvalsPlace")}
-									</span>
-									<select
-										id={`place-${index}`}
-										className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-										value={row.scopeId}
-										onChange={(event) =>
-											setRows((current) =>
-												current.map((item, itemIndex) =>
-													itemIndex === index
-														? { ...item, scopeId: event.target.value }
-														: item,
-												),
-											)
-										}
-									>
-										<option value="">{t("approvalsPlace")}</option>
-										{(centers.data?.centers ?? []).map((center) => (
-											<option key={center.id} value={center.id}>
-												{center.name}
-											</option>
-										))}
-									</select>
-								</label>
-							) : null}
-							{scope === "district" ? (
-								<label
-									className="flex flex-col gap-2"
-									htmlFor={`place-${index}`}
-								>
-									<span className="font-meta text-xs uppercase text-fg-muted">
-										{t("approvalsPlace")}
+										{t("approvalsEmail")}
 									</span>
 									<input
-										id={`place-${index}`}
+										id={`email-${index}`}
 										className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-										value={row.scopeId}
+										value={row.email}
 										onChange={(event) =>
 											setRows((current) =>
 												current.map((item, itemIndex) =>
 													itemIndex === index
-														? { ...item, scopeId: event.target.value }
+														? { ...item, email: event.target.value }
 														: item,
 												),
 											)
 										}
 									/>
 								</label>
-							) : null}
-						</div>
-					);
-				})}
-				{formError ? (
-					<p className="font-sans text-lg text-destructive">{formError}</p>
-				) : null}
-				{ready ? (
-					<Button
-						type="submit"
-						variant={actionable ? "quiet" : "ink"}
-						className="w-fit"
-					>
-						{t("approvalsAsk")}
-					</Button>
-				) : null}
-			</form>
+								<label
+									className="flex flex-col gap-2"
+									htmlFor={`role-${index}`}
+								>
+									<span className="font-meta text-xs uppercase text-fg-muted">
+										{t("approvalsRole")}
+									</span>
+									<select
+										id={`role-${index}`}
+										className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+										value={row.role}
+										onChange={(event) =>
+											setRows((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index
+														? { ...item, role: event.target.value, scopeId: "" }
+														: item,
+												),
+											)
+										}
+									>
+										<option value="">{t("approvalsRole")}</option>
+										{ROLES.map((role) => (
+											<option key={role.code} value={role.code}>
+												{t(role.label)}
+											</option>
+										))}
+									</select>
+								</label>
+								{scope === "center" ? (
+									<label
+										className="flex flex-col gap-2"
+										htmlFor={`place-${index}`}
+									>
+										<span className="font-meta text-xs uppercase text-fg-muted">
+											{t("approvalsPlace")}
+										</span>
+										<select
+											id={`place-${index}`}
+											className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+											value={row.scopeId}
+											onChange={(event) =>
+												setRows((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index
+															? { ...item, scopeId: event.target.value }
+															: item,
+													),
+												)
+											}
+										>
+											<option value="">{t("approvalsPlace")}</option>
+											{(centers.data?.centers ?? []).map((center) => (
+												<option key={center.id} value={center.id}>
+													{center.name}
+												</option>
+											))}
+										</select>
+									</label>
+								) : null}
+								{scope === "district" ? (
+									<label
+										className="flex flex-col gap-2"
+										htmlFor={`place-${index}`}
+									>
+										<span className="font-meta text-xs uppercase text-fg-muted">
+											{t("approvalsPlace")}
+										</span>
+										<input
+											id={`place-${index}`}
+											className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+											value={row.scopeId}
+											onChange={(event) =>
+												setRows((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index
+															? { ...item, scopeId: event.target.value }
+															: item,
+													),
+												)
+											}
+										/>
+									</label>
+								) : null}
+							</div>
+						);
+					})}
+					{formError ? (
+						<p className="font-sans text-lg text-destructive">{formError}</p>
+					) : null}
+					{ready ? (
+						<Button type="submit" variant="ink" className="w-fit">
+							{t("approvalsAsk")}
+						</Button>
+					) : null}
+				</form>
+			) : null}
 		</section>
 	);
 }

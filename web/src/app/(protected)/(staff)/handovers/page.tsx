@@ -1,5 +1,7 @@
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -42,30 +44,37 @@ export default function HandoversPage() {
 				</p>
 			</div>
 			{grants.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("handoverEmpty")}
-				</p>
+				<EmptyState sentence={t("handoverEmpty")} />
 			) : (
-				<ul>
-					{grants.map((grant) => (
-						<li key={grant.id} className="border-t border-ink/15 py-4">
-							<Link
-								to={`/handovers/${grant.id}`}
-								className="flex flex-col gap-2"
+				<RecordTable
+					caption={t("handoverTitle")}
+					columns={[
+						t("nameLabel"),
+						t("inventorySerial"),
+						t("status"),
+						t("openRow"),
+					]}
+					rows={grants.map((grant) => ({
+						key: grant.id,
+						cells: [
+							grant.itemName,
+							grant.serial,
+							<Badge
+								key="status"
+								variant={grant.recorded ? "neutral" : "pending"}
 							>
-								<p className="font-sans text-lg font-medium text-fg">
-									{grant.itemName}
-								</p>
-								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{grant.serial} · {grant.recipientName}
-								</p>
-								{grant.recorded ? (
-									<Badge variant="neutral">{t("handoverRecorded")}</Badge>
-								) : null}
-							</Link>
-						</li>
-					))}
-				</ul>
+								{grant.recorded ? t("handoverRecorded") : t("helpWaiting")}
+							</Badge>,
+							<Link
+								key="open"
+								to={`/handovers/${grant.id}`}
+								className="underline"
+							>
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

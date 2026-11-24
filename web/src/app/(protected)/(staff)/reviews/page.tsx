@@ -48,11 +48,17 @@ function ReviewTable({
 	return (
 		<RecordTable
 			caption={t("reviewsTitle")}
-			columns={[t("nameLabel"), t("status"), t("openRow")]}
+			columns={[
+				t("nameLabel"),
+				t("catalogLanguage"),
+				t("status"),
+				t("openRow"),
+			]}
 			rows={items.map((course) => ({
 				key: course.id,
 				cells: [
 					course.title,
+					course.missingKinyarwanda ? t("english") : t("kinyarwanda"),
 					<span key="status" className="flex flex-wrap gap-2">
 						<Badge variant="neutral">{t(statusKey(course.status))}</Badge>
 						{course.approved && course.status === "in_review" ? (

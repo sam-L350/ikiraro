@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -35,22 +37,16 @@ export default function AuditSummaryPage() {
 				</p>
 			</div>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("auditSummaryEmpty")}
-				</p>
+				<EmptyState sentence={t("auditSummaryEmpty")} />
 			) : (
-				<ul>
-					{items.map((item) => (
-						<li key={item.id} className="border-t border-ink/15 py-4">
-							<p className="font-sans text-lg font-medium text-fg">
-								{item.reason}
-							</p>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{item.decidedAt.slice(0, 10)}
-							</p>
-						</li>
-					))}
-				</ul>
+				<RecordTable
+					caption={t("auditSummaryTitle")}
+					columns={[t("sessionWhen"), t("auditAction")]}
+					rows={items.map((item) => ({
+						key: item.id,
+						cells: [item.decidedAt.slice(0, 10), item.reason],
+					}))}
+				/>
 			)}
 		</section>
 	);

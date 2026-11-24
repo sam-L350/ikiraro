@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -42,27 +44,22 @@ export default function LeaderboardPage() {
 				</p>
 			</div>
 			{rows.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("leaderboardEmpty")}
-				</p>
+				<EmptyState sentence={t("leaderboardEmpty")} />
 			) : (
-				<ul>
-					{rows.map((row) => (
-						<li key={rowKey(row)} className="border-t border-ink/15 py-4">
-							<p className="font-sans text-lg font-medium text-fg">
-								{row.initials}
-							</p>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{row.district}
-							</p>
-							<p className="font-sans text-lg font-medium text-fg">
-								{row.progress === null
-									? t("leaderboardNoThreshold")
-									: t("leaderboardProgress", { percent: String(row.progress) })}
-							</p>
-						</li>
-					))}
-				</ul>
+				<RecordTable
+					caption={t("leaderboardTitle")}
+					columns={[t("nameLabel"), t("districtLabel"), t("status")]}
+					rows={rows.map((row) => ({
+						key: rowKey(row),
+						cells: [
+							row.initials,
+							row.district,
+							row.progress === null
+								? t("leaderboardNoThreshold")
+								: t("leaderboardProgress", { percent: String(row.progress) }),
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

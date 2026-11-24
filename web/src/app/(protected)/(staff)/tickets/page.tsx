@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -76,71 +79,75 @@ export default function TicketsPage() {
 				</p>
 			</div>
 			{queue.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("ticketsEmpty")}
-				</p>
+				<EmptyState sentence={t("ticketsEmpty")} />
 			) : (
-				<ul className="flex flex-col gap-4">
-					{queue.map((item: Ticket) => {
+				<RecordTable
+					caption={t("ticketsTitle")}
+					columns={[t("nameLabel"), t("status"), t("openRow")]}
+					rows={queue.map((item: Ticket) => {
 						const ink = !answerShown;
 						answerShown = true;
 						const note = notes[item.id]?.trim() ?? "";
-						return (
-							<li
-								key={item.id}
-								className="flex flex-col gap-3 rounded-md border border-line bg-card p-4"
-							>
-								<p className="font-sans text-lg text-fg">{item.body}</p>
-								<p className="font-sans text-lg text-fg">
-									{item.minutes !== null
-										? t("helpAnswered", { minutes: String(item.minutes) })
-										: t("helpWaiting")}
-								</p>
-								<label
-									className="flex flex-col gap-2"
-									htmlFor={`ticket-${item.id}`}
-								>
-									<span className="font-meta text-xs uppercase text-fg-muted">
-										{t("ticketsNote")}
-									</span>
-									<textarea
-										id={`ticket-${item.id}`}
-										className="min-h-20 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
-										value={notes[item.id] ?? ""}
-										onChange={(event) =>
-											setNotes((current) => ({
-												...current,
-												[item.id]: event.target.value,
-											}))
-										}
-									/>
-								</label>
-								{note !== "" ? (
-									<div className="flex flex-wrap gap-3">
-										{item.status === "open" ? (
+						const status =
+							item.minutes !== null
+								? t("helpAnswered", { minutes: String(item.minutes) })
+								: item.status === "closed"
+									? t("helpClosedQuiet")
+									: t("helpWaiting");
+						return {
+							key: item.id,
+							cells: [
+								item.body,
+								<Badge key="status" variant="pending">
+									{status}
+								</Badge>,
+								<div key="action" className="flex flex-col gap-3">
+									<label
+										className="flex flex-col gap-2"
+										htmlFor={`ticket-${item.id}`}
+									>
+										<span className="font-meta text-xs uppercase text-fg-muted">
+											{t("ticketsNote")}
+										</span>
+										<textarea
+											id={`ticket-${item.id}`}
+											className="min-h-20 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
+											value={notes[item.id] ?? ""}
+											onChange={(event) =>
+												setNotes((current) => ({
+													...current,
+													[item.id]: event.target.value,
+												}))
+											}
+										/>
+									</label>
+									{note !== "" ? (
+										<div className="flex flex-wrap gap-3">
+											{item.status === "open" ? (
+												<Button
+													type="button"
+													variant={ink ? "ink" : "quiet"}
+													className="w-fit"
+													onClick={() => void onAnswer(item.id)}
+												>
+													{t("ticketsAnswer")}
+												</Button>
+											) : null}
 											<Button
 												type="button"
-												variant={ink ? "ink" : "quiet"}
+												variant="quiet"
 												className="w-fit"
-												onClick={() => void onAnswer(item.id)}
+												onClick={() => void onClose(item.id)}
 											>
-												{t("ticketsAnswer")}
+												{t("ticketsClose")}
 											</Button>
-										) : null}
-										<Button
-											type="button"
-											variant="quiet"
-											className="w-fit"
-											onClick={() => void onClose(item.id)}
-										>
-											{t("ticketsClose")}
-										</Button>
-									</div>
-								) : null}
-							</li>
-						);
+										</div>
+									) : null}
+								</div>,
+							],
+						};
 					})}
-				</ul>
+				/>
 			)}
 			{formError ? (
 				<p className="font-sans text-lg text-destructive">{formError}</p>

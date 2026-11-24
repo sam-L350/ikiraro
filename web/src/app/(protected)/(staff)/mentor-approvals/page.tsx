@@ -1,4 +1,7 @@
 import { Link } from "react-router";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -35,25 +38,28 @@ export default function MentorApprovalsPage() {
 				{t("mentorsApprovals")}
 			</h1>
 			{items.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("mentorsApprovalsEmpty")}
-				</p>
+				<EmptyState sentence={t("mentorsApprovalsEmpty")} />
 			) : (
-				<ul>
-					{items.map((row) => (
-						<li key={row.id} className="border-t border-ink/15 py-4">
+				<RecordTable
+					caption={t("mentorsApprovals")}
+					columns={[t("nameLabel"), t("status"), t("openRow")]}
+					rows={items.map((row) => ({
+						key: row.id,
+						cells: [
+							row.name,
+							<Badge key="status" variant="pending">
+								{row.kind}
+							</Badge>,
 							<Link
+								key="open"
 								to={`/mentor-approvals/${row.id}`}
-								className="font-sans text-lg font-medium text-fg underline"
+								className="underline"
 							>
-								{row.name}
-							</Link>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{row.kind} · {row.weeklyContactCap}
-							</p>
-						</li>
-					))}
-				</ul>
+								{t("openRow")}
+							</Link>,
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

@@ -98,6 +98,17 @@ export default function InboxPage() {
 		await preferences.invalidate();
 	}
 
+	function deliveryNotes(item: InboxItem): string[] {
+		const notes: string[] = [];
+		if (item.sms === "queued") notes.push(t("inboxSmsQueued"));
+		if (item.sms === "submitted") notes.push(t("inboxSmsSubmitted"));
+		if (item.sms === "capped") notes.push(t("inboxSmsDailyCap"));
+		if (item.sms === "failed") notes.push(t("inboxSmsFailed"));
+		if (item.email === "queued") notes.push(t("inboxEmailQueued"));
+		if (item.email === "failed") notes.push(t("inboxEmailFailed"));
+		return notes;
+	}
+
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-8">
 			<div className="flex flex-col gap-3">
@@ -120,66 +131,45 @@ export default function InboxPage() {
 				<RecordTable
 					caption={t("inboxTitle")}
 					columns={[t("nameLabel"), t("inboxUnread"), t("inboxMarkRead")]}
-					rows={items.map((item) => ({
-						key: item.id,
-						cells: [
-							item.title,
-							item.readAt ? null : (
-								<Badge key="unread" variant="pending">
-									{t("inboxUnread")}
-								</Badge>
-							),
-							item.readAt ? null : (
-								<Button
-									key="read"
-									type="button"
-									variant="quiet"
-									className="w-fit"
-									disabled={busy}
-									onClick={() => void onRead(item.id)}
-								>
-									{t("inboxMarkRead")}
-								</Button>
-							),
-						],
-					}))}
+					rows={items.map((item) => {
+						const notes = deliveryNotes(item);
+						const failed = item.sms === "failed" || item.email === "failed";
+						return {
+							key: item.id,
+							cells: [
+								<div key="subject" className="flex flex-col gap-1">
+									<p>{item.title}</p>
+									<p>{item.body}</p>
+									{notes.map((note) => (
+										<p
+											key={note}
+											className={failed ? "text-destructive" : "text-fg-muted"}
+										>
+											{note}
+										</p>
+									))}
+								</div>,
+								item.readAt ? null : (
+									<Badge key="unread" variant="pending">
+										{t("inboxUnread")}
+									</Badge>
+								),
+								item.readAt ? null : (
+									<Button
+										key="read"
+										type="button"
+										variant="quiet"
+										className="w-fit"
+										disabled={busy}
+										onClick={() => void onRead(item.id)}
+									>
+										{t("inboxMarkRead")}
+									</Button>
+								),
+							],
+						};
+					})}
 				/>
-			)}
-			{items.length === 0 ? null : (
-				<ul className="flex flex-col">
-					{items.map((item) => (
-						<li
-							key={item.id}
-							className="flex flex-col gap-2 border-b border-line py-4"
-						>
-							<p className="text-lg text-fg">{item.body}</p>
-							{item.sms === "queued" ? (
-								<p className="text-lg text-fg-muted">{t("inboxSmsQueued")}</p>
-							) : null}
-							{item.sms === "submitted" ? (
-								<p className="text-lg text-fg-muted">
-									{t("inboxSmsSubmitted")}
-								</p>
-							) : null}
-							{item.sms === "capped" ? (
-								<p className="text-lg text-fg-muted">{t("inboxSmsDailyCap")}</p>
-							) : null}
-							{item.sms === "failed" ? (
-								<p className="text-lg text-destructive">
-									{t("inboxSmsFailed")}
-								</p>
-							) : null}
-							{item.email === "queued" ? (
-								<p className="text-lg text-fg-muted">{t("inboxEmailQueued")}</p>
-							) : null}
-							{item.email === "failed" ? (
-								<p className="text-lg text-destructive">
-									{t("inboxEmailFailed")}
-								</p>
-							) : null}
-						</li>
-					))}
-				</ul>
 			)}
 			{choices.length === 0 ? null : (
 				<section className="flex flex-col gap-4">

@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -31,28 +33,27 @@ export default function MentorReviewPage() {
 				{t("messagesReview")}
 			</h1>
 			{messages.length === 0 ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("messagesReviewEmpty")}
-				</p>
+				<EmptyState sentence={t("messagesReviewEmpty")} />
 			) : (
-				<ul>
-					{messages.map((row) => (
-						<li key={row.id} className="border-t border-ink/15 py-4">
-							<p className="font-sans text-lg font-medium text-fg">
-								{row.body}
-							</p>
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{row.senderName}
-							</p>
-						</li>
-					))}
-				</ul>
+				<RecordTable
+					caption={t("messagesReview")}
+					columns={[t("nameLabel"), t("messagesNav")]}
+					rows={messages.map((row) => ({
+						key: row.id,
+						cells: [row.senderName, row.body],
+					}))}
+				/>
 			)}
-			{reports.map((row) => (
-				<p key={row.id} className="font-sans text-lg font-medium text-fg">
-					{row.reporterName}: {row.note}
-				</p>
-			))}
+			{reports.length === 0 ? null : (
+				<RecordTable
+					caption={t("messagesReview")}
+					columns={[t("nameLabel"), t("auditAction")]}
+					rows={reports.map((row) => ({
+						key: row.id,
+						cells: [row.reporterName, row.note],
+					}))}
+				/>
+			)}
 		</section>
 	);
 }
