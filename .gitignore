@@ -19,6 +19,9 @@ dist/
 !.env.example
 .dev.vars
 
+# Local object bytes written by the development store and the content seed
+.data/
+
 # Logs
 *.log
 

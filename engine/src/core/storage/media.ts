@@ -49,7 +49,7 @@ export async function createUploadIntent(
 		ip: string;
 	},
 ): Promise<UploadIntent> {
-	if (env.isProduction && store.kind === "memory") {
+	if (env.isProduction && store.kind !== "s3") {
 		throw errors.unavailable("Media storage is not configured.");
 	}
 	const contentType = mediaContentType(input.contentType);

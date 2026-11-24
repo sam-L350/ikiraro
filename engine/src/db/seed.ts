@@ -14,6 +14,7 @@ import {
 import { seedDemoAccounts } from "./demo-accounts";
 import { db } from "./index";
 import { configSettings, permissions, rolePermissions, roles } from "./schema";
+import { seedPracticalContent } from "./seed-courses";
 import { seedCenterAssignments, seedGeography } from "./seed-geography";
 
 function isRoleCode(value: string): value is RoleCode {
@@ -77,4 +78,5 @@ export async function seedFoundations(): Promise<void> {
 	await seedGeography(db);
 	await seedDemoAccounts();
 	await seedCenterAssignments(db);
+	await seedPracticalContent();
 }

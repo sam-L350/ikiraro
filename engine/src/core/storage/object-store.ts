@@ -1,3 +1,6 @@
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { env } from "../../config/env";
 import { presignS3Url } from "./s3-sign";
 import { issueMediaToken } from "./token";
@@ -22,7 +25,7 @@ export type SignedUrl = {
  * `reserve` only remembers a key. Bytes move through a signed URL.
  */
 export interface ObjectStore {
-	readonly kind: "memory" | "s3";
+	readonly kind: "memory" | "file" | "s3";
 	reserve(intent: ObjectIntent): Promise<{ key: string }>;
 	createUploadUrl(input: {
 		key: string;
@@ -209,6 +212,96 @@ export function createS3ObjectStore(
 	};
 }
 
+function objectPath(directory: string, key: string): string {
+	if (key.length === 0 || key.includes("..") || key.startsWith("/")) {
+		throw new Error("The storage key is not valid");
+	}
+	const root = resolve(directory);
+	const full = resolve(root, key);
+	if (full !== root && !full.startsWith(`${root}/`)) {
+		throw new Error("The storage key is not valid");
+	}
+	return full;
+}
+
+/** Development store. The same directory is shared by the API and the seed. */
+export function createFileObjectStore(input: {
+	directory: string;
+	apiUrl: string;
+	secret: string;
+	now?: () => number;
+}): ObjectStore {
+	const now = input.now ?? Date.now;
+	function signed(
+		method: "GET" | "PUT",
+		key: string,
+		contentType: string,
+		expiresInSeconds: number,
+	): SignedUrl {
+		const expiresAt = new Date(now() + expiresInSeconds * 1000);
+		const token = issueMediaToken(
+			{
+				key,
+				method,
+				contentType,
+				exp: expiresAt.getTime(),
+			},
+			input.secret,
+		);
+		const route = method === "PUT" ? "upload" : "file";
+		return {
+			url: `${input.apiUrl}/api/media/${route}?token=${token}`,
+			expiresAt: expiresAt.toISOString(),
+		};
+	}
+	return {
+		kind: "file",
+		async reserve(intent) {
+			return { key: intent.key };
+		},
+		async createUploadUrl(grant) {
+			return signed(
+				"PUT",
+				grant.key,
+				grant.contentType,
+				grant.expiresInSeconds,
+			);
+		},
+		async createDownloadUrl(grant) {
+			return signed("GET", grant.key, "", grant.expiresInSeconds);
+		},
+		async put(object) {
+			const path = objectPath(input.directory, object.key);
+			await mkdir(dirname(path), { recursive: true });
+			await writeFile(path, object.bytes);
+			await writeFile(`${path}.type`, object.contentType);
+		},
+		async read(key) {
+			const path = objectPath(input.directory, key);
+			try {
+				const bytes = await readFile(path);
+				const contentType = await readFile(`${path}.type`, "utf8");
+				return { contentType, bytes };
+			} catch (error) {
+				if (
+					typeof error === "object" &&
+					error !== null &&
+					"code" in error &&
+					error.code === "ENOENT"
+				) {
+					return null;
+				}
+				throw error;
+			}
+		},
+		async remove(key) {
+			const path = objectPath(input.directory, key);
+			await rm(path, { force: true });
+			await rm(`${path}.type`, { force: true });
+		},
+	};
+}
+
 let singleton: ObjectStore | undefined;
 
 export function getObjectStore(): ObjectStore {
@@ -216,12 +309,22 @@ export function getObjectStore(): ObjectStore {
 		const source =
 			typeof process !== "undefined" && process.env ? process.env : {};
 		const r2 = readR2(source);
-		singleton = r2
-			? createS3ObjectStore(r2)
-			: createMemoryObjectStore({
-					apiUrl: env.apiUrl,
-					secret: env.otpPepper,
-				});
+		if (r2) {
+			singleton = createS3ObjectStore(r2);
+		} else if (env.isProduction) {
+			singleton = createMemoryObjectStore({
+				apiUrl: env.apiUrl,
+				secret: env.otpPepper,
+			});
+		} else {
+			singleton = createFileObjectStore({
+				directory: fileURLToPath(
+					new URL("../../../.data/objects/", import.meta.url),
+				),
+				apiUrl: env.apiUrl,
+				secret: env.otpPepper,
+			});
+		}
 	}
 	return singleton;
 }
