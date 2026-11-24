@@ -7,6 +7,7 @@
 import { createApp } from "./app";
 import { configureEnv } from "./config/env";
 import { cleanExpiredSessions } from "./core/auth/sessions";
+import { askDueFollowUps } from "./core/hardware/follow-ups";
 import { escalateOverdue } from "./core/learning/sla";
 import { logger } from "./core/logger";
 import { drainNotifications } from "./core/notifications/drain";
@@ -39,6 +40,10 @@ export default {
 				escalateOverdue(db)
 					.catch((error) => {
 						logger.error("review escalation failed", { error });
+					})
+					.then(() => askDueFollowUps(db))
+					.catch((error) => {
+						logger.error("follow-up check failed", { error });
 					})
 					.then(() => drainNotifications(db))
 					.catch((error) => {

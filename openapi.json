@@ -90,6 +90,9 @@
 			"name": "feedback-snippets"
 		},
 		{
+			"name": "follow-ups"
+		},
+		{
 			"name": "handovers"
 		},
 		{
@@ -14677,6 +14680,1133 @@
 											},
 											"required": [
 												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups/{id}/answer": {
+			"post": {
+				"operationId": "createFollowUpAnswer",
+				"summary": "The recipient says whether the device is in use, and for what.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"inUse": {
+										"type": "boolean"
+									},
+									"purpose": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"inUse"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups/{id}/decide": {
+			"post": {
+				"operationId": "createFollowUpDecision",
+				"summary": "The center's trainer records the same kind of decision used on a task.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"evidenceId": {
+										"type": "string"
+									},
+									"decision": {
+										"type": "string",
+										"enum": [
+											"approved",
+											"needs_revision",
+											"rejected"
+										]
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"evidenceId",
+									"decision",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups/{id}/evidence": {
+			"post": {
+				"operationId": "createFollowUpEvidence",
+				"summary": "Optional photo of the device in use. A trainer reviews it like other evidence.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"mediaId": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"mediaId",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups/{id}": {
+			"get": {
+				"operationId": "getFollowUp",
+				"summary": "One of the signed-in recipient's check-ins.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"day": {
+													"oneOf": [
+														{
+															"const": 30,
+															"type": "number"
+														},
+														{
+															"const": 90,
+															"type": "number"
+														},
+														{
+															"const": 180,
+															"type": "number"
+														}
+													]
+												},
+												"dueOn": {
+													"type": "string"
+												},
+												"response": {
+													"type": "string",
+													"enum": [
+														"waiting",
+														"answered",
+														"unresponsive"
+													]
+												},
+												"asked": {
+													"type": "boolean"
+												},
+												"inUse": {
+													"type": "boolean",
+													"nullable": true
+												},
+												"purpose": {
+													"type": "string",
+													"nullable": true
+												},
+												"evidenceStatus": {
+													"type": "string",
+													"enum": [
+														"pending",
+														"approved",
+														"needs_revision",
+														"rejected"
+													],
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"day",
+												"dueOn",
+												"response",
+												"asked",
+												"inUse",
+												"purpose",
+												"evidenceStatus"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups/{id}/silence": {
+			"post": {
+				"operationId": "createFollowUpSilence",
+				"summary": "Mark the 180 day check-in unanswered so a review opens.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups/close": {
+			"post": {
+				"operationId": "createFollowUpClose",
+				"summary": "Close an unanswered-check-in review. The note is the written reason.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"reviewId": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"reviewId",
+									"note"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups": {
+			"get": {
+				"operationId": "getFollowUps",
+				"summary": "The signed-in recipient's 30, 90, and 180 day check-ins.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"day": {
+																"oneOf": [
+																	{
+																		"const": 30,
+																		"type": "number"
+																	},
+																	{
+																		"const": 90,
+																		"type": "number"
+																	},
+																	{
+																		"const": 180,
+																		"type": "number"
+																	}
+																]
+															},
+															"dueOn": {
+																"type": "string"
+															},
+															"response": {
+																"type": "string",
+																"enum": [
+																	"waiting",
+																	"answered",
+																	"unresponsive"
+																]
+															},
+															"asked": {
+																"type": "boolean"
+															},
+															"inUse": {
+																"type": "boolean",
+																"nullable": true
+															},
+															"purpose": {
+																"type": "string",
+																"nullable": true
+															},
+															"evidenceStatus": {
+																"type": "string",
+																"enum": [
+																	"pending",
+																	"approved",
+																	"needs_revision",
+																	"rejected"
+																],
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"day",
+															"dueOn",
+															"response",
+															"asked",
+															"inUse",
+															"purpose",
+															"evidenceStatus"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/follow-ups/queue": {
+			"get": {
+				"operationId": "getFollowUpQueue",
+				"summary": "Usage evidence for a trainer, and unanswered check-ins for a coordinator.",
+				"tags": [
+					"follow-ups"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"evidence": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"evidenceId": {
+																"type": "string"
+															},
+															"followUpId": {
+																"type": "string"
+															},
+															"day": {
+																"oneOf": [
+																	{
+																		"const": 30,
+																		"type": "number"
+																	},
+																	{
+																		"const": 90,
+																		"type": "number"
+																	},
+																	{
+																		"const": 180,
+																		"type": "number"
+																	}
+																]
+															},
+															"note": {
+																"type": "string"
+															},
+															"recipientName": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"evidenceId",
+															"followUpId",
+															"day",
+															"note",
+															"recipientName",
+															"centerName"
+														],
+														"additionalProperties": false
+													}
+												},
+												"reviews": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"reviewId": {
+																"type": "string"
+															},
+															"followUpId": {
+																"type": "string"
+															},
+															"day": {
+																"oneOf": [
+																	{
+																		"const": 30,
+																		"type": "number"
+																	},
+																	{
+																		"const": 90,
+																		"type": "number"
+																	},
+																	{
+																		"const": 180,
+																		"type": "number"
+																	}
+																]
+															},
+															"recipientName": {
+																"type": "string"
+															},
+															"districtName": {
+																"type": "string"
+															},
+															"open": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"reviewId",
+															"followUpId",
+															"day",
+															"recipientName",
+															"districtName",
+															"open"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"evidence",
+												"reviews"
 											],
 											"additionalProperties": false
 										},

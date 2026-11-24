@@ -31,6 +31,12 @@ export {
 } from "./content";
 export { deviceBookings, devices } from "./devices";
 export {
+	followUpEvidence,
+	followUpReviews,
+	followUps,
+	followUpVerifications,
+} from "./follow-ups";
+export {
 	centerStaff,
 	districts,
 	learningCenters,

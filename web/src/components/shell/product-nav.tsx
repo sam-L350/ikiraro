@@ -55,6 +55,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/practice", label: "practiceNav" },
 			{ to: "/allocation", label: "allocationNav" },
 			{ to: "/conditions", label: "conditionsNav" },
+			{ to: "/follow-ups", label: "followUpsNav" },
 		);
 	}
 	const canReadPoints =
@@ -112,7 +113,18 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/appeals", label: "appealsNav" },
 			{ to: "/feedback", label: "feedbackNav" },
 			{ to: "/quality", label: "qualityNav" },
+			{ to: "/follow-up-queue", label: "followUpsQueue" },
 		);
+	}
+	const canReadFollowUps =
+		user?.roles.some(
+			(role) =>
+				role.code === "district_coordinator" ||
+				role.code === "hardware_officer" ||
+				role.code === "platform_admin",
+		) ?? false;
+	if (canReadFollowUps && !canReviewEvidence) {
+		items.push({ to: "/follow-up-queue", label: "followUpsQueue" });
 	}
 	const canAnnounce =
 		user?.roles.some(

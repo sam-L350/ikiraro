@@ -7,6 +7,7 @@
  */
 import { createApp } from "./app";
 import { env } from "./config/env";
+import { askDueFollowUps } from "./core/hardware/follow-ups";
 import { escalateOverdue } from "./core/learning/sla";
 import { logger } from "./core/logger";
 import { drainNotifications } from "./core/notifications/drain";
@@ -38,6 +39,10 @@ const drainTimer = setInterval(() => {
 	escalateOverdue(db)
 		.catch((error: unknown) => {
 			logger.error("review escalation failed", { error });
+		})
+		.then(() => askDueFollowUps(db))
+		.catch((error: unknown) => {
+			logger.error("follow-up check failed", { error });
 		})
 		.then(() => drainNotifications(db))
 		.catch((error: unknown) => {

@@ -90,7 +90,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/7.11-recovery-and-exceptions`
   - [x] `phase/7.12-leaderboard-and-equity`
 - [ ] Phase 8 — Impact and ecosystem (`phase/8-impact-and-ecosystem`)
-  - [ ] `phase/8.1-follow-ups`
+  - [x] `phase/8.1-follow-ups`
   - [ ] `phase/8.2-outcomes-and-surveys`
   - [ ] `phase/8.3-dormancy`
   - [ ] `phase/8.4-mentors`

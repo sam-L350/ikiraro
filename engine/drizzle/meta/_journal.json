@@ -267,6 +267,13 @@
       "when": 1795462000000,
       "tag": "0037_phase7_recovery",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1795463000000,
+      "tag": "0038_phase8_follow_ups",
+      "breakpoints": true
     }
   ]
 }
