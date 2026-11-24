@@ -102,6 +102,10 @@ export const hardwareGrants = pgTable(
 		handoverConfirmedAt: timestamp("handover_confirmed_at", {
 			withTimezone: true,
 		}),
+		conditions: text("conditions"),
+		conditionsAgreedAt: timestamp("conditions_agreed_at", {
+			withTimezone: true,
+		}),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
@@ -116,6 +120,10 @@ export const hardwareGrants = pgTable(
 		check(
 			"hardware_grants_status",
 			sql`${table.status} in ('active', 'recovered', 'transferred')`,
+		),
+		check(
+			"hardware_grants_conditions",
+			sql`${table.conditions} is null or char_length(btrim(${table.conditions})) between 1 and 800`,
 		),
 	],
 );

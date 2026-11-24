@@ -30,6 +30,9 @@
 			"name": "audit"
 		},
 		{
+			"name": "audit-summary"
+		},
+		{
 			"name": "auth"
 		},
 		{
@@ -40,6 +43,9 @@
 		},
 		{
 			"name": "centers"
+		},
+		{
+			"name": "conditions"
 		},
 		{
 			"name": "config"
@@ -73,6 +79,9 @@
 		},
 		{
 			"name": "examples"
+		},
+		{
+			"name": "exceptions"
 		},
 		{
 			"name": "feedback-snippets"
@@ -133,6 +142,9 @@
 		},
 		{
 			"name": "quality"
+		},
+		{
+			"name": "recovery"
 		},
 		{
 			"name": "registrations"
@@ -1469,6 +1481,97 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/audit-summary": {
+			"get": {
+				"operationId": "getAuditSummary",
+				"summary": "Approved exceptions. Names and serials are not included. No sign-in is required.",
+				"tags": [
+					"audit-summary"
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"reason": {
+																"type": "string"
+															},
+															"decidedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"reason",
+															"decidedAt"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}
@@ -4667,6 +4770,355 @@
 											"required": [
 												"assigned",
 												"centers"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/conditions/{id}/agree": {
+			"post": {
+				"operationId": "createConditionAgreement",
+				"summary": "The recipient agrees to the conditions stored on this grant.",
+				"tags": [
+					"conditions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/conditions/{id}": {
+			"get": {
+				"operationId": "getCondition",
+				"summary": "One grant's conditions, for the recipient.",
+				"tags": [
+					"conditions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"itemName": {
+													"type": "string"
+												},
+												"conditions": {
+													"type": "string",
+													"nullable": true
+												},
+												"agreed": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"id",
+												"itemName",
+												"conditions",
+												"agreed"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/conditions": {
+			"get": {
+				"operationId": "getConditions",
+				"summary": "Conditions stored on the signed-in recipient's grants.",
+				"tags": [
+					"conditions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"grants": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"itemName": {
+																"type": "string"
+															},
+															"conditions": {
+																"type": "string",
+																"nullable": true
+															},
+															"agreed": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"itemName",
+															"conditions",
+															"agreed"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"grants"
 											],
 											"additionalProperties": false
 										},
@@ -12972,6 +13424,514 @@
 					},
 					"400": {
 						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/exceptions/{id}/approve": {
+			"post": {
+				"operationId": "createExceptionApproval",
+				"summary": "A different admin approves the exception and makes the reason public.",
+				"tags": [
+					"exceptions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/exceptions/{id}/decline": {
+			"post": {
+				"operationId": "createExceptionDecline",
+				"summary": "A different admin turns the request down. It stays out of the public list.",
+				"tags": [
+					"exceptions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {},
+								"required": [],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/exceptions/create": {
+			"post": {
+				"operationId": "createException",
+				"summary": "Ask a different admin to set a rule aside. The request is not public.",
+				"tags": [
+					"exceptions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"grantId": {
+										"type": "string"
+									},
+									"reason": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"grantId",
+									"reason"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/exceptions": {
+			"get": {
+				"operationId": "getExceptions",
+				"summary": "Open and decided exceptions, plus the grants a request can name.",
+				"tags": [
+					"exceptions"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"exceptions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"grantId": {
+																"type": "string"
+															},
+															"itemName": {
+																"type": "string"
+															},
+															"reason": {
+																"type": "string"
+															},
+															"mine": {
+																"type": "boolean"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"pending",
+																	"approved",
+																	"rejected"
+																]
+															},
+															"publicSummary": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"grantId",
+															"itemName",
+															"reason",
+															"mine",
+															"status",
+															"publicSummary"
+														],
+														"additionalProperties": false
+													}
+												},
+												"grants": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"itemName": {
+																"type": "string"
+															},
+															"recipientName": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"itemName",
+															"recipientName"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"exceptions",
+												"grants"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -22210,6 +23170,529 @@
 											"required": [
 												"trainers",
 												"anomalies"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/recovery/{id}/conditions": {
+			"post": {
+				"operationId": "createRecoveryConditions",
+				"summary": "Store the conditions the recipient will be asked to agree to.",
+				"tags": [
+					"recovery"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"conditions": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"conditions"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/recovery/{id}": {
+			"get": {
+				"operationId": "getRecovery",
+				"summary": "The conditions on one grant, and the recovery if it was stored.",
+				"tags": [
+					"recovery"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"itemName": {
+													"type": "string"
+												},
+												"serial": {
+													"type": "string"
+												},
+												"recipientName": {
+													"type": "string"
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"active",
+														"recovered",
+														"transferred"
+													]
+												},
+												"conditions": {
+													"type": "string",
+													"nullable": true
+												},
+												"agreed": {
+													"type": "boolean"
+												},
+												"situation": {
+													"type": "string",
+													"enum": [
+														"lost",
+														"unused",
+														"misused"
+													],
+													"nullable": true
+												},
+												"reason": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"itemName",
+												"serial",
+												"recipientName",
+												"status",
+												"conditions",
+												"agreed",
+												"situation",
+												"reason"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/recovery/{id}/return": {
+			"post": {
+				"operationId": "createRecoveryReturn",
+				"summary": "Return the item to stock and store why.",
+				"tags": [
+					"recovery"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"situation": {
+										"type": "string"
+									},
+									"reason": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"situation",
+									"reason"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/recovery": {
+			"get": {
+				"operationId": "getRecoveries",
+				"summary": "Grants the hardware officer can attach conditions to, or take back.",
+				"tags": [
+					"recovery"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"grants": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"itemName": {
+																"type": "string"
+															},
+															"recipientName": {
+																"type": "string"
+															},
+															"hasConditions": {
+																"type": "boolean"
+															},
+															"agreed": {
+																"type": "boolean"
+															},
+															"recovered": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"itemName",
+															"recipientName",
+															"hasConditions",
+															"agreed",
+															"recovered"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"grants"
 											],
 											"additionalProperties": false
 										},

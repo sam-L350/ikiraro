@@ -87,7 +87,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/7.8-allocation-rounds`
   - [x] `phase/7.9-committee-decision`
   - [x] `phase/7.10-handover-and-custody`
-  - [ ] `phase/7.11-recovery-and-exceptions`
+  - [x] `phase/7.11-recovery-and-exceptions`
   - [ ] `phase/7.12-leaderboard-and-equity`
 - [ ] Phase 8 — Impact and ecosystem (`phase/8-impact-and-ecosystem`)
   - [ ] `phase/8.1-follow-ups`

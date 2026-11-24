@@ -66,6 +66,7 @@ export {
 	notifications,
 	notificationTemplates,
 } from "./notifications";
+export { grantExceptions, hardwareRecoveries } from "./recovery";
 export {
 	consents,
 	declaredRelationships,

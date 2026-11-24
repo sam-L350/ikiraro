@@ -46,6 +46,12 @@ export default function HomePage() {
 					>
 						{t("directoryNav")}
 					</Link>
+					<Link
+						to="/audit-summary"
+						className="mt-3 font-sans text-sm font-semibold text-fg"
+					>
+						{t("auditSummaryNav")}
+					</Link>
 				</div>
 			</section>
 

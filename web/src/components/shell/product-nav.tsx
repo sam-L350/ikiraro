@@ -54,6 +54,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/schedule", label: "scheduleNav" },
 			{ to: "/practice", label: "practiceNav" },
 			{ to: "/allocation", label: "allocationNav" },
+			{ to: "/conditions", label: "conditionsNav" },
 		);
 	}
 	const canReadPoints =
@@ -128,6 +129,7 @@ function useProductNavItems(): NavItem[] {
 	if (canAdjustPoints) {
 		items.push(
 			{ to: "/adjustments", label: "adjustmentsNav" },
+			{ to: "/exceptions", label: "exceptionsNav" },
 			{ to: "/quality", label: "qualityNav" },
 		);
 		if (!canReviewEvidence) {
@@ -164,6 +166,7 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/inventory", label: "inventoryNav" },
 			{ to: "/handovers", label: "handoverNav" },
+			{ to: "/recovery", label: "recoveryNav" },
 		);
 	}
 	const canOpenRounds =
