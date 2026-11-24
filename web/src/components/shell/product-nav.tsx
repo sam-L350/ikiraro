@@ -5,6 +5,7 @@ import {
 	BookOpen,
 	Briefcase,
 	Calendar,
+	ChevronDown,
 	CircleHelp,
 	ClipboardList,
 	Compass,
@@ -35,8 +36,8 @@ import {
 	Users,
 	Webhook,
 } from "lucide-react";
-import type { Ref } from "react";
-import { NavLink } from "react-router";
+import { type Ref, useState } from "react";
+import { NavLink, useLocation } from "react-router";
 import { OpenPreviewButton } from "@/components/dev/role-preview";
 import { Wordmark } from "@/components/shell/wordmark";
 import { useAuth } from "@/lib/auth";
@@ -126,11 +127,64 @@ function NavIcon({ to }: { to: string }) {
 	return <Icon aria-hidden="true" className="size-4 shrink-0" />;
 }
 
+type NavGroup =
+	| "you"
+	| "learning"
+	| "center"
+	| "content"
+	| "mentors"
+	| "hardware"
+	| "allocation"
+	| "reports"
+	| "admin";
+
 type NavItem = {
 	to: string;
 	label: MessageKey;
 	end?: boolean;
+	group: NavGroup;
 };
+
+const GROUP_ORDER: NavGroup[] = [
+	"you",
+	"learning",
+	"center",
+	"content",
+	"mentors",
+	"hardware",
+	"allocation",
+	"reports",
+	"admin",
+];
+
+const GROUP_LABEL: Record<NavGroup, MessageKey> = {
+	you: "navGroupYou",
+	learning: "navGroupLearning",
+	center: "navGroupCenter",
+	content: "navGroupContent",
+	mentors: "navGroupMentors",
+	hardware: "navGroupHardware",
+	allocation: "navGroupAllocation",
+	reports: "navGroupReports",
+	admin: "navGroupAdmin",
+};
+
+const GROUP_ICON: Record<NavGroup, LucideIcon> = {
+	you: User,
+	learning: BookOpen,
+	center: MapPin,
+	content: PenLine,
+	mentors: Users,
+	hardware: Package,
+	allocation: Scale,
+	reports: PieChart,
+	admin: Settings,
+};
+
+function isItemActive(item: NavItem, pathname: string) {
+	if (item.end) return pathname === item.to;
+	return pathname === item.to || pathname.startsWith(`${item.to}/`);
+}
 
 function useProductNavItems(): NavItem[] {
 	const { user } = useAuth();
@@ -157,41 +211,42 @@ function useProductNavItems(): NavItem[] {
 	const mode = context.data?.mode;
 	const canAddStaff = mode === "admin" || mode === "center";
 
-	const items: NavItem[] = [
-		{ to: "/home", label: "navHome", end: true },
-		{ to: "/profile", label: "yourProfile", end: true },
-		{ to: "/inbox", label: "inboxNav" },
-		{ to: "/help", label: "helpNav" },
-	];
+	const items: NavItem[] = [];
+	function add(group: NavGroup, item: Omit<NavItem, "group">) {
+		if (items.some((existing) => existing.to === item.to)) return;
+		items.push({ ...item, group });
+	}
+	add("you", { to: "/home", label: "navHome", end: true });
+	add("you", { to: "/profile", label: "yourProfile", end: true });
+	add("you", { to: "/inbox", label: "inboxNav" });
+	add("you", { to: "/help", label: "helpNav" });
 	const canAnswerTickets =
 		user?.roles.some(
 			(role) =>
 				role.code === "platform_admin" || role.code === "content_reviewer",
 		) ?? false;
 	if (canAnswerTickets) {
-		items.push({ to: "/tickets", label: "ticketsNav" });
+		add("you", { to: "/tickets", label: "ticketsNav" });
 	}
 	if (canUseCatalog) {
-		items.push({ to: "/catalog", label: "catalogNav" });
+		add("learning", { to: "/catalog", label: "catalogNav" });
 	}
 	const isLearner =
 		user?.roles.some((role) => role.code === "learner") ?? false;
 	if (isLearner) {
-		items.push(
-			{ to: "/schedule", label: "scheduleNav" },
-			{ to: "/practice", label: "practiceNav" },
-			{ to: "/allocation", label: "allocationNav" },
-			{ to: "/conditions", label: "conditionsNav" },
-			{ to: "/follow-ups", label: "followUpsNav" },
-			{ to: "/surveys", label: "surveysNav" },
-			{ to: "/stories", label: "storiesNav" },
-			{ to: "/pathways", label: "pathwaysNav" },
-			{ to: "/placement", label: "placementNav" },
-			{ to: "/mentors", label: "mentorsNav" },
-			{ to: "/opportunities", label: "opportunitiesNav" },
-			{ to: "/referrals", label: "referralsNav" },
-			{ to: "/messages", label: "messagesNav" },
-		);
+		add("learning", { to: "/schedule", label: "scheduleNav" });
+		add("learning", { to: "/practice", label: "practiceNav" });
+		add("learning", { to: "/allocation", label: "allocationNav" });
+		add("learning", { to: "/conditions", label: "conditionsNav" });
+		add("learning", { to: "/follow-ups", label: "followUpsNav" });
+		add("learning", { to: "/surveys", label: "surveysNav" });
+		add("learning", { to: "/stories", label: "storiesNav" });
+		add("learning", { to: "/pathways", label: "pathwaysNav" });
+		add("learning", { to: "/placement", label: "placementNav" });
+		add("learning", { to: "/mentors", label: "mentorsNav" });
+		add("learning", { to: "/opportunities", label: "opportunitiesNav" });
+		add("learning", { to: "/referrals", label: "referralsNav" });
+		add("learning", { to: "/messages", label: "messagesNav" });
 	}
 	const canReadPoints =
 		user?.roles.some(
@@ -201,20 +256,18 @@ function useProductNavItems(): NavItem[] {
 				role.code === "center_manager",
 		) ?? false;
 	if (canReadPoints) {
-		items.push(
-			{ to: "/passport", label: "passportNav" },
-			{ to: "/points", label: "pointsNav" },
-		);
+		add("learning", { to: "/passport", label: "passportNav" });
+		add("learning", { to: "/points", label: "pointsNav" });
 	}
 	if (user?.roles.some((role) => role.code === "learner")) {
-		items.push({ to: "/pulse", label: "pulseNav" });
+		add("learning", { to: "/pulse", label: "pulseNav" });
 	}
 	const canFileConcern =
 		user?.roles.some(
 			(role) => role.code === "learner" || role.code === "trainer",
 		) ?? false;
 	if (canFileConcern) {
-		items.push({ to: "/report", label: "reportNav" });
+		add("learning", { to: "/report", label: "reportNav" });
 	}
 	const canSeeOperations =
 		user?.roles.some(
@@ -226,43 +279,38 @@ function useProductNavItems(): NavItem[] {
 				role.code === "platform_admin",
 		) ?? false;
 	if (canSeeOperations) {
-		items.push({ to: "/operations", label: "operationsNav" });
+		add(isStaff ? "center" : "learning", {
+			to: "/operations",
+			label: "operationsNav",
+		});
 	}
 	if (!isStaff) return items;
-	items.push(
-		{ to: "/staff", label: "staffTitle", end: true },
-		{ to: "/register/assisted", label: "registerLearner" },
-	);
+	add("center", { to: "/staff", label: "staffTitle", end: true });
+	add("center", { to: "/register/assisted", label: "registerLearner" });
 	if (canAddStaff) {
-		items.push({ to: "/staff/new", label: "staffAccounts" });
+		add("center", { to: "/staff/new", label: "staffAccounts" });
 	}
 	if (canWriteCourses) {
-		items.push(
-			{ to: "/courses", label: "coursesNav" },
-			{ to: "/templates", label: "contentTemplatesNav" },
-			{ to: "/pathways", label: "pathwaysNav" },
-			{ to: "/placement", label: "placementNav" },
-		);
+		add("content", { to: "/courses", label: "coursesNav" });
+		add("content", { to: "/templates", label: "contentTemplatesNav" });
+		add("content", { to: "/pathways", label: "pathwaysNav" });
+		add("content", { to: "/placement", label: "placementNav" });
 	}
 	if (canReviewCourses) {
-		items.push({ to: "/reviews", label: "reviewsNav" });
+		add("content", { to: "/reviews", label: "reviewsNav" });
 	}
 	const canPack =
 		user?.roles.some(
 			(role) => role.code === "trainer" || role.code === "center_manager",
 		) ?? false;
 	if (canPack) {
-		items.push(
-			{ to: "/content-packs", label: "contentPacksNav" },
-			{ to: "/field-guide", label: "fieldGuideNav" },
-		);
+		add("center", { to: "/content-packs", label: "contentPacksNav" });
+		add("center", { to: "/field-guide", label: "fieldGuideNav" });
 	}
 	if (canReviewEvidence) {
-		items.push(
-			{ to: "/evidence", label: "evidenceQueueTitle" },
-			{ to: "/questions", label: "taskQuestionsNav" },
-			{ to: "/sessions", label: "sessionsNav" },
-		);
+		add("center", { to: "/evidence", label: "evidenceQueueTitle" });
+		add("center", { to: "/questions", label: "taskQuestionsNav" });
+		add("center", { to: "/sessions", label: "sessionsNav" });
 		if (
 			user?.roles.some(
 				(role) =>
@@ -270,17 +318,15 @@ function useProductNavItems(): NavItem[] {
 					role.code === "district_coordinator",
 			)
 		) {
-			items.push({ to: "/tours", label: "toursNav" });
+			add("center", { to: "/tours", label: "toursNav" });
 		}
-		items.push(
-			{ to: "/devices", label: "devicesNav" },
-			{ to: "/second-reviews", label: "secondReviewsNav" },
-			{ to: "/appeals", label: "appealsNav" },
-			{ to: "/feedback", label: "feedbackNav" },
-			{ to: "/quality", label: "qualityNav" },
-			{ to: "/follow-up-queue", label: "followUpsQueue" },
-			{ to: "/survey-queue", label: "surveysQueue" },
-		);
+		add("center", { to: "/devices", label: "devicesNav" });
+		add("center", { to: "/second-reviews", label: "secondReviewsNav" });
+		add("center", { to: "/appeals", label: "appealsNav" });
+		add("center", { to: "/feedback", label: "feedbackNav" });
+		add("center", { to: "/quality", label: "qualityNav" });
+		add("center", { to: "/follow-up-queue", label: "followUpsQueue" });
+		add("center", { to: "/survey-queue", label: "surveysQueue" });
 	}
 	const canReadFollowUps =
 		user?.roles.some(
@@ -290,7 +336,7 @@ function useProductNavItems(): NavItem[] {
 				role.code === "platform_admin",
 		) ?? false;
 	if (canReadFollowUps && !canReviewEvidence) {
-		items.push({ to: "/follow-up-queue", label: "followUpsQueue" });
+		add("center", { to: "/follow-up-queue", label: "followUpsQueue" });
 	}
 	const canReadDormancy =
 		user?.roles.some(
@@ -298,34 +344,33 @@ function useProductNavItems(): NavItem[] {
 				role.code === "district_coordinator" || role.code === "platform_admin",
 		) ?? false;
 	if (canReadDormancy) {
-		items.push({ to: "/dormancy", label: "dormancyNav" });
+		add("center", { to: "/dormancy", label: "dormancyNav" });
 	}
 	if (user?.roles.some((role) => role.code === "district_coordinator")) {
-		items.push({ to: "/coverage", label: "coverageNav" });
+		add("center", { to: "/coverage", label: "coverageNav" });
 	}
 	const canWriteReferral =
 		user?.roles.some(
 			(role) => role.code === "trainer" || role.code === "district_coordinator",
 		) ?? false;
 	if (canWriteReferral) {
-		items.push({ to: "/referral-write", label: "referralsWriteNav" });
+		add("center", { to: "/referral-write", label: "referralsWriteNav" });
 	}
 	const canDiscover =
 		user?.roles.some((role) => role.code === "mentor") ?? false;
 	if (canDiscover) {
-		items.push(
-			{ to: "/mentor-discover", label: "mentorsDiscoverNav" },
-			{ to: "/messages", label: "messagesNav" },
-		);
+		add("mentors", { to: "/mentor-discover", label: "mentorsDiscoverNav" });
+		add("mentors", { to: "/messages", label: "messagesNav" });
 	}
 	const canApproveMentors =
 		user?.roles.some((role) => role.code === "platform_admin") ?? false;
 	if (canApproveMentors) {
-		items.push(
-			{ to: "/mentor-approvals", label: "mentorsApprovalsNav" },
-			{ to: "/mentor-review", label: "messagesReviewNav" },
-			{ to: "/mentor-safeguarding", label: "messagesCheckNav" },
-		);
+		add("mentors", { to: "/mentor-approvals", label: "mentorsApprovalsNav" });
+		add("mentors", { to: "/mentor-review", label: "messagesReviewNav" });
+		add("mentors", {
+			to: "/mentor-safeguarding",
+			label: "messagesCheckNav",
+		});
 	}
 	const canAnnounce =
 		user?.roles.some(
@@ -335,28 +380,24 @@ function useProductNavItems(): NavItem[] {
 				role.code === "platform_admin",
 		) ?? false;
 	if (canAnnounce) {
-		items.push({ to: "/announcements", label: "announcementsNav" });
+		add("center", { to: "/announcements", label: "announcementsNav" });
 	}
 	const canAdjustPoints =
 		user?.roles.some((role) => role.code === "platform_admin") ?? false;
 	if (canAdjustPoints) {
-		items.push(
-			{ to: "/approvals", label: "approvalsNav" },
-			{ to: "/adjustments", label: "adjustmentsNav" },
-			{ to: "/exceptions", label: "exceptionsNav" },
-			{ to: "/quality", label: "qualityNav" },
-		);
+		add("admin", { to: "/approvals", label: "approvalsNav" });
+		add("admin", { to: "/adjustments", label: "adjustmentsNav" });
+		add("admin", { to: "/exceptions", label: "exceptionsNav" });
+		add("admin", { to: "/quality", label: "qualityNav" });
 		if (!canReviewEvidence) {
-			items.push({ to: "/feedback", label: "feedbackNav" });
+			add("admin", { to: "/feedback", label: "feedbackNav" });
 		}
-		items.push(
-			{ to: "/notification-templates", label: "templatesNav" },
-			{ to: "/privacy-tools", label: "privacyToolsNav" },
-			{ to: "/settings", label: "settingsNav" },
-			{ to: "/webhooks", label: "webhooksNav" },
-			{ to: "/duplicates", label: "duplicatesNav" },
-			{ to: "/retention", label: "retentionNav" },
-		);
+		add("admin", { to: "/notification-templates", label: "templatesNav" });
+		add("admin", { to: "/privacy-tools", label: "privacyToolsNav" });
+		add("admin", { to: "/settings", label: "settingsNav" });
+		add("admin", { to: "/webhooks", label: "webhooksNav" });
+		add("admin", { to: "/duplicates", label: "duplicatesNav" });
+		add("admin", { to: "/retention", label: "retentionNav" });
 	}
 	const canReadAudit =
 		user?.roles.some(
@@ -367,7 +408,7 @@ function useProductNavItems(): NavItem[] {
 				role.code === "district_coordinator",
 		) ?? false;
 	if (canReadAudit) {
-		items.push({ to: "/audit", label: "auditNav" });
+		add("reports", { to: "/audit", label: "auditNav" });
 	}
 	const canReviewConcerns =
 		user?.roles.some(
@@ -375,17 +416,15 @@ function useProductNavItems(): NavItem[] {
 				role.code === "district_coordinator" || role.code === "platform_admin",
 		) ?? false;
 	if (canReviewConcerns) {
-		items.push({ to: "/concerns", label: "concernsNav" });
+		add("reports", { to: "/concerns", label: "concernsNav" });
 	}
 	const canManageHardware =
 		user?.roles.some((role) => role.code === "hardware_officer") ?? false;
 	if (canManageHardware) {
-		items.push(
-			{ to: "/inventory", label: "inventoryNav" },
-			{ to: "/licences", label: "licencesNav" },
-			{ to: "/handovers", label: "handoverNav" },
-			{ to: "/recovery", label: "recoveryNav" },
-		);
+		add("hardware", { to: "/inventory", label: "inventoryNav" });
+		add("hardware", { to: "/licences", label: "licencesNav" });
+		add("hardware", { to: "/handovers", label: "handoverNav" });
+		add("hardware", { to: "/recovery", label: "recoveryNav" });
 	}
 	const canOpenRounds =
 		user?.roles.some(
@@ -393,7 +432,7 @@ function useProductNavItems(): NavItem[] {
 				role.code === "district_coordinator" || role.code === "platform_admin",
 		) ?? false;
 	if (canOpenRounds) {
-		items.push({ to: "/rounds", label: "roundsNav" });
+		add("allocation", { to: "/rounds", label: "roundsNav" });
 	}
 	const canReadEquity =
 		user?.roles.some(
@@ -405,18 +444,16 @@ function useProductNavItems(): NavItem[] {
 				role.code === "hardware_officer",
 		) ?? false;
 	if (canReadEquity) {
-		items.push(
-			{ to: "/equity", label: "equityNav" },
-			{ to: "/donor-report", label: "donorNav" },
-			{ to: "/scheduled-report", label: "scheduledReportNav" },
-			{ to: "/warnings", label: "warningsNav" },
-			{ to: "/story-report", label: "storyReportNav" },
-		);
+		add("reports", { to: "/equity", label: "equityNav" });
+		add("reports", { to: "/donor-report", label: "donorNav" });
+		add("reports", { to: "/scheduled-report", label: "scheduledReportNav" });
+		add("reports", { to: "/warnings", label: "warningsNav" });
+		add("reports", { to: "/story-report", label: "storyReportNav" });
 	}
 	const canDecideGrants =
 		user?.roles.some((role) => role.code === "committee_member") ?? false;
 	if (canDecideGrants) {
-		items.push({ to: "/decisions", label: "decisionsNav" });
+		add("allocation", { to: "/decisions", label: "decisionsNav" });
 	}
 	return items;
 }
@@ -473,42 +510,93 @@ export function ProductIdentity({
 	);
 }
 
-export function ProductNavLinks({
-	layout = "rail",
+function NavDestination({
+	item,
 	onNavigate,
 }: {
-	layout?: "rail" | "row";
+	item: NavItem;
 	onNavigate?: () => void;
 }) {
 	const { t } = useI18n();
+	return (
+		<NavLink
+			to={item.to}
+			end={item.end}
+			onClick={onNavigate}
+			className={({ isActive }) =>
+				cn(
+					"inline-flex min-h-11 w-full items-center gap-2 rounded-full px-4 font-sans text-sm font-semibold",
+					isActive ? "bg-ink text-ink-fg" : "text-ink hover:bg-surface",
+				)
+			}
+		>
+			<NavIcon to={item.to} />
+			{t(item.label)}
+		</NavLink>
+	);
+}
+
+export function ProductNavLinks({ onNavigate }: { onNavigate?: () => void }) {
+	const { t } = useI18n();
+	const { pathname } = useLocation();
 	const items = useProductNavItems();
+	const [toggled, setToggled] = useState<Partial<Record<NavGroup, boolean>>>(
+		{},
+	);
+	const groups = GROUP_ORDER.map((id) => ({
+		id,
+		items: items.filter((item) => item.group === id),
+	})).filter((group) => group.items.length > 0);
+
+	function groupIsOpen(id: NavGroup) {
+		if (id in toggled) return toggled[id] === true;
+		return items.some(
+			(item) => item.group === id && isItemActive(item, pathname),
+		);
+	}
 
 	return (
 		<nav aria-label={t("navLabel")}>
-			<ul
-				className={cn(
-					"flex items-start gap-1",
-					layout === "row" ? "flex-row flex-wrap" : "flex-col",
-				)}
-			>
-				{items.map((item) => (
-					<li key={item.to}>
-						<NavLink
-							to={item.to}
-							end={item.end}
-							onClick={onNavigate}
-							className={({ isActive }) =>
-								cn(
-									"inline-flex min-h-11 items-center gap-2 rounded-full px-4 font-sans text-sm font-semibold",
-									isActive ? "bg-ink text-ink-fg" : "text-ink hover:bg-surface",
-								)
-							}
-						>
-							<NavIcon to={item.to} />
-							{t(item.label)}
-						</NavLink>
-					</li>
-				))}
+			<ul className="flex flex-col gap-1">
+				{groups.map((group) => {
+					const open = groupIsOpen(group.id);
+					const Icon = GROUP_ICON[group.id];
+					const panelId = `nav-group-${group.id}`;
+					return (
+						<li key={group.id}>
+							<button
+								type="button"
+								className="inline-flex min-h-11 w-full items-center gap-2 rounded-full px-4 font-sans text-sm font-semibold text-ink hover:bg-surface"
+								aria-expanded={open}
+								aria-controls={panelId}
+								onClick={() =>
+									setToggled((current) => ({
+										...current,
+										[group.id]: !open,
+									}))
+								}
+							>
+								<Icon aria-hidden="true" className="size-4 shrink-0" />
+								<span className="flex-1 text-left">
+									{t(GROUP_LABEL[group.id])}
+								</span>
+								<ChevronDown
+									aria-hidden="true"
+									className={cn("size-4 shrink-0", open ? "rotate-180" : "")}
+								/>
+							</button>
+							{open ? (
+								<ul id={panelId} className="flex flex-col gap-1 pl-3">
+									{group.items.map((item) => (
+										<li key={item.to}>
+											<NavDestination item={item} onNavigate={onNavigate} />
+										</li>
+									))}
+								</ul>
+							) : null}
+						</li>
+					);
+				})}
 			</ul>
 		</nav>
 	);

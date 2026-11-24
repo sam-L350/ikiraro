@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
+import { HomeCharts } from "@/components/home/overview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -77,6 +78,33 @@ export default function LearnerHomePage() {
 		{ query: {} },
 		{ enabled: canSessions },
 	);
+	const isAdmin = codes.includes("platform_admin");
+	const isHardware = codes.includes("hardware_officer");
+	const flags = {
+		points: canCatalog,
+		passport: canCatalog,
+		inbox: true,
+		followUps: isLearner,
+		surveys: isLearner,
+		operations: isManager || isCoordinator || isAdmin,
+		courses: codes.includes("content_author"),
+		reviews: codes.includes("content_reviewer"),
+		inventory: isHardware,
+		hardware: isHardware,
+		decisions: codes.includes("committee_member"),
+		equity:
+			codes.includes("auditor") ||
+			isAdmin ||
+			isCoordinator ||
+			isManager ||
+			isHardware,
+		approvals: isAdmin,
+		tickets: isAdmin || codes.includes("content_reviewer"),
+		mentors: codes.includes("mentor"),
+		dormancy: isCoordinator || isAdmin,
+		concerns: isCoordinator || isAdmin,
+		rounds: isCoordinator || isAdmin,
+	};
 
 	if (isStaff && !isLearner) {
 		const evidenceItems = (evidence.data?.items ?? []) as QueueItem[];
@@ -99,9 +127,11 @@ export default function LearnerHomePage() {
 			<StaffHome
 				evidenceItems={evidenceItems}
 				sessionItems={sessionItems}
+				enrollments={enrollments}
 				focus={focus}
 				verifier={isVerifier}
 				canCatalog={canCatalog}
+				flags={flags}
 			/>
 		);
 	}
@@ -138,15 +168,18 @@ export default function LearnerHomePage() {
 	const waiting = focus ? waitingRows(enrollments, focus, locale) : [];
 
 	return (
-		<div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8">
+		<div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8">
+			<h1 className="font-sans text-4xl font-semibold leading-tight text-fg">
+				{t("homeOverview")}
+			</h1>
 			{focus?.next ? (
 				<>
 					<p className="text-sm text-fg-muted">
 						{textFor(locale, focus.courseTitleRw, focus.courseTitleEn)}
 					</p>
-					<h1 className="font-sans text-4xl font-semibold leading-tight text-fg sm:text-5xl">
+					<p className="font-sans text-3xl font-semibold leading-tight text-fg sm:text-4xl">
 						{title}
-					</h1>
+					</p>
 					<Button asChild className="w-fit">
 						<Link to={`/tasks/${focus.enrollmentId}/${focus.next.taskId}`}>
 							{t("continueTask")}
@@ -166,6 +199,12 @@ export default function LearnerHomePage() {
 					) : null}
 				</>
 			)}
+			<HomeCharts
+				flags={flags}
+				enrollments={enrollments}
+				evidence={[]}
+				sessions={[]}
+			/>
 			{waiting.length > 0 ? (
 				<section className="flex flex-col gap-2">
 					<h2 className="font-meta text-xs uppercase text-fg-muted">
@@ -199,15 +238,19 @@ export default function LearnerHomePage() {
 function StaffHome({
 	evidenceItems,
 	sessionItems,
+	enrollments,
 	focus,
 	verifier,
 	canCatalog,
+	flags,
 }: {
 	evidenceItems: readonly QueueItem[];
 	sessionItems: readonly SessionItem[];
+	enrollments: readonly Enrollment[];
 	focus: Enrollment | null;
 	verifier: boolean;
 	canCatalog: boolean;
+	flags: Parameters<typeof HomeCharts>[0]["flags"];
 }) {
 	const { locale, t } = useI18n();
 	const evidenceRows = evidenceItems.map((item) => ({
@@ -248,8 +291,17 @@ function StaffHome({
 	return (
 		<div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8">
 			<h1 className="font-sans text-4xl font-semibold leading-tight text-fg">
-				{t("staffHomeLead")}
+				{t("homeOverview")}
 			</h1>
+			<p className="font-sans text-lg font-medium text-fg">
+				{t("staffHomeLead")}
+			</p>
+			<HomeCharts
+				flags={flags}
+				enrollments={enrollments}
+				evidence={evidenceItems}
+				sessions={sessionItems}
+			/>
 			{rows.length === 0 ? (
 				<EmptyState sentence={t("homeNothing")} action={badge ?? next} />
 			) : (
