@@ -4,7 +4,7 @@ import { SharedComputerCheck } from "@/components/auth/shared-computer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
-import { isApiClientError, useEngineMutation } from "@/lib/engine";
+import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
 
@@ -237,7 +237,15 @@ export function RegistrationForm({
 	const [done, setDone] = useState<{ name: string; phone: string } | null>(
 		null,
 	);
-	const [awaitingCode, setAwaitingCode] = useState<string | null>(null);
+	const [awaitingCode, setAwaitingCode] = useState<{
+		phone: string;
+		suggestion: string;
+	} | null>(null);
+	const [picks, setPicks] = useState<Record<string, string>>({});
+	const check = useEngine("/placement/questions", undefined, {
+		enabled: mode === "self",
+	});
+	const questions = mode === "self" ? (check.data?.questions ?? []) : [];
 	const self = useEngineMutation("/registrations");
 	const assisted = useEngineMutation("/registrations/assisted");
 	const minor = isMinor(dateOfBirth);
@@ -275,21 +283,45 @@ export function RegistrationForm({
 			...(email.trim() ? { email: email.trim() } : {}),
 			...(gender ? { gender } : {}),
 			...(guardian.trim() ? { guardianContact: guardian.trim() } : {}),
+			...(questions.length > 0 &&
+			questions.every((question) => picks[question.id])
+				? {
+						placementChoiceIds: questions.map(
+							(question) => picks[question.id] ?? "",
+						),
+					}
+				: {}),
 		};
 		try {
-			const created =
-				mode === "assisted"
-					? await assisted.mutateAsync({ body })
-					: await self.mutateAsync({ body });
-			if (mode === "assisted")
+			if (mode === "assisted") {
+				const created = await assisted.mutateAsync({ body });
 				setDone({ name: created.name, phone: created.phone });
-			else setAwaitingCode(created.phone);
+			} else {
+				const created = await self.mutateAsync({ body });
+				const suggestion = created.suggestion;
+				const course =
+					language === "rw" && suggestion?.titleRw
+						? suggestion.titleRw
+						: (suggestion?.titleEn ?? "");
+				setAwaitingCode({ phone: created.phone, suggestion: course });
+			}
 		} catch (caught) {
 			setError(reasonKey(caught));
 		}
 	}
 
-	if (awaitingCode) return <ActivationForm phone={awaitingCode} />;
+	if (awaitingCode) {
+		return (
+			<div className="mt-4 flex flex-col gap-4">
+				{awaitingCode.suggestion ? (
+					<p className="font-sans text-lg font-medium text-fg">
+						{t("placementSuggested", { course: awaitingCode.suggestion })}
+					</p>
+				) : null}
+				<ActivationForm phone={awaitingCode.phone} />
+			</div>
+		);
+	}
 
 	if (done) {
 		return (
@@ -484,6 +516,61 @@ export function RegistrationForm({
 				<p className="font-sans text-sm font-medium text-fg">
 					{t("minorVisibility")}
 				</p>
+			) : null}
+			{questions.length > 0 ? (
+				<div className="mt-4 flex flex-col gap-6">
+					<div>
+						<h2 className="font-sans text-2xl font-semibold text-fg">
+							{t("placementTitle")}
+						</h2>
+						<p className="mt-2 font-sans text-lg font-medium text-fg">
+							{t("placementSentence")}
+						</p>
+					</div>
+					{questions.map((question) => {
+						const prompt =
+							locale === "rw" && question.promptRw
+								? question.promptRw
+								: question.promptEn;
+						return (
+							<fieldset
+								key={question.id}
+								className="flex flex-col gap-2 border-0 p-0"
+							>
+								<legend className="font-sans text-lg font-semibold text-fg">
+									{prompt}
+								</legend>
+								{question.choices.map((choice) => {
+									const label =
+										locale === "rw" && choice.labelRw
+											? choice.labelRw
+											: choice.labelEn;
+									const selected = picks[question.id] === choice.id;
+									return (
+										<button
+											key={choice.id}
+											type="button"
+											aria-pressed={selected}
+											className={
+												selected
+													? "min-h-16 rounded-md bg-ink px-4 text-left font-sans text-lg font-semibold text-ink-fg"
+													: "min-h-16 rounded-md border border-line bg-card px-4 text-left font-sans text-lg font-medium text-fg"
+											}
+											onClick={() =>
+												setPicks((current) => ({
+													...current,
+													[question.id]: choice.id,
+												}))
+											}
+										>
+											{label}
+										</button>
+									);
+								})}
+							</fieldset>
+						);
+					})}
+				</div>
 			) : null}
 			{error ? (
 				<p className="font-sans text-sm font-medium text-danger" role="alert">

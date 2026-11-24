@@ -21,12 +21,18 @@ export async function createRegistration(input: {
 	gender?: string;
 	guardianContact?: string;
 	consents: { purpose: ConsentPurpose; granted: boolean }[];
+	placementChoiceIds?: string[];
 }): Promise<{
 	id: number;
 	name: string;
 	phone: string;
 	active: false;
 	codeSent: boolean;
+	suggestion: {
+		courseId: string;
+		titleEn: string;
+		titleRw: string;
+	} | null;
 }> {
 	return registerLearner(db, { ...input, ip: clientIp() }, smsSender());
 }

@@ -83,6 +83,14 @@ export {
 	notificationTemplates,
 } from "./notifications";
 export { opportunities, referrals } from "./opportunities";
+export {
+	pathwayCourses,
+	pathways,
+	placementAnswers,
+	placementChoices,
+	placementQuestions,
+	placementResults,
+} from "./pathways";
 export { grantExceptions, hardwareRecoveries } from "./recovery";
 export {
 	consents,

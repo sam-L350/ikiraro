@@ -12,6 +12,7 @@ import { writeAudit } from "../audit/write";
 import { consumeOtpChallenge, createOtp, readMatchingOtp } from "../auth/login";
 import { normalizeRwandanPhone } from "../auth/phone";
 import { createSession } from "../auth/sessions";
+import { type PlacementSuggestion, storePlacement } from "../learning/pathways";
 import type { SmsSender } from "../sms/sender";
 import { isUnder18, parseDateOfBirth } from "./age";
 import {
@@ -38,6 +39,7 @@ export type RegistrationInput = {
 	gender?: string;
 	guardianContact?: string;
 	consents: ConsentChoice[];
+	placementChoiceIds?: string[];
 	ip: string;
 };
 
@@ -47,6 +49,7 @@ export type RegisteredLearner = {
 	phone: string;
 	active: false;
 	codeSent: boolean;
+	suggestion: PlacementSuggestion | null;
 };
 
 const PHONE_EMAIL_DOMAIN = "@phone.ikiraro.local";
@@ -129,7 +132,11 @@ export async function registerLearner(
 		});
 	}
 
-	let created: { id: number; phone: string };
+	let created: {
+		id: number;
+		phone: string;
+		suggestion: PlacementSuggestion | null;
+	};
 	try {
 		created = await database.transaction(async (tx) => {
 			const [user] = await tx
@@ -172,7 +179,16 @@ export async function registerLearner(
 					minor,
 				},
 			});
-			return { id: user.id, phone: user.phone };
+			const choiceIds = input.placementChoiceIds ?? [];
+			const suggestion =
+				choiceIds.length > 0
+					? await storePlacement(tx, {
+							userId: user.id,
+							choiceIds,
+							ip: input.ip,
+						})
+					: null;
+			return { id: user.id, phone: user.phone, suggestion };
 		});
 	} catch (error) {
 		if (isUniqueViolation(error)) {
@@ -197,6 +213,7 @@ export async function registerLearner(
 		phone: created.phone,
 		active: false,
 		codeSent,
+		suggestion: created.suggestion,
 	};
 }
 

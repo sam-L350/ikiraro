@@ -171,6 +171,12 @@
 			"name": "passports"
 		},
 		{
+			"name": "pathways"
+		},
+		{
+			"name": "placement"
+		},
+		{
 			"name": "point-adjustments"
 		},
 		{
@@ -26616,6 +26622,891 @@
 				}
 			}
 		},
+		"/api/v1/pathways/create": {
+			"post": {
+				"operationId": "createPathwayRecord",
+				"summary": "Store an ordered pathway. Both languages are required.",
+				"tags": [
+					"pathways"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"courseIds": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"titleEn",
+									"titleRw",
+									"courseIds"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pathways": {
+			"get": {
+				"operationId": "getPathways",
+				"summary": "Ordered pathways, and the next course this person has not finished.",
+				"tags": [
+					"pathways"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"pathways": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"courses": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"finished": {
+																			"type": "boolean"
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"titleEn",
+																		"titleRw",
+																		"finished"
+																	],
+																	"additionalProperties": false
+																}
+															},
+															"nextCourseId": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw",
+															"courses",
+															"nextCourseId"
+														],
+														"additionalProperties": false
+													}
+												},
+												"canWrite": {
+													"type": "boolean"
+												},
+												"courses": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"pathways",
+												"canWrite",
+												"courses"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/placement/answer": {
+			"post": {
+				"operationId": "createPlacementAnswer",
+				"summary": "Store this person's check and the course it suggests.",
+				"tags": [
+					"placement"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"choiceIds": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"choiceIds"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"courseId": {
+													"type": "string"
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"courseId",
+												"titleEn",
+												"titleRw"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/placement": {
+			"get": {
+				"operationId": "getPlacement",
+				"summary": "This person's check and the course it suggested.",
+				"tags": [
+					"placement"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"questions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"promptEn": {
+																"type": "string"
+															},
+															"promptRw": {
+																"type": "string"
+															},
+															"choices": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"labelEn": {
+																			"type": "string"
+																		},
+																		"labelRw": {
+																			"type": "string"
+																		},
+																		"courseId": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"labelEn",
+																		"labelRw",
+																		"courseId"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"promptEn",
+															"promptRw",
+															"choices"
+														],
+														"additionalProperties": false
+													}
+												},
+												"suggestion": {
+													"type": "object",
+													"properties": {
+														"courseId": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"courseId",
+														"titleEn",
+														"titleRw"
+													],
+													"additionalProperties": false,
+													"nullable": true
+												},
+												"canWrite": {
+													"type": "boolean"
+												},
+												"courses": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"titleEn",
+															"titleRw"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"questions",
+												"suggestion",
+												"canWrite",
+												"courses"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/placement/questions/create": {
+			"post": {
+				"operationId": "createPlacementQuestionRecord",
+				"summary": "Add one part of the check. Each choice names a published course.",
+				"tags": [
+					"placement"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"promptEn": {
+										"type": "string"
+									},
+									"promptRw": {
+										"type": "string"
+									},
+									"choices": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"labelEn": {
+													"type": "string"
+												},
+												"labelRw": {
+													"type": "string"
+												},
+												"courseId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"labelEn",
+												"labelRw",
+												"courseId"
+											],
+											"additionalProperties": false
+										}
+									}
+								},
+								"required": [
+									"promptEn",
+									"promptRw",
+									"choices"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/placement/questions": {
+			"get": {
+				"operationId": "getPlacementQuestions",
+				"summary": "The check a person can answer while registering. No account is required.",
+				"tags": [
+					"placement"
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"questions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"position": {
+																"type": "number"
+															},
+															"promptEn": {
+																"type": "string"
+															},
+															"promptRw": {
+																"type": "string"
+															},
+															"choices": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"position": {
+																			"type": "number"
+																		},
+																		"labelEn": {
+																			"type": "string"
+																		},
+																		"labelRw": {
+																			"type": "string"
+																		},
+																		"courseId": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"position",
+																		"labelEn",
+																		"labelRw",
+																		"courseId"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"position",
+															"promptEn",
+															"promptRw",
+															"choices"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"questions"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/point-adjustments/{id}/approve": {
 			"post": {
 				"operationId": "createPointAdjustmentApproval",
@@ -30733,6 +31624,12 @@
 											],
 											"additionalProperties": false
 										}
+									},
+									"placementChoiceIds": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
 									}
 								},
 								"required": [
@@ -30781,6 +31678,27 @@
 												},
 												"codeSent": {
 													"type": "boolean"
+												},
+												"suggestion": {
+													"type": "object",
+													"properties": {
+														"courseId": {
+															"type": "string"
+														},
+														"titleEn": {
+															"type": "string"
+														},
+														"titleRw": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"courseId",
+														"titleEn",
+														"titleRw"
+													],
+													"additionalProperties": false,
+													"nullable": true
 												}
 											},
 											"required": [
@@ -30788,7 +31706,8 @@
 												"name",
 												"phone",
 												"active",
-												"codeSent"
+												"codeSent",
+												"suggestion"
 											],
 											"additionalProperties": false
 										},

@@ -67,6 +67,8 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/follow-ups", label: "followUpsNav" },
 			{ to: "/surveys", label: "surveysNav" },
 			{ to: "/stories", label: "storiesNav" },
+			{ to: "/pathways", label: "pathwaysNav" },
+			{ to: "/placement", label: "placementNav" },
 			{ to: "/mentors", label: "mentorsNav" },
 			{ to: "/opportunities", label: "opportunitiesNav" },
 			{ to: "/referrals", label: "referralsNav" },
@@ -114,7 +116,11 @@ function useProductNavItems(): NavItem[] {
 		items.push({ to: "/staff/new", label: "staffAccounts" });
 	}
 	if (canWriteCourses) {
-		items.push({ to: "/courses", label: "coursesNav" });
+		items.push(
+			{ to: "/courses", label: "coursesNav" },
+			{ to: "/pathways", label: "pathwaysNav" },
+			{ to: "/placement", label: "placementNav" },
+		);
 	}
 	if (canReviewCourses) {
 		items.push({ to: "/reviews", label: "reviewsNav" });

@@ -102,7 +102,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/8.10-maker-checker-and-support`
   - [x] `phase/8.11-success-stories`
 - [ ] Phase 9 — Scale (`phase/9-scale`)
-  - [ ] `phase/9.1-pathways-and-placement`
+  - [x] `phase/9.1-pathways-and-placement`
   - [ ] `phase/9.2-peer-and-group-work`
   - [ ] `phase/9.3-scheduled-reports-and-warnings`
   - [ ] `phase/9.4-portable-credentials`
@@ -950,7 +950,7 @@ Paper, ink, and one working action stay. An icon sits beside a label. A status s
 
 | Branch | Shows |
 | --- | --- |
-| `phase/9.1-pathways-and-placement` | The placement check is a short list of rules, each with a pass, fail, or unknown pill. The pathway is ordered. The next course is the ink action. |
+| `phase/9.1-pathways-and-placement` | The placement check is a short set of visual choices and suggests one starting course. The pathway is ordered. The next course is the ink action. |
 | `phase/9.2-peer-and-group-work` | Questions on a task are a thread. Group credit is a table of people and what each person did. Practice mode has its own empty state, and the sample data is labeled as sample. |
 | `phase/9.3-scheduled-reports-and-warnings` | A warning is a table: who, kind, and how old it is. The scheduled report uses the same table shape as the donor report, and the download stays quiet. |
 | `phase/9.4-portable-credentials` | Badge level and expiry sit in a table on the passport. Licence seats are a table. Grant and revoke are row actions, and only one of them is ink. |
