@@ -232,6 +232,13 @@
       "when": 1795457000000,
       "tag": "0032_phase7_devices",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795458000000,
+      "tag": "0033_phase7_inventory",
+      "breakpoints": true
     }
   ]
 }

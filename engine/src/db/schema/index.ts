@@ -46,6 +46,7 @@ export type {
 	User,
 } from "./identity";
 export { accounts, sessions, users } from "./identity";
+export { hardwareInventory, hardwareStatusHistory } from "./inventory";
 export {
 	enrollments,
 	moduleProgress,

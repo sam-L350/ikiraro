@@ -157,6 +157,11 @@ function useProductNavItems(): NavItem[] {
 	if (canReviewConcerns) {
 		items.push({ to: "/concerns", label: "concernsNav" });
 	}
+	const canManageHardware =
+		user?.roles.some((role) => role.code === "hardware_officer") ?? false;
+	if (canManageHardware) {
+		items.push({ to: "/inventory", label: "inventoryNav" });
+	}
 	return items;
 }
 

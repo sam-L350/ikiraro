@@ -72,6 +72,9 @@
 			"name": "feedback-snippets"
 		},
 		{
+			"name": "inventory"
+		},
+		{
 			"name": "media"
 		},
 		{
@@ -11968,6 +11971,1367 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/inventory/{id}": {
+			"get": {
+				"operationId": "getInventoryItem",
+				"summary": "One item and the status history that was added after it.",
+				"tags": [
+					"inventory"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"category": {
+													"type": "string"
+												},
+												"serial": {
+													"type": "string"
+												},
+												"condition": {
+													"type": "string",
+													"enum": [
+														"good",
+														"worn",
+														"damaged"
+													]
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"retired",
+														"in_stock",
+														"reserved",
+														"awarded",
+														"in_repair",
+														"lost"
+													]
+												},
+												"centerId": {
+													"type": "string"
+												},
+												"centerName": {
+													"type": "string"
+												},
+												"donor": {
+													"type": "string",
+													"nullable": true
+												},
+												"acquiredOn": {
+													"type": "string"
+												},
+												"criteria": {
+													"type": "array",
+													"items": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "points",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "badges",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	},
+																	"badgeId": {
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"kind"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "hours",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "attendance",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "district",
+																		"type": "string"
+																	},
+																	"districtId": {
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"districtId"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "months_active",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															}
+														]
+													}
+												},
+												"history": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"retired",
+																	"in_stock",
+																	"reserved",
+																	"awarded",
+																	"in_repair",
+																	"lost"
+																]
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"note": {
+																"type": "string",
+																"nullable": true
+															},
+															"recordedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"centerName",
+															"note",
+															"recordedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"category",
+												"serial",
+												"condition",
+												"status",
+												"centerId",
+												"centerName",
+												"donor",
+												"acquiredOn",
+												"criteria",
+												"history",
+												"centers"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/inventory/{id}/update": {
+			"put": {
+				"operationId": "updateInventoryItem",
+				"summary": "Change the current item. A new status or center is added to the history.",
+				"tags": [
+					"inventory"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"condition": {
+										"type": "string"
+									},
+									"status": {
+										"type": "string"
+									},
+									"centerId": {
+										"type": "string"
+									},
+									"donor": {
+										"type": "string"
+									},
+									"note": {
+										"type": "string"
+									},
+									"criteria": {
+										"type": "array",
+										"items": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "points",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "badges",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														},
+														"badgeId": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"kind"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "hours",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "attendance",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "district",
+															"type": "string"
+														},
+														"districtId": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"kind",
+														"districtId"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "months_active",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												}
+											]
+										}
+									}
+								},
+								"required": [
+									"condition",
+									"status",
+									"centerId",
+									"criteria"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"category": {
+													"type": "string"
+												},
+												"serial": {
+													"type": "string"
+												},
+												"condition": {
+													"type": "string",
+													"enum": [
+														"good",
+														"worn",
+														"damaged"
+													]
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"retired",
+														"in_stock",
+														"reserved",
+														"awarded",
+														"in_repair",
+														"lost"
+													]
+												},
+												"centerId": {
+													"type": "string"
+												},
+												"centerName": {
+													"type": "string"
+												},
+												"donor": {
+													"type": "string",
+													"nullable": true
+												},
+												"acquiredOn": {
+													"type": "string"
+												},
+												"criteria": {
+													"type": "array",
+													"items": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "points",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "badges",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	},
+																	"badgeId": {
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"kind"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "hours",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "attendance",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "district",
+																		"type": "string"
+																	},
+																	"districtId": {
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"districtId"
+																],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"const": "months_active",
+																		"type": "string"
+																	},
+																	"minimum": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"minimum"
+																],
+																"additionalProperties": false
+															}
+														]
+													}
+												},
+												"history": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"retired",
+																	"in_stock",
+																	"reserved",
+																	"awarded",
+																	"in_repair",
+																	"lost"
+																]
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"note": {
+																"type": "string",
+																"nullable": true
+															},
+															"recordedAt": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"status",
+															"centerName",
+															"note",
+															"recordedAt"
+														],
+														"additionalProperties": false
+													}
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"category",
+												"serial",
+												"condition",
+												"status",
+												"centerId",
+												"centerName",
+												"donor",
+												"acquiredOn",
+												"criteria",
+												"history",
+												"centers"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/inventory/create": {
+			"post": {
+				"operationId": "createInventoryItem",
+				"summary": "Add an item. It starts in stock, and that first status is kept in the history.",
+				"tags": [
+					"inventory"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"category": {
+										"type": "string"
+									},
+									"serial": {
+										"type": "string"
+									},
+									"condition": {
+										"type": "string"
+									},
+									"centerId": {
+										"type": "string"
+									},
+									"donor": {
+										"type": "string"
+									},
+									"acquiredOn": {
+										"type": "string"
+									},
+									"criteria": {
+										"type": "array",
+										"items": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "points",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "badges",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														},
+														"badgeId": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"kind"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "hours",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "attendance",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "district",
+															"type": "string"
+														},
+														"districtId": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"kind",
+														"districtId"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"const": "months_active",
+															"type": "string"
+														},
+														"minimum": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"kind",
+														"minimum"
+													],
+													"additionalProperties": false
+												}
+											]
+										}
+									}
+								},
+								"required": [
+									"name",
+									"category",
+									"serial",
+									"condition",
+									"centerId",
+									"acquiredOn",
+									"criteria"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/inventory": {
+			"get": {
+				"operationId": "getInventory",
+				"summary": "Items on the hardware register, and the centers that can hold them.",
+				"tags": [
+					"inventory"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "centerId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"category": {
+																"type": "string"
+															},
+															"serial": {
+																"type": "string"
+															},
+															"condition": {
+																"type": "string",
+																"enum": [
+																	"good",
+																	"worn",
+																	"damaged"
+																]
+															},
+															"status": {
+																"type": "string",
+																"enum": [
+																	"retired",
+																	"in_stock",
+																	"reserved",
+																	"awarded",
+																	"in_repair",
+																	"lost"
+																]
+															},
+															"centerId": {
+																"type": "string"
+															},
+															"centerName": {
+																"type": "string"
+															},
+															"donor": {
+																"type": "string",
+																"nullable": true
+															},
+															"acquiredOn": {
+																"type": "string"
+															},
+															"criteria": {
+																"type": "array",
+																"items": {
+																	"oneOf": [
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "points",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "badges",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				},
+																				"badgeId": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"kind"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "hours",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "attendance",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "district",
+																					"type": "string"
+																				},
+																				"districtId": {
+																					"type": "string"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"districtId"
+																			],
+																			"additionalProperties": false
+																		},
+																		{
+																			"type": "object",
+																			"properties": {
+																				"kind": {
+																					"const": "months_active",
+																					"type": "string"
+																				},
+																				"minimum": {
+																					"type": "number"
+																				}
+																			},
+																			"required": [
+																				"kind",
+																				"minimum"
+																			],
+																			"additionalProperties": false
+																		}
+																	]
+																}
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"category",
+															"serial",
+															"condition",
+															"status",
+															"centerId",
+															"centerName",
+															"donor",
+															"acquiredOn",
+															"criteria"
+														],
+														"additionalProperties": false
+													}
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"items",
+												"centers"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}
