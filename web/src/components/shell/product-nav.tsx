@@ -57,6 +57,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/conditions", label: "conditionsNav" },
 			{ to: "/follow-ups", label: "followUpsNav" },
 			{ to: "/surveys", label: "surveysNav" },
+			{ to: "/mentors", label: "mentorsNav" },
 		);
 	}
 	const canReadPoints =
@@ -135,6 +136,16 @@ function useProductNavItems(): NavItem[] {
 		) ?? false;
 	if (canReadDormancy) {
 		items.push({ to: "/dormancy", label: "dormancyNav" });
+	}
+	const canDiscover =
+		user?.roles.some((role) => role.code === "mentor") ?? false;
+	if (canDiscover) {
+		items.push({ to: "/mentor-discover", label: "mentorsDiscoverNav" });
+	}
+	const canApproveMentors =
+		user?.roles.some((role) => role.code === "platform_admin") ?? false;
+	if (canApproveMentors) {
+		items.push({ to: "/mentor-approvals", label: "mentorsApprovalsNav" });
 	}
 	const canAnnounce =
 		user?.roles.some(

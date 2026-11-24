@@ -67,6 +67,7 @@ export {
 	taskProgress,
 } from "./learning";
 export { mediaObjects } from "./media";
+export { mentorOptIns, mentorRequests, mentors } from "./mentors";
 export { misconductReports } from "./misconduct";
 export {
 	notificationPreferences,
