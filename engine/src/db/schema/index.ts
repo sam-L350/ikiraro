@@ -130,6 +130,14 @@ export {
 	supportTickets,
 } from "./support";
 export { outcomeSurveys } from "./surveys";
+export { contentTemplates } from "./templates";
+export {
+	popupAttendance,
+	popupHomeLinks,
+	popupSessions,
+	popupSignups,
+	popupTours,
+} from "./tours";
 export {
 	inPersonChecks,
 	secondReviews,

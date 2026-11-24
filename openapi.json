@@ -63,6 +63,9 @@
 			"name": "courses"
 		},
 		{
+			"name": "coverage"
+		},
+		{
 			"name": "credentials"
 		},
 		{
@@ -249,7 +252,13 @@
 			"name": "tasks"
 		},
 		{
+			"name": "templates"
+		},
+		{
 			"name": "tickets"
+		},
+		{
+			"name": "tours"
 		},
 		{
 			"name": "verifications"
@@ -9610,6 +9619,113 @@
 											},
 											"required": [
 												"courses"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/coverage": {
+			"get": {
+				"operationId": "getCoverage",
+				"summary": "Sectors with no center, and where their learners already train.",
+				"tags": [
+					"coverage"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sectors": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"sector": {
+																"type": "string"
+															},
+															"learners": {
+																"type": "number"
+															},
+															"homeCenter": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"sector",
+															"learners",
+															"homeCenter"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"sectors"
 											],
 											"additionalProperties": false
 										},
@@ -41692,6 +41808,386 @@
 				}
 			}
 		},
+		"/api/v1/templates/create": {
+			"post": {
+				"operationId": "createContentTemplate",
+				"summary": "Store a task shape. Using it is a separate step.",
+				"tags": [
+					"templates"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"titleEn": {
+										"type": "string"
+									},
+									"titleRw": {
+										"type": "string"
+									},
+									"instructionsEn": {
+										"type": "string"
+									},
+									"instructionsRw": {
+										"type": "string"
+									},
+									"evidenceType": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name",
+									"titleEn"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"titleEn": {
+													"type": "string"
+												},
+												"titleRw": {
+													"type": "string",
+													"nullable": true
+												},
+												"evidenceType": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"id",
+												"name",
+												"titleEn",
+												"titleRw",
+												"evidenceType"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/templates": {
+			"get": {
+				"operationId": "getContentTemplates",
+				"summary": "Task templates an author can copy into a draft.",
+				"tags": [
+					"templates"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"templates": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string",
+																"nullable": true
+															},
+															"evidenceType": {
+																"type": "string",
+																"nullable": true
+															}
+														},
+														"required": [
+															"id",
+															"name",
+															"titleEn",
+															"titleRw",
+															"evidenceType"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"templates"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/templates/use": {
+			"post": {
+				"operationId": "createTemplateUse",
+				"summary": "Copy a template into a new draft course.",
+				"tags": [
+					"templates"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"templateId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"templateId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"courseId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"courseId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/tickets/{id}/answer": {
 			"post": {
 				"operationId": "createTicketAnswer",
@@ -42255,6 +42751,929 @@
 										"meta"
 									],
 									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tours/attend": {
+			"post": {
+				"operationId": "createTourAttendance",
+				"summary": "Mark that a signed-up learner came.",
+				"tags": [
+					"tours"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"sessionId": {
+										"type": "string"
+									},
+									"userId": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"sessionId",
+									"userId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sessionId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"sessionId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tours/create": {
+			"post": {
+				"operationId": "createPopupTour",
+				"summary": "Store a temporary place and the center people return to.",
+				"tags": [
+					"tours"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"place": {
+										"type": "string"
+									},
+									"homeCenterId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"place",
+									"homeCenterId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tours": {
+			"get": {
+				"operationId": "getTours",
+				"summary": "Tours a manager or coordinator can run.",
+				"tags": [
+					"tours"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"tours": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"place": {
+																"type": "string"
+															},
+															"homeCenterId": {
+																"type": "string"
+															},
+															"homeCenterName": {
+																"type": "string"
+															},
+															"sessions": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"id": {
+																			"type": "string"
+																		},
+																		"topic": {
+																			"type": "string"
+																		},
+																		"startsAt": {
+																			"type": "string"
+																		},
+																		"minutes": {
+																			"type": "number"
+																		},
+																		"capacity": {
+																			"type": "number"
+																		},
+																		"signedUp": {
+																			"type": "number"
+																		}
+																	},
+																	"required": [
+																		"id",
+																		"topic",
+																		"startsAt",
+																		"minutes",
+																		"capacity",
+																		"signedUp"
+																	],
+																	"additionalProperties": false
+																}
+															},
+															"people": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"userId": {
+																			"type": "number"
+																		},
+																		"name": {
+																			"type": "string"
+																		},
+																		"sessionId": {
+																			"type": "string"
+																		},
+																		"attended": {
+																			"type": "boolean"
+																		},
+																		"linked": {
+																			"type": "boolean"
+																		}
+																	},
+																	"required": [
+																		"userId",
+																		"name",
+																		"sessionId",
+																		"attended",
+																		"linked"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"id",
+															"place",
+															"homeCenterId",
+															"homeCenterName",
+															"sessions",
+															"people"
+														],
+														"additionalProperties": false
+													}
+												},
+												"centers": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"id",
+															"name"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"tours",
+												"centers"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tours/link": {
+			"post": {
+				"operationId": "createTourHomeLink",
+				"summary": "Set the learner's home center to the tour's center.",
+				"tags": [
+					"tours"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"tourId": {
+										"type": "string"
+									},
+									"userId": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"tourId",
+									"userId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"tourId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"tourId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tours/open": {
+			"get": {
+				"operationId": "getTourOpenSessions",
+				"summary": "Upcoming pop-up sessions a learner can join.",
+				"tags": [
+					"tours"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sessions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"place": {
+																"type": "string"
+															},
+															"homeCenter": {
+																"type": "string"
+															},
+															"topic": {
+																"type": "string"
+															},
+															"startsAt": {
+																"type": "string"
+															},
+															"placesLeft": {
+																"type": "number"
+															},
+															"signedUp": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"id",
+															"place",
+															"homeCenter",
+															"topic",
+															"startsAt",
+															"placesLeft",
+															"signedUp"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"sessions"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tours/session": {
+			"post": {
+				"operationId": "createTourSessionSlot",
+				"summary": "Add a session at a pop-up.",
+				"tags": [
+					"tours"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"tourId": {
+										"type": "string"
+									},
+									"topic": {
+										"type": "string"
+									},
+									"startsAt": {
+										"type": "string"
+									},
+									"minutes": {
+										"type": "number"
+									},
+									"capacity": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"tourId",
+									"topic",
+									"startsAt",
+									"minutes",
+									"capacity"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/tours/signup": {
+			"post": {
+				"operationId": "createTourSignup",
+				"summary": "Take one place on a pop-up session.",
+				"tags": [
+					"tours"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"sessionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sessionId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"sessionId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"sessionId"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
 								}
 							}
 						}

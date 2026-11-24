@@ -1,5 +1,12 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { isApiClientError, useEngine } from "@/lib/engine";
+import { Button } from "@/components/ui/button";
+import {
+	invalidateEngine,
+	isApiClientError,
+	useEngine,
+	useEngineMutation,
+} from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
 type ScheduleItem = {
@@ -13,6 +20,16 @@ type ScheduleItem = {
 	minutes: number;
 	open: boolean;
 	attended: boolean;
+};
+
+type OpenTour = {
+	id: string;
+	place: string;
+	homeCenter: string;
+	topic: string;
+	startsAt: string;
+	placesLeft: number;
+	signedUp: boolean;
 };
 
 function courseTitle(
@@ -35,6 +52,9 @@ function when(locale: "rw" | "en", value: string): string {
 export default function SchedulePage() {
 	const { locale, t } = useI18n();
 	const schedule = useEngine("/schedule");
+	const tours = useEngine("/tours/open");
+	const signup = useEngineMutation("/tours/signup");
+	const [tourError, setTourError] = useState<string | null>(null);
 
 	if (schedule.isPending) {
 		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
@@ -109,6 +129,110 @@ export default function SchedulePage() {
 					})}
 				</ul>
 			)}
+			<section className="flex flex-col gap-3">
+				<h2 className="font-meta text-xs uppercase text-fg-muted">
+					{t("toursTitle")}
+				</h2>
+				{tours.isPending ? (
+					<div className="h-16 animate-pulse rounded-md bg-surface" />
+				) : tours.error || !tours.data ? (
+					<p className="text-lg text-destructive">{t("tryAgain")}</p>
+				) : (tours.data.sessions ?? []).length === 0 ? (
+					<p className="font-sans text-lg font-medium text-fg">
+						{t("toursOpenEmpty")}
+					</p>
+				) : (
+					<TourTable
+						sessions={(tours.data.sessions ?? []) as OpenTour[]}
+						locale={locale}
+						inkId={
+							((tours.data.sessions ?? []) as OpenTour[]).find(
+								(session) => !session.signedUp && session.placesLeft > 0,
+							)?.id ?? null
+						}
+						pending={signup.isPending}
+						onSignUp={async (sessionId) => {
+							setTourError(null);
+							try {
+								await signup.mutateAsync({ body: { sessionId } });
+								await invalidateEngine("/tours/open");
+							} catch (caught) {
+								setTourError(
+									caught instanceof Error ? caught.message : t("tryAgain"),
+								);
+							}
+						}}
+					/>
+				)}
+				{tourError ? (
+					<p className="text-lg text-destructive">{tourError}</p>
+				) : null}
+			</section>
 		</section>
+	);
+}
+
+function TourTable({
+	sessions,
+	locale,
+	inkId,
+	pending,
+	onSignUp,
+}: {
+	sessions: OpenTour[];
+	locale: "rw" | "en";
+	inkId: string | null;
+	pending: boolean;
+	onSignUp: (sessionId: string) => Promise<void>;
+}) {
+	const { t } = useI18n();
+	return (
+		<table className="w-full border-collapse text-left">
+			<thead>
+				<tr className="font-meta text-xs uppercase text-fg-muted">
+					<th className="border-b border-line py-2 font-semibold">
+						{t("toursPlace")}
+					</th>
+					<th className="border-b border-line py-2 font-semibold">
+						{t("toursTopic")}
+					</th>
+					<th className="border-b border-line py-2 font-semibold">
+						{t("toursWhen")}
+					</th>
+					<th className="border-b border-line py-2 font-semibold" />
+				</tr>
+			</thead>
+			<tbody>
+				{sessions.map((session) => (
+					<tr key={session.id}>
+						<td className="border-b border-line py-3 font-sans text-lg text-fg">
+							{session.place}
+						</td>
+						<td className="border-b border-line py-3 font-sans text-lg text-fg">
+							{session.topic}
+						</td>
+						<td className="border-b border-line py-3 font-sans text-lg text-fg">
+							{when(locale, session.startsAt)}
+						</td>
+						<td className="border-b border-line py-3">
+							{session.signedUp ? (
+								<Badge variant="neutral">{t("toursSignedUp")}</Badge>
+							) : session.placesLeft === 0 ? (
+								<Badge variant="danger">{t("sessionFull")}</Badge>
+							) : (
+								<Button
+									type="button"
+									variant={session.id === inkId ? "ink" : "quiet"}
+									disabled={pending}
+									onClick={() => void onSignUp(session.id)}
+								>
+									{t("toursSignUp")}
+								</Button>
+							)}
+						</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
 	);
 }

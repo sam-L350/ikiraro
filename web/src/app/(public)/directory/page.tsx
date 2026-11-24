@@ -122,21 +122,44 @@ export default function DirectoryPage() {
 							</circle>
 						))}
 					</svg>
-					<ul>
-						{items.map((item) => (
-							<li key={item.id} className="border-t border-ink/15 py-4">
-								<p className="font-sans text-lg font-medium text-fg">
-									{item.name}
-								</p>
-								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{item.sector} · {item.district}
-									{item.distanceKm !== null
-										? ` · ${t("directoryKm", { count: String(item.distanceKm) })}`
-										: ""}
-								</p>
-							</li>
-						))}
-					</ul>
+					<table className="w-full border-collapse text-left">
+						<thead>
+							<tr className="font-meta text-xs uppercase text-fg-muted">
+								<th className="border-b border-line py-2 font-semibold">
+									{t("directoryCenter")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("directorySector")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("directoryDistrict")}
+								</th>
+								<th className="border-b border-line py-2 font-semibold">
+									{t("directoryDistance")}
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{items.map((item) => (
+								<tr key={item.id}>
+									<td className="border-b border-line py-3 font-sans text-lg text-fg">
+										{item.name}
+									</td>
+									<td className="border-b border-line py-3 font-sans text-lg text-fg">
+										{item.sector}
+									</td>
+									<td className="border-b border-line py-3 font-sans text-lg text-fg">
+										{item.district}
+									</td>
+									<td className="border-b border-line py-3 font-sans text-lg text-fg">
+										{item.distanceKm === null
+											? ""
+											: t("directoryKm", { count: String(item.distanceKm) })}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
 				</div>
 			)}
 			{unmapped.length > 0 && items.length > 0 ? (

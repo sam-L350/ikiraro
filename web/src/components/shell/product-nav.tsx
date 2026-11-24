@@ -118,6 +118,7 @@ function useProductNavItems(): NavItem[] {
 	if (canWriteCourses) {
 		items.push(
 			{ to: "/courses", label: "coursesNav" },
+			{ to: "/templates", label: "contentTemplatesNav" },
 			{ to: "/pathways", label: "pathwaysNav" },
 			{ to: "/placement", label: "placementNav" },
 		);
@@ -140,6 +141,17 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/evidence", label: "evidenceQueueTitle" },
 			{ to: "/questions", label: "taskQuestionsNav" },
 			{ to: "/sessions", label: "sessionsNav" },
+		);
+		if (
+			user?.roles.some(
+				(role) =>
+					role.code === "center_manager" ||
+					role.code === "district_coordinator",
+			)
+		) {
+			items.push({ to: "/tours", label: "toursNav" });
+		}
+		items.push(
 			{ to: "/devices", label: "devicesNav" },
 			{ to: "/second-reviews", label: "secondReviewsNav" },
 			{ to: "/appeals", label: "appealsNav" },
@@ -166,6 +178,9 @@ function useProductNavItems(): NavItem[] {
 		) ?? false;
 	if (canReadDormancy) {
 		items.push({ to: "/dormancy", label: "dormancyNav" });
+	}
+	if (user?.roles.some((role) => role.code === "district_coordinator")) {
+		items.push({ to: "/coverage", label: "coverageNav" });
 	}
 	const canWriteReferral =
 		user?.roles.some(
