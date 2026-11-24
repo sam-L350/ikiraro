@@ -93,6 +93,12 @@ export {
 export { allocationRounds, roundApplications } from "./rounds";
 export { smsCharges } from "./sms";
 export { taskSubmissions } from "./submissions";
+export {
+	adminApprovals,
+	helpGuides,
+	supportResponses,
+	supportTickets,
+} from "./support";
 export { outcomeSurveys } from "./surveys";
 export {
 	inPersonChecks,

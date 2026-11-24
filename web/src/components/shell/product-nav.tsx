@@ -43,7 +43,16 @@ function useProductNavItems(): NavItem[] {
 		{ to: "/home", label: "navHome", end: true },
 		{ to: "/profile", label: "yourProfile", end: true },
 		{ to: "/inbox", label: "inboxNav" },
+		{ to: "/help", label: "helpNav" },
 	];
+	const canAnswerTickets =
+		user?.roles.some(
+			(role) =>
+				role.code === "platform_admin" || role.code === "content_reviewer",
+		) ?? false;
+	if (canAnswerTickets) {
+		items.push({ to: "/tickets", label: "ticketsNav" });
+	}
 	if (canUseCatalog) {
 		items.push({ to: "/catalog", label: "catalogNav" });
 	}
@@ -114,7 +123,10 @@ function useProductNavItems(): NavItem[] {
 			(role) => role.code === "trainer" || role.code === "center_manager",
 		) ?? false;
 	if (canPack) {
-		items.push({ to: "/content-packs", label: "contentPacksNav" });
+		items.push(
+			{ to: "/content-packs", label: "contentPacksNav" },
+			{ to: "/field-guide", label: "fieldGuideNav" },
+		);
 	}
 	if (canReviewEvidence) {
 		items.push(
@@ -185,6 +197,7 @@ function useProductNavItems(): NavItem[] {
 		user?.roles.some((role) => role.code === "platform_admin") ?? false;
 	if (canAdjustPoints) {
 		items.push(
+			{ to: "/approvals", label: "approvalsNav" },
 			{ to: "/adjustments", label: "adjustmentsNav" },
 			{ to: "/exceptions", label: "exceptionsNav" },
 			{ to: "/quality", label: "qualityNav" },

@@ -8,7 +8,7 @@ import { getPrivateMedia, putPrivateMedia } from "./core/storage/media-http";
  * Assembles the HTTP application:
  *
  * - `endpoints`  — generated from `src/api/**` (typed RPC, OpenAPI, client).
- *   A center can download a published course, and an offline review keeps its time.
+ *   A role change waits for a second admin. Help, tickets, and a field guide are in the app.
  * - `rawRoutes`  — explicit routes for things that are not JSON function calls
  * - `onError`    — hook unexpected failures into your error tracker
  */
