@@ -177,6 +177,18 @@ function useProductNavItems(): NavItem[] {
 	if (canOpenRounds) {
 		items.push({ to: "/rounds", label: "roundsNav" });
 	}
+	const canReadEquity =
+		user?.roles.some(
+			(role) =>
+				role.code === "auditor" ||
+				role.code === "platform_admin" ||
+				role.code === "district_coordinator" ||
+				role.code === "center_manager" ||
+				role.code === "hardware_officer",
+		) ?? false;
+	if (canReadEquity) {
+		items.push({ to: "/equity", label: "equityNav" });
+	}
 	const canDecideGrants =
 		user?.roles.some((role) => role.code === "committee_member") ?? false;
 	if (canDecideGrants) {

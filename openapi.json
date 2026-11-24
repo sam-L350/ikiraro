@@ -75,6 +75,9 @@
 			"name": "enrollments"
 		},
 		{
+			"name": "equity"
+		},
+		{
 			"name": "evidence-queue"
 		},
 		{
@@ -91,6 +94,9 @@
 		},
 		{
 			"name": "inventory"
+		},
+		{
+			"name": "leaderboard"
 		},
 		{
 			"name": "media"
@@ -12504,6 +12510,395 @@
 				}
 			}
 		},
+		"/api/v1/equity/export": {
+			"get": {
+				"operationId": "getEquityExport",
+				"summary": "CSV of the same counts the viewer can see. Names are not in the file.",
+				"tags": [
+					"equity"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"csv": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"csv"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/equity": {
+			"get": {
+				"operationId": "getEquity",
+				"summary": "Funnel, equity slices, and donor batches inside the viewer's scope.",
+				"tags": [
+					"equity"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"funnel": {
+													"type": "object",
+													"properties": {
+														"registered": {
+															"type": "number"
+														},
+														"enrolled": {
+															"type": "number"
+														},
+														"submitted": {
+															"type": "number"
+														},
+														"approved": {
+															"type": "number"
+														},
+														"badges": {
+															"type": "number"
+														},
+														"applicants": {
+															"type": "number"
+														},
+														"recipients": {
+															"type": "number"
+														},
+														"activeAt90Days": {
+															"type": "number"
+														}
+													},
+													"required": [
+														"registered",
+														"enrolled",
+														"submitted",
+														"approved",
+														"badges",
+														"applicants",
+														"recipients",
+														"activeAt90Days"
+													],
+													"additionalProperties": false
+												},
+												"districts": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"label": {
+																"type": "string"
+															},
+															"registered": {
+																"type": "number"
+															},
+															"enrolled": {
+																"type": "number"
+															},
+															"applicants": {
+																"type": "number"
+															},
+															"recipients": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"label",
+															"registered",
+															"enrolled",
+															"applicants",
+															"recipients"
+														],
+														"additionalProperties": false
+													}
+												},
+												"ages": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"label": {
+																"type": "string"
+															},
+															"registered": {
+																"type": "number"
+															},
+															"enrolled": {
+																"type": "number"
+															},
+															"applicants": {
+																"type": "number"
+															},
+															"recipients": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"label",
+															"registered",
+															"enrolled",
+															"applicants",
+															"recipients"
+														],
+														"additionalProperties": false
+													}
+												},
+												"sectors": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"label": {
+																"type": "string"
+															},
+															"registered": {
+																"type": "number"
+															},
+															"enrolled": {
+																"type": "number"
+															},
+															"applicants": {
+																"type": "number"
+															},
+															"recipients": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"label",
+															"registered",
+															"enrolled",
+															"applicants",
+															"recipients"
+														],
+														"additionalProperties": false
+													}
+												},
+												"genders": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"label": {
+																"type": "string"
+															},
+															"registered": {
+																"type": "number"
+															},
+															"enrolled": {
+																"type": "number"
+															},
+															"applicants": {
+																"type": "number"
+															},
+															"recipients": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"label",
+															"registered",
+															"enrolled",
+															"applicants",
+															"recipients"
+														],
+														"additionalProperties": false
+													}
+												},
+												"batches": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"donor": {
+																"type": "string"
+															},
+															"items": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"name": {
+																			"type": "string"
+																		},
+																		"serial": {
+																			"type": "string"
+																		},
+																		"centerName": {
+																			"type": "string"
+																		},
+																		"districtName": {
+																			"type": "string"
+																		},
+																		"status": {
+																			"type": "string"
+																		},
+																		"outcome": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"name",
+																		"serial",
+																		"centerName",
+																		"districtName",
+																		"status",
+																		"outcome"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"donor",
+															"items"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"funnel",
+												"districts",
+												"ages",
+												"sectors",
+												"genders",
+												"batches"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/evidence-queue/{id}": {
 			"get": {
 				"operationId": "getEvidenceReview",
@@ -16323,6 +16718,98 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/leaderboard": {
+			"get": {
+				"operationId": "getLeaderboard",
+				"summary": "Opt-in initials and district. No sign-in is required. Full names stay off.",
+				"tags": [
+					"leaderboard"
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"rows": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"initials": {
+																"type": "string"
+															},
+															"district": {
+																"type": "string"
+															},
+															"progress": {
+																"type": "number",
+																"nullable": true
+															}
+														},
+														"required": [
+															"initials",
+															"district",
+															"progress"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"rows"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}
