@@ -101,7 +101,7 @@ Check a box only after that subphase's "Done when" line is true and the branch i
   - [x] `phase/8.9-offline-content-packs`
   - [x] `phase/8.10-maker-checker-and-support`
   - [x] `phase/8.11-success-stories`
-- [ ] Phase 9 — Scale (`phase/9-scale`)
+- [x] Phase 9 — Scale (`phase/9-scale`)
   - [x] `phase/9.1-pathways-and-placement`
   - [x] `phase/9.2-peer-and-group-work`
   - [x] `phase/9.3-scheduled-reports-and-warnings`
