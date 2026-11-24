@@ -14,6 +14,7 @@ export const CONSENT_PURPOSES = [
 	"public_passport",
 	"leaderboard",
 	"mentor_contact",
+	"success_story",
 	"guardian",
 ] as const;
 
@@ -36,6 +37,7 @@ type ConsentDb = Pick<Database, "insert" | "select" | "transaction">;
 const RESTRICTED_FOR_MINORS: readonly ConsentPurpose[] = [
 	"public_passport",
 	"mentor_contact",
+	"success_story",
 ];
 
 export function isConsentPurpose(value: string): value is ConsentPurpose {
@@ -86,6 +88,10 @@ export function registrationConsents(
 		{
 			purpose: "mentor_contact",
 			granted: minor ? false : map.get("mentor_contact") === true,
+		},
+		{
+			purpose: "success_story",
+			granted: minor ? false : map.get("success_story") === true,
 		},
 	];
 	if (minor) rows.push({ purpose: "guardian", granted: true });
@@ -141,7 +147,7 @@ export async function recordConsent(
 	const minor = person?.dateOfBirth ? isUnder18(person.dateOfBirth) : false;
 	if (minor && input.granted && RESTRICTED_FOR_MINORS.includes(input.purpose)) {
 		throw errors.badRequest(
-			"Public passport and mentor contact stay off until the learner is 18.",
+			"Public passport, mentor contact, and a partner story stay off until the learner is 18.",
 			{ reason: "minor_visibility" },
 		);
 	}

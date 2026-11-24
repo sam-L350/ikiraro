@@ -92,6 +92,7 @@ export {
 } from "./registration";
 export { allocationRounds, roundApplications } from "./rounds";
 export { smsCharges } from "./sms";
+export { successStories } from "./stories";
 export { taskSubmissions } from "./submissions";
 export {
 	adminApprovals,

@@ -46,6 +46,8 @@ function purposeTitle(purpose: Purpose): MessageKey {
 			return "consentLeaderboard";
 		case "mentor_contact":
 			return "consentMentor";
+		case "success_story":
+			return "consentStory";
 		case "guardian":
 			return "consentGuardian";
 		default: {
@@ -59,6 +61,7 @@ function lockedForMinor(purpose: Purpose): boolean {
 	switch (purpose) {
 		case "public_passport":
 		case "mentor_contact":
+		case "success_story":
 			return true;
 		case "terms":
 		case "data_use":

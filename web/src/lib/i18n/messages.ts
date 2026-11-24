@@ -321,7 +321,10 @@ export const en = {
 	consentMentorBody: "A mentor may ask to reach me.",
 	consentGuardian: "Guardian consent",
 	consentGuardianBody: "The guardian agrees for this learner.",
-	minorVisibility: "Public passport and mentor contact stay off until age 18.",
+	minorVisibility:
+		"Public passport, mentor contact, and a partner story stay off until age 18.",
+	consentStory: "Partner story",
+	consentStoryBody: "Partners can use a story and photo I choose to share.",
 	createMyAccount: "Create my account",
 	activateAccount: "Activate",
 	activationSentence: "Enter the code we sent to finish registration.",
@@ -1266,6 +1269,23 @@ export const en = {
 		"Report a problem with the app, the course, or someone's conduct from Help. A conduct report goes to a platform admin, outside the center.",
 	fieldGuidePhoto:
 		"A photo has to finish uploading before it can be sent. Sending work back needs a note you type.",
+	storiesNav: "Your story",
+	storiesTitle: "Your story",
+	storiesSentence:
+		"Partners can use this story and photo only while you allow it. Your phone, email, and village stay out.",
+	storiesAllow: "Allow partners to use a story",
+	storiesWithdraw: "Stop sharing the story",
+	storiesBody: "Story",
+	storiesPhoto: "Photo",
+	storiesSave: "Save the story",
+	storiesMinor: "A partner story stays off until the learner is 18.",
+	storyReportNav: "Partner stories",
+	storyReportTitle: "Partner stories",
+	storyReportSentence:
+		"Stories and photos a learner allowed a partner to use. Phone, email, and village stay out.",
+	storyReportDownload: "Download the stories",
+	storyReportEmpty: "No story is shared.",
+	storyReportDenied: "A coordinator or an auditor reads these stories.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1596,7 +1616,10 @@ export const rw: Record<MessageKey, string> = {
 	consentGuardian: "Uruhushya rw'umurezi",
 	consentGuardianBody: "Umurezi yemeye uyu munyeshuri.",
 	minorVisibility:
-		"Pasiporo rusange no kugana umujyanama biguma bifunze kugeza ku myaka 18.",
+		"Pasiporo rusange, ukugana umujyanama, n'inkuru y'abafatanyabikorwa biguma bifunze kugeza ku myaka 18.",
+	consentStory: "Inkuru y'abafatanyabikorwa",
+	consentStoryBody:
+		"Abafatanyabikorwa bashobora gukoresha inkuru n'ifoto nahisemo gusangiza.",
 	createMyAccount: "Fungura konti yanjye",
 	activateAccount: "Tangiza",
 	activationSentence:
@@ -2552,4 +2575,21 @@ export const rw: Record<MessageKey, string> = {
 		"Tanga ikibazo cyo ku porogaramu, ku isomo, cyangwa ku myitwarire mu bufasha. Ikibazo cy'imyitwarire kigera ku muyobozi wa sisitemu, hanze y'ikigo.",
 	fieldGuidePhoto:
 		"Ifoto igomba kurangiza koherezwa mbere yo kwoherezwa. Kugarura akazi bisaba inyandiko wanditse.",
+	storiesNav: "Inkuru yawe",
+	storiesTitle: "Inkuru yawe",
+	storiesSentence:
+		"Abafatanyabikorwa bashobora gukoresha iyi nkuru n'iyi foto gusa igihe ubyemeye. Telefoni, imeri, n'umudugudu biguma hanze.",
+	storiesAllow: "Emera abafatanyabikorwa gukoresha inkuru",
+	storiesWithdraw: "Hagarika gusangiza inkuru",
+	storiesBody: "Inkuru",
+	storiesPhoto: "Ifoto",
+	storiesSave: "Bika inkuru",
+	storiesMinor: "Inkuru y'abafatanyabikorwa iguma ifunze kugeza ku myaka 18.",
+	storyReportNav: "Inkuru z'abafatanyabikorwa",
+	storyReportTitle: "Inkuru z'abafatanyabikorwa",
+	storyReportSentence:
+		"Inkuru n'amafoto umunyeshuri yemeye ko umufatanyabikorwa akoresha. Telefoni, imeri, n'umudugudu biguma hanze.",
+	storyReportDownload: "Kuramo inkuru",
+	storyReportEmpty: "Nta nkuru isangiwe.",
+	storyReportDenied: "Umuyobozi cyangwa umugenzuzi ni we usoma izi nkuru.",
 };

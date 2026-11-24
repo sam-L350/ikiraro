@@ -218,6 +218,7 @@ describe.serial("registration", () => {
 						guardian: true,
 						public_passport: true,
 						mentor_contact: true,
+						success_story: true,
 					}),
 				}),
 				sms.sender,
@@ -231,6 +232,7 @@ describe.serial("registration", () => {
 			);
 			expect(granted.public_passport).toBe(false);
 			expect(granted.mentor_contact).toBe(false);
+			expect(granted.success_story).toBe(false);
 			expect(granted.guardian).toBe(true);
 		},
 		30_000,

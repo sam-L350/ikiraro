@@ -330,6 +330,13 @@
       "when": 1795471000000,
       "tag": "0046_phase8_maker_checker",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1795472000000,
+      "tag": "0047_phase8_success_stories",
+      "breakpoints": true
     }
   ]
 }

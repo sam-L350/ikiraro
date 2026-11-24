@@ -14,6 +14,7 @@ type ConsentPurpose =
 	| "public_passport"
 	| "leaderboard"
 	| "mentor_contact"
+	| "success_story"
 	| "guardian";
 
 const largeField =
@@ -230,6 +231,7 @@ export function RegistrationForm({
 	const [passport, setPassport] = useState(false);
 	const [leaderboard, setLeaderboard] = useState(false);
 	const [mentor, setMentor] = useState(false);
+	const [story, setStory] = useState(false);
 	const [guardianConsent, setGuardianConsent] = useState(false);
 	const [error, setError] = useState<MessageKey | null>(null);
 	const [done, setDone] = useState<{ name: string; phone: string } | null>(
@@ -257,6 +259,7 @@ export function RegistrationForm({
 			{ purpose: "public_passport", granted: minor ? false : passport },
 			{ purpose: "leaderboard", granted: leaderboard },
 			{ purpose: "mentor_contact", granted: minor ? false : mentor },
+			{ purpose: "success_story", granted: minor ? false : story },
 		];
 		if (minor) consents.push({ purpose: "guardian", granted: true });
 		const body = {
@@ -460,6 +463,13 @@ export function RegistrationForm({
 					checked={minor ? false : mentor}
 					disabled={minor}
 					onChange={setMentor}
+				/>
+				<ConsentBox
+					title={t("consentStory")}
+					body={t("consentStoryBody")}
+					checked={minor ? false : story}
+					disabled={minor}
+					onChange={setStory}
 				/>
 				{minor ? (
 					<ConsentBox

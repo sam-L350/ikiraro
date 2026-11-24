@@ -66,6 +66,7 @@ function useProductNavItems(): NavItem[] {
 			{ to: "/conditions", label: "conditionsNav" },
 			{ to: "/follow-ups", label: "followUpsNav" },
 			{ to: "/surveys", label: "surveysNav" },
+			{ to: "/stories", label: "storiesNav" },
 			{ to: "/mentors", label: "mentorsNav" },
 			{ to: "/opportunities", label: "opportunitiesNav" },
 			{ to: "/referrals", label: "referralsNav" },
@@ -260,6 +261,7 @@ function useProductNavItems(): NavItem[] {
 		items.push(
 			{ to: "/equity", label: "equityNav" },
 			{ to: "/donor-report", label: "donorNav" },
+			{ to: "/story-report", label: "storyReportNav" },
 		);
 	}
 	const canDecideGrants =

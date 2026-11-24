@@ -222,6 +222,9 @@
 			"name": "submissions"
 		},
 		{
+			"name": "success-stories"
+		},
+		{
 			"name": "surveys"
 		},
 		{
@@ -6063,6 +6066,7 @@
 											"public_passport",
 											"leaderboard",
 											"mentor_contact",
+											"success_story",
 											"guardian"
 										]
 									},
@@ -6102,6 +6106,7 @@
 														"public_passport",
 														"leaderboard",
 														"mentor_contact",
+														"success_story",
 														"guardian"
 													]
 												},
@@ -28785,6 +28790,7 @@
 																	"public_passport",
 																	"leaderboard",
 																	"mentor_contact",
+																	"success_story",
 																	"guardian"
 																]
 															},
@@ -29026,6 +29032,7 @@
 																	"public_passport",
 																	"leaderboard",
 																	"mentor_contact",
+																	"success_story",
 																	"guardian"
 																]
 															},
@@ -30509,6 +30516,7 @@
 														"public_passport",
 														"leaderboard",
 														"mentor_contact",
+														"success_story",
 														"guardian"
 													]
 												},
@@ -30711,6 +30719,7 @@
 														"public_passport",
 														"leaderboard",
 														"mentor_contact",
+														"success_story",
 														"guardian"
 													]
 												},
@@ -35774,6 +35783,417 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/success-stories/create": {
+			"post": {
+				"operationId": "createSuccessStory",
+				"summary": "Store a story and photo. Partners see it only while consent is on.",
+				"tags": [
+					"success-stories"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"body": {
+										"type": "string"
+									},
+									"mediaId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"body",
+									"mediaId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/success-stories/export": {
+			"get": {
+				"operationId": "getSuccessStoryExport",
+				"summary": "A file a partner report can include. Phone, email, and village stay out.",
+				"tags": [
+					"success-stories"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"file": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"file"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/success-stories": {
+			"get": {
+				"operationId": "getSuccessStories",
+				"summary": "This person's story, and whether partners may use it.",
+				"tags": [
+					"success-stories"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"allowed": {
+													"type": "boolean"
+												},
+												"minor": {
+													"type": "boolean"
+												},
+												"body": {
+													"type": "string",
+													"nullable": true
+												},
+												"photoUrl": {
+													"type": "string",
+													"nullable": true
+												}
+											},
+											"required": [
+												"allowed",
+												"minor",
+												"body",
+												"photoUrl"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication required",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/success-stories/report": {
+			"get": {
+				"operationId": "getSuccessStoryReport",
+				"summary": "Consented stories inside this person's scope.",
+				"tags": [
+					"success-stories"
+				],
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"ok": {
+											"const": true,
+											"type": "boolean"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"stories": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"name": {
+																"type": "string"
+															},
+															"story": {
+																"type": "string"
+															},
+															"photoUrl": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"name",
+															"story",
+															"photoUrl"
+														],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"stories"
+											],
+											"additionalProperties": false
+										},
+										"meta": {
+											"type": "object",
+											"properties": {
+												"requestId": {
+													"type": "string"
+												},
+												"timestamp": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"requestId",
+												"timestamp"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"ok",
+										"data",
+										"meta"
+									],
+									"additionalProperties": false
 								}
 							}
 						}
