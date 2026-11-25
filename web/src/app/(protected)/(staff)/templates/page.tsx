@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RecordTable } from "@/components/ui/record-table";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -121,49 +122,34 @@ export default function TemplatesPage() {
 					{t("contentTemplatesEmpty")}
 				</p>
 			) : (
-				<table className="w-full border-collapse text-left">
-					<thead>
-						<tr className="font-meta text-xs uppercase text-fg-muted">
-							<th className="border-b border-line py-2 font-semibold">
-								{t("contentTemplatesName")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold">
-								{t("contentTemplatesTask")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold">
-								{t("contentTemplatesEvidence")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold" />
-						</tr>
-					</thead>
-					<tbody>
-						{templates.map((row) => (
-							<tr key={row.id}>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{row.name}
-								</td>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{row.titleEn}
-								</td>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{evidenceLabel(row.evidenceType, t)}
-								</td>
-								<td className="border-b border-line py-3">
-									<Button
-										type="button"
-										variant={row.id === inkUse ? "ink" : "quiet"}
-										onClick={() => void onUse(row.id)}
-									>
-										{t("contentTemplatesUse")}
-									</Button>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+				<RecordTable
+					caption={t("contentTemplatesTitle")}
+					columns={[
+						t("contentTemplatesName"),
+						t("contentTemplatesTask"),
+						t("contentTemplatesEvidence"),
+						t("contentTemplatesUse"),
+					]}
+					rows={templates.map((row) => ({
+						key: row.id,
+						cells: [
+							row.name,
+							row.titleEn,
+							evidenceLabel(row.evidenceType, t),
+							<Button
+								key="use"
+								type="button"
+								variant={row.id === inkUse ? "ink" : "quiet"}
+								onClick={() => void onUse(row.id)}
+							>
+								{t("contentTemplatesUse")}
+							</Button>,
+						],
+					}))}
+				/>
 			)}
 			<form
-				className="flex max-w-sm flex-col gap-4"
+				className="flex max-w-sm flex-col gap-4 rounded-[20px] bg-surface p-5 sm:p-6"
 				onSubmit={(event) => {
 					event.preventDefault();
 					void onSave();
@@ -205,7 +191,7 @@ export default function TemplatesPage() {
 					</span>
 					<select
 						id="template-evidence"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+						className="h-11 rounded-xl border border-line-strong bg-canvas px-3 font-sans text-lg text-fg"
 						value={evidenceType}
 						onChange={(event) => setEvidenceType(event.target.value)}
 					>

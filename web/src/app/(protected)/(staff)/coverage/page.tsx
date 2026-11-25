@@ -1,3 +1,4 @@
+import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -42,36 +43,22 @@ export default function CoveragePage() {
 					{t("coverageEmpty")}
 				</p>
 			) : (
-				<table className="w-full border-collapse text-left">
-					<thead>
-						<tr className="font-meta text-xs uppercase text-fg-muted">
-							<th className="border-b border-line py-2 font-semibold">
-								{t("coverageSector")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold">
-								{t("coverageLearners")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold">
-								{t("coverageHome")}
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{sectors.map((row) => (
-							<tr key={`${row.sector}-${row.homeCenter ?? "none"}`}>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{row.sector}
-								</td>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{row.learners}
-								</td>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{row.homeCenter ?? t("coverageNoHome")}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+				<RecordTable
+					caption={t("coverageTitle")}
+					columns={[
+						t("coverageSector"),
+						t("coverageLearners"),
+						t("coverageHome"),
+					]}
+					rows={sectors.map((row) => ({
+						key: `${row.sector}-${row.homeCenter ?? "none"}`,
+						cells: [
+							row.sector,
+							String(row.learners),
+							row.homeCenter ?? t("coverageNoHome"),
+						],
+					}))}
+				/>
 			)}
 		</section>
 	);

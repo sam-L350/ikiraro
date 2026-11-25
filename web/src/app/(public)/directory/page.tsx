@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { RwandaMap } from "@/components/public/rwanda-map";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 type DirectoryCenter = {
 	id: string;
@@ -17,6 +20,7 @@ type DirectoryCenter = {
 export default function DirectoryPage() {
 	const { t } = useI18n();
 	const [query, setQuery] = useState("");
+	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [origin, setOrigin] = useState<{
 		latitude: number;
 		longitude: number;
@@ -47,15 +51,18 @@ export default function DirectoryPage() {
 	}
 
 	const items = (directory.data?.items ?? []) as DirectoryCenter[];
-	const placed = items.filter(
-		(item) => item.mapX !== null && item.mapY !== null,
+	const placed = items.flatMap((item) =>
+		item.mapX === null || item.mapY === null
+			? []
+			: [{ id: item.id, name: item.name, mapX: item.mapX, mapY: item.mapY }],
 	);
 	const unmapped = items.filter(
 		(item) => item.mapX === null || item.mapY === null,
 	);
+	const selected = items.find((item) => item.id === selectedId) ?? null;
 
 	return (
-		<section className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16 lg:px-12">
+		<section className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 lg:px-12">
 			<div>
 				<h1 className="font-sans text-4xl font-semibold text-balance text-fg sm:text-5xl">
 					{t("directoryTitle")}
@@ -72,9 +79,9 @@ export default function DirectoryPage() {
 					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 						{t("directorySearch")}
 					</span>
-					<input
+					<Input
 						id="directory-search"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+						className="h-11 font-sans text-lg"
 						value={query}
 						onChange={(event) => setQuery(event.target.value)}
 					/>
@@ -94,7 +101,7 @@ export default function DirectoryPage() {
 				</p>
 			) : null}
 			{directory.isPending ? (
-				<div className="h-40 animate-pulse rounded-md bg-surface" />
+				<div className="h-80 animate-pulse rounded-[20px] bg-surface" />
 			) : directory.error ? (
 				<p className="text-lg text-destructive">{t("tryAgain")}</p>
 			) : items.length === 0 ? (
@@ -102,64 +109,55 @@ export default function DirectoryPage() {
 					{t("directoryEmpty")}
 				</p>
 			) : (
-				<div className="grid gap-10 lg:grid-cols-[minmax(0,16rem)_1fr]">
-					<svg
-						viewBox="0 0 100 120"
-						className="w-full rounded-md border border-line bg-card"
-						role="img"
-						aria-label={t("directoryTitle")}
-					>
-						<rect width="100" height="120" fill="var(--card)" />
-						{placed.map((item) => (
-							<circle
-								key={item.id}
-								cx={(item.mapX ?? 0) * 100}
-								cy={(item.mapY ?? 0) * 120}
-								r={2.2}
-								fill="var(--ink)"
-							>
-								<title>{item.name}</title>
-							</circle>
-						))}
-					</svg>
-					<table className="w-full border-collapse text-left">
-						<thead>
-							<tr className="font-meta text-xs uppercase text-fg-muted">
-								<th className="border-b border-line py-2 font-semibold">
-									{t("directoryCenter")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("directorySector")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("directoryDistrict")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("directoryDistance")}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{items.map((item) => (
-								<tr key={item.id}>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{item.name}
-									</td>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{item.sector}
-									</td>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{item.district}
-									</td>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{item.distanceKm === null
-											? ""
-											: t("directoryKm", { count: String(item.distanceKm) })}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
+				<div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+					<div className="rounded-[20px] bg-canvas p-4 sm:p-6">
+						<RwandaMap
+							centers={placed}
+							selectedId={selectedId}
+							onSelect={setSelectedId}
+							label={t("directoryMap")}
+						/>
+						{selected ? (
+							<p className="mt-4 font-sans text-lg font-semibold text-fg">
+								{selected.name}
+								<span className="mt-1 block font-medium">
+									{selected.sector} · {selected.district} · {selected.province}
+								</span>
+							</p>
+						) : (
+							<p className="mt-4 font-sans text-sm font-medium text-fg">
+								{t("directoryMapHint")}
+							</p>
+						)}
+					</div>
+					<ul className="max-h-[36rem] overflow-y-auto">
+						{items.map((item) => {
+							const active = item.id === selectedId;
+							return (
+								<li key={item.id}>
+									<button
+										type="button"
+										className={cn(
+											"flex w-full flex-col gap-1 border-b border-line py-3 text-left",
+											active && "bg-surface px-3",
+										)}
+										onClick={() => setSelectedId(item.id)}
+										aria-pressed={active}
+									>
+										<span className="font-sans text-lg font-semibold text-fg">
+											{item.name}
+										</span>
+										<span className="font-sans text-sm font-medium text-fg">
+											{item.sector} · {item.district} · {item.province}
+											{item.distanceKm === null
+												? ""
+												: ` · ${t("directoryKm", { count: String(item.distanceKm) })}`}
+										</span>
+									</button>
+								</li>
+							);
+						})}
+					</ul>
 				</div>
 			)}
 			{unmapped.length > 0 && items.length > 0 ? (

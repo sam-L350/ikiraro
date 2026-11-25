@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RecordTable } from "@/components/ui/record-table";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -83,32 +84,16 @@ export default function WebhooksPage() {
 					{t("webhooksEmpty")}
 				</p>
 			) : (
-				<table className="w-full border-collapse text-left">
-					<thead>
-						<tr className="font-meta text-xs uppercase text-fg-muted">
-							<th className="border-b border-line py-2 font-semibold">
-								{t("webhooksUrl")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold">
-								{t("webhooksEvent")}
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{hooks.map((hook) => (
-							<tr key={hook.id}>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{hook.url}
-								</td>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{eventLabel(hook.event, t)}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+				<RecordTable
+					caption={t("webhooksTitle")}
+					columns={[t("webhooksUrl"), t("webhooksEvent")]}
+					rows={hooks.map((hook) => ({
+						key: hook.id,
+						cells: [hook.url, eventLabel(hook.event, t)],
+					}))}
+				/>
 			)}
-			<div className="flex flex-col gap-4">
+			<div className="flex max-w-xl flex-col gap-4 rounded-[20px] bg-surface p-5 sm:p-6">
 				<label className="flex flex-col gap-2" htmlFor="webhook-url">
 					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 						{t("webhooksUrl")}
@@ -126,7 +111,7 @@ export default function WebhooksPage() {
 					</span>
 					<select
 						id="webhook-event"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+						className="h-11 rounded-xl border border-line-strong bg-canvas px-3 font-sans text-lg text-fg"
 						value={event}
 						onChange={(change) => setEvent(change.target.value)}
 					>

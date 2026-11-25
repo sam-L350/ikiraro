@@ -16,13 +16,15 @@ export function LanguageSwitch() {
 					type="button"
 					onClick={() => setLocale(option.id)}
 					aria-pressed={locale === option.id}
+					aria-label={option.label}
 					className={
 						locale === option.id
 							? "inline-flex h-11 items-center font-meta text-xs font-semibold uppercase tracking-wide text-fg"
 							: "inline-flex h-11 items-center font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted hover:text-ink"
 					}
 				>
-					{option.label}
+					<span className="sm:hidden">{option.id}</span>
+					<span className="hidden sm:inline">{option.label}</span>
 				</button>
 			))}
 		</fieldset>

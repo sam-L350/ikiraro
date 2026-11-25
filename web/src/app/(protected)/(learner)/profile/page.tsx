@@ -3,9 +3,9 @@ import { AccountSecurity } from "@/components/auth/account-security";
 import { PrivacyActions } from "@/components/auth/privacy-actions";
 import { SubjectTools } from "@/components/auth/subject-tools";
 import { Spinner } from "@/components/spinner";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
 	type EngineResponse,
 	isApiClientError,
@@ -307,49 +307,44 @@ function ProfileEditor({
 								{t("minorVisibility")}
 							</p>
 						) : null}
-						<ul className="mt-4 flex flex-col">
+						<ul className="mt-4 flex flex-col rounded-[20px] bg-surface px-5">
 							{profile.consents.map((row) => {
 								const locked = profile.minor && lockedForMinor(row.purpose);
+								const name = t(purposeTitle(row.purpose));
+								const held = locked && !row.granted;
 								return (
 									<li
 										key={row.purpose}
-										className="flex items-center justify-between gap-4 border-t border-ink/15 py-4"
+										className="flex items-center justify-between gap-4 border-t border-line py-3 first:border-t-0"
 									>
-										<span className="font-sans font-semibold text-fg">
-											{t(purposeTitle(row.purpose))}
-										</span>
-										<span className="flex items-center gap-3">
-											<Badge variant={row.granted ? "pending" : "neutral"}>
+										<div>
+											<p className="font-sans text-lg font-semibold text-fg">
+												{name}
+											</p>
+											<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 												{row.granted ? t("consentOn") : t("consentOff")}
-											</Badge>
-											{locked && !row.granted ? null : (
-												<Button
-													type="button"
-													variant="quiet"
-													disabled={consent.isPending}
-													onClick={() => {
-														setError(null);
-														consent.mutate(
-															{
-																body: {
-																	purpose: row.purpose,
-																	granted: !row.granted,
-																},
-															},
-															{
-																onSuccess: () => void onChanged(),
-																onError: (caught) =>
-																	setError(reasonKey(caught)),
-															},
-														);
-													}}
-												>
-													{row.granted
-														? t("withdrawConsent")
-														: t("allowConsent")}
-												</Button>
-											)}
-										</span>
+											</p>
+										</div>
+										<Switch
+											checked={row.granted}
+											disabled={consent.isPending || held}
+											label={`${name}, ${row.granted ? t("withdrawConsent") : t("allowConsent")}`}
+											onToggle={() => {
+												setError(null);
+												consent.mutate(
+													{
+														body: {
+															purpose: row.purpose,
+															granted: !row.granted,
+														},
+													},
+													{
+														onSuccess: () => void onChanged(),
+														onError: (caught) => setError(reasonKey(caught)),
+													},
+												);
+											}}
+										/>
 									</li>
 								);
 							})}

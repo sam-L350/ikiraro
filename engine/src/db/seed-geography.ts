@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "./index";
 import {
 	centerStaff,
@@ -96,6 +96,141 @@ export async function seedGeography(database: Database): Promise<void> {
 
 	await ensureCenter(database, GITEGA_SECTOR, "Gitega Learning Center");
 	await ensureCenter(database, HUYE_SECTOR, "Huye Learning Center");
+	await seedDistrictCenters(database, divisions);
+	await retireFixtureCenters(database);
+}
+
+function sectorForDistrict(
+	divisions: Divisions,
+	district: District,
+): Sector | undefined {
+	const local = divisions.sectors.filter(
+		(sector) => sector.districtCode === district.code,
+	);
+	if (district.latitude === null || district.longitude === null)
+		return local[0];
+	const named = local.find((sector) => sector.name === district.name);
+	if (
+		named?.latitude !== null &&
+		named?.longitude !== null &&
+		named !== undefined &&
+		Math.abs(named.latitude - district.latitude) < 0.35 &&
+		Math.abs(named.longitude - district.longitude) < 0.35
+	) {
+		return named;
+	}
+	let best = local[0];
+	let bestDistance = Number.POSITIVE_INFINITY;
+	for (const sector of local) {
+		if (sector.latitude === null || sector.longitude === null) continue;
+		const distance =
+			(sector.latitude - district.latitude) ** 2 +
+			(sector.longitude - district.longitude) ** 2;
+		if (distance < bestDistance) {
+			best = sector;
+			bestDistance = distance;
+		}
+	}
+	return best;
+}
+
+/** One center on each district centroid, named for that district. */
+async function seedDistrictCenters(
+	database: Database,
+	divisions: Divisions,
+): Promise<void> {
+	for (const district of divisions.districts) {
+		const sector = sectorForDistrict(divisions, district);
+		if (!sector) throw new Error(`Missing sector for ${district.code}`);
+		if (district.latitude === null || district.longitude === null) {
+			throw new Error(`Missing coordinates for ${district.name}`);
+		}
+		await ensureCenterAt(
+			database,
+			sector.code,
+			`${district.name} Learning Center`,
+			district.latitude,
+			district.longitude,
+		);
+	}
+}
+
+async function ensureCenterAt(
+	database: Database,
+	sectorCode: string,
+	name: string,
+	latitude: number,
+	longitude: number,
+): Promise<void> {
+	const [sector] = await database
+		.select({ id: sectors.id })
+		.from(sectors)
+		.where(eq(sectors.code, sectorCode))
+		.limit(1);
+	if (!sector) throw new Error(`Missing sector ${sectorCode}`);
+	const [existing] = await database
+		.select({ id: learningCenters.id })
+		.from(learningCenters)
+		.where(eq(learningCenters.name, name))
+		.limit(1);
+	if (existing) {
+		await database
+			.update(learningCenters)
+			.set({
+				sectorId: sector.id,
+				latitude,
+				longitude,
+				active: true,
+			})
+			.where(eq(learningCenters.id, existing.id));
+		return;
+	}
+	await database.insert(learningCenters).values({
+		sectorId: sector.id,
+		name,
+		latitude,
+		longitude,
+		active: true,
+	});
+}
+
+/** Test leftovers sit on invented districts. They are not places in Rwanda. */
+async function retireFixtureCenters(database: Database): Promise<void> {
+	const fixtures = await database
+		.select({ id: learningCenters.id })
+		.from(learningCenters)
+		.innerJoin(sectors, eq(sectors.id, learningCenters.sectorId))
+		.innerJoin(districts, eq(districts.id, sectors.districtId))
+		.where(
+			sql`${districts.code} not like 'RW%' or ${learningCenters.name} ~ '[0-9a-f]{6,}'`,
+		);
+	if (fixtures.length > 0) {
+		await database
+			.update(learningCenters)
+			.set({ active: false })
+			.where(
+				inArray(
+					learningCenters.id,
+					fixtures.map((row) => row.id),
+				),
+			);
+	}
+	await database.execute(sql`
+		insert into consents (user_id, purpose, granted, version)
+		select latest.user_id, 'leaderboard', false, '1'
+		from (
+			select distinct on (consent.user_id) consent.user_id, consent.granted
+			from consents consent
+			inner join users person on person.id = consent.user_id
+			inner join learning_centers center on center.id = person.center_id
+			inner join sectors sector on sector.id = center.sector_id
+			inner join districts district on district.id = sector.district_id
+			where consent.purpose = 'leaderboard'
+				and district.code not like 'RW%'
+			order by consent.user_id, consent.granted_at desc
+		) latest
+		where latest.granted = true
+	`);
 }
 
 async function ensureCenter(

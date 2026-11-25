@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { LedgerMark } from "@/components/public/marks";
 import { EmptyState } from "@/components/ui/empty-state";
 import { RecordTable } from "@/components/ui/record-table";
 import { useEngine } from "@/lib/engine";
@@ -25,16 +26,19 @@ export default function AuditSummaryPage() {
 
 	return (
 		<section className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-16">
-			<div>
-				<Link to="/" className="font-sans text-sm font-semibold text-fg">
-					{t("wordmark")}
-				</Link>
-				<h1 className="mt-3 font-sans text-4xl font-semibold text-balance text-fg">
-					{t("auditSummaryTitle")}
-				</h1>
-				<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
-					{t("auditSummarySentence")}
-				</p>
+			<div className="flex items-end gap-5">
+				<LedgerMark className="size-24 shrink-0" />
+				<div>
+					<Link to="/" className="font-sans text-sm font-semibold text-fg">
+						{t("wordmark")}
+					</Link>
+					<h1 className="mt-3 font-sans text-4xl font-semibold text-balance text-fg">
+						{t("auditSummaryTitle")}
+					</h1>
+					<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
+						{t("auditSummarySentence")}
+					</p>
+				</div>
 			</div>
 			{items.length === 0 ? (
 				<EmptyState sentence={t("auditSummaryEmpty")} />

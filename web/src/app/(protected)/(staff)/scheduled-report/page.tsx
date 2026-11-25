@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RecordTable } from "@/components/ui/record-table";
 import {
 	callEngine,
 	invalidateEngine,
@@ -158,30 +159,14 @@ export default function ScheduledReportPage() {
 			>
 				{t("donorDownload")}
 			</Button>
-			<table className="w-full border-collapse text-left">
-				<thead>
-					<tr className="font-meta text-xs uppercase text-fg-muted">
-						<th className="border-b border-line py-2 font-semibold">
-							{t("donorTotals")}
-						</th>
-						<th className="border-b border-line py-2 font-semibold">
-							{t("scheduledReportCount")}
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					{TOTALS.map((row) => (
-						<tr key={row.key}>
-							<td className="border-b border-line py-3 font-sans text-lg text-fg">
-								{t(row.label)}
-							</td>
-							<td className="border-b border-line py-3 font-sans text-lg text-fg">
-								{data.totals[row.key]}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
+			<RecordTable
+				caption={t("donorTotals")}
+				columns={[t("donorTotals"), t("scheduledReportCount")]}
+				rows={TOTALS.map((row) => ({
+					key: row.key,
+					cells: [t(row.label), String(data.totals[row.key])],
+				}))}
+			/>
 			<div className="flex flex-col gap-3">
 				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
 					{t("donorDecisions")}
@@ -191,36 +176,18 @@ export default function ScheduledReportPage() {
 						{t("equityHidden")}
 					</p>
 				) : (
-					<table className="w-full border-collapse text-left">
-						<thead>
-							<tr className="font-meta text-xs uppercase text-fg-muted">
-								<th className="border-b border-line py-2 font-semibold">
-									{t("scheduledReportDistrict")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("donorAwarded")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("donorDeclined")}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{data.decisions.map((row) => (
-								<tr key={row.district}>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{row.district}
-									</td>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{row.awarded}
-									</td>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{row.declined}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
+					<RecordTable
+						caption={t("donorDecisions")}
+						columns={[
+							t("scheduledReportDistrict"),
+							t("donorAwarded"),
+							t("donorDeclined"),
+						]}
+						rows={data.decisions.map((row) => ({
+							key: row.district,
+							cells: [row.district, String(row.awarded), String(row.declined)],
+						}))}
+					/>
 				)}
 			</div>
 			<div className="flex flex-col gap-3">
@@ -252,39 +219,29 @@ export default function ScheduledReportPage() {
 						{t("equityBatchEmpty")}
 					</p>
 				) : (
-					<table className="w-full border-collapse text-left">
-						<thead>
-							<tr className="font-meta text-xs uppercase text-fg-muted">
-								<th className="border-b border-line py-2 font-semibold">
-									{t("donorItems")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("scheduledReportDistrict")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("donorOutcomes")}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{data.batches.map((row) => (
-								<tr key={row.serial}>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{row.donor} · {row.name}
-									</td>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{row.center} · {row.district}
-									</td>
-									<td className="border-b border-line py-3 font-sans text-lg text-fg">
-										{row.outcome}
-										{row.day30 ? ` · 30 ${row.day30}` : ""}
-										{row.day90 ? ` · 90 ${row.day90}` : ""}
-										{row.day180 ? ` · 180 ${row.day180}` : ""}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
+					<RecordTable
+						caption={t("donorBatches")}
+						columns={[
+							t("donorItems"),
+							t("scheduledReportDistrict"),
+							t("donorOutcomes"),
+						]}
+						rows={data.batches.map((row) => ({
+							key: row.serial,
+							cells: [
+								`${row.donor} · ${row.name}`,
+								`${row.center} · ${row.district}`,
+								[
+									row.outcome,
+									row.day30 ? `30 ${row.day30}` : "",
+									row.day90 ? `90 ${row.day90}` : "",
+									row.day180 ? `180 ${row.day180}` : "",
+								]
+									.filter((part) => part !== "")
+									.join(" · "),
+							],
+						}))}
+					/>
 				)}
 			</div>
 			<div className="flex flex-col gap-3">
@@ -296,11 +253,11 @@ export default function ScheduledReportPage() {
 						{t("scheduledReportEmpty")}
 					</p>
 				) : (
-					<ul>
+					<ul className="rounded-[20px] bg-surface px-5">
 						{schedule.schedules.map((row) => (
 							<li
 								key={row.districtId}
-								className="border-t border-line py-3 font-sans text-lg text-fg"
+								className="border-t border-line py-3 font-sans text-lg font-medium text-fg first:border-t-0"
 							>
 								{t("scheduledReportEvery", {
 									district: row.districtName,
@@ -312,7 +269,7 @@ export default function ScheduledReportPage() {
 				)}
 			</div>
 			<form
-				className="flex max-w-sm flex-col gap-4"
+				className="flex max-w-sm flex-col gap-4 rounded-[20px] bg-surface p-5 sm:p-6"
 				onSubmit={(event) => {
 					event.preventDefault();
 					void onSave();
@@ -325,7 +282,7 @@ export default function ScheduledReportPage() {
 						</span>
 						<select
 							id="schedule-district"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className="h-11 rounded-xl border border-line-strong bg-canvas px-3 font-sans text-lg text-fg"
 							value={districtId}
 							onChange={(event) => setDistrictId(event.target.value)}
 						>

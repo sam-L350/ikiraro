@@ -2,8 +2,10 @@ import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
+import { eventTitle } from "@/lib/event-title";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { cn } from "@/lib/utils";
 
 type Template = {
 	id: string;
@@ -13,6 +15,36 @@ type Template = {
 	title: string;
 	body: string;
 };
+
+function channelName(
+	channel: string,
+	t: (key: "prefInApp" | "prefSms" | "prefEmail") => string,
+): string {
+	switch (channel) {
+		case "in_app":
+			return t("prefInApp");
+		case "sms":
+			return t("prefSms");
+		case "email":
+			return t("prefEmail");
+		default:
+			return channel;
+	}
+}
+
+function localeName(
+	locale: string,
+	t: (key: "english" | "kinyarwanda") => string,
+): string {
+	switch (locale) {
+		case "en":
+			return t("english");
+		case "rw":
+			return t("kinyarwanda");
+		default:
+			return locale;
+	}
+}
 
 function reasonKey(error: unknown): MessageKey {
 	if (!isApiClientError(error)) return "tryAgain";
@@ -81,62 +113,82 @@ export default function NotificationTemplatesPage() {
 				<p className="text-lg text-fg">{t("templatesLead")}</p>
 			</div>
 			{rows.length === 0 ? (
-				<p className="text-lg text-fg">{t("templatesEmpty")}</p>
+				<p className="font-sans text-lg font-medium text-fg">
+					{t("templatesEmpty")}
+				</p>
 			) : (
-				<form
-					className="flex flex-col gap-4"
-					onSubmit={(event) => void onSubmit(event)}
-				>
-					<label className="flex flex-col gap-2" htmlFor="template-choice">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("templatesTitle")}
-						</span>
-						<select
-							id="template-choice"
-							className="h-10 w-full rounded-xl border border-line-strong bg-surface px-3.5 text-sm text-fg"
-							value={selected}
-							disabled={save.isPending}
-							onChange={(event) => choose(event.target.value)}
-						>
-							<option value="">{t("templatesEmpty")}</option>
-							{rows.map((row) => (
-								<option key={row.id} value={row.id}>
-									{row.eventName} · {row.channel} · {row.locale}
-								</option>
-							))}
-						</select>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="template-title">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("templatesTitleField")}
-						</span>
-						<Input
-							id="template-title"
-							value={title}
-							disabled={save.isPending || !selected}
-							onChange={(event) => setTitle(event.target.value)}
-						/>
-					</label>
-					<label className="flex flex-col gap-2" htmlFor="template-body">
-						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{t("templatesBody")}
-						</span>
-						<Input
-							id="template-body"
-							value={body}
-							disabled={save.isPending || !selected}
-							onChange={(event) => setBody(event.target.value)}
-						/>
-					</label>
-					<Button
-						type="submit"
-						variant="sticker"
-						disabled={save.isPending || !selected}
-						className="w-fit"
+				<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+					<ul className="flex flex-col gap-2">
+						{rows.map((row) => {
+							const titleKey = eventTitle(row.eventName);
+							const active = selected === row.id;
+							return (
+								<li key={row.id}>
+									<button
+										type="button"
+										aria-pressed={active}
+										disabled={save.isPending}
+										onClick={() => choose(row.id)}
+										className={cn(
+											"flex w-full flex-col gap-1 rounded-[20px] px-5 py-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink",
+											active ? "bg-surface ring-2 ring-ink" : "bg-surface",
+										)}
+									>
+										<span className="font-sans text-lg font-semibold text-fg">
+											{titleKey ? t(titleKey) : row.eventName}
+										</span>
+										<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+											{channelName(row.channel, t)} ·{" "}
+											{localeName(row.locale, t)}
+										</span>
+										<span className="font-sans text-sm font-medium text-fg">
+											{row.title}
+										</span>
+									</button>
+								</li>
+							);
+						})}
+					</ul>
+					<form
+						className="flex flex-col gap-4 rounded-[20px] bg-surface p-5 sm:p-6"
+						onSubmit={(event) => void onSubmit(event)}
 					>
-						{t("templatesSave")}
-					</Button>
-				</form>
+						<p className="font-sans text-lg font-semibold text-fg">
+							{t("templatesChoose")}
+						</p>
+						<label className="flex flex-col gap-2" htmlFor="template-title">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("templatesTitleField")}
+							</span>
+							<Input
+								id="template-title"
+								value={title}
+								disabled={save.isPending || !selected}
+								onChange={(event) => setTitle(event.target.value)}
+							/>
+						</label>
+						<label className="flex flex-col gap-2" htmlFor="template-body">
+							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+								{t("templatesBody")}
+							</span>
+							<textarea
+								id="template-body"
+								value={body}
+								disabled={save.isPending || !selected}
+								onChange={(event) => setBody(event.target.value)}
+								className="min-h-32 w-full rounded-xl border border-line-strong bg-canvas px-3 py-2 font-sans text-base text-fg"
+							/>
+						</label>
+						<Button
+							type="submit"
+							variant="sticker"
+							disabled={save.isPending || !selected}
+							className="w-fit"
+						>
+							{t("templatesSave")}
+						</Button>
+					</form>
+				</div>
 			)}
 			{error ? <p className="text-lg text-destructive">{t(error)}</p> : null}
 		</div>

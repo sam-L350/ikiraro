@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RecordTable } from "@/components/ui/record-table";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -87,48 +88,55 @@ export default function WarningsPage() {
 					{t("warningsSentence")}
 				</p>
 			</div>
+			{data.rules.length === 0 ? null : (
+				<section className="rounded-[20px] bg-surface p-5 sm:p-6">
+					<h2 className="font-sans text-2xl font-semibold text-fg">
+						{t("warningsRules")}
+					</h2>
+					<ul className="mt-3 flex flex-col">
+						{data.rules.map((rule) => (
+							<li
+								key={rule.districtId}
+								className="flex items-baseline justify-between gap-4 border-t border-line py-3 first:border-t-0"
+							>
+								<span className="font-sans text-lg font-semibold text-fg">
+									{rule.districtName}
+								</span>
+								<span className="font-sans text-base font-medium text-fg">
+									{t("warningsAgeValue", { days: String(rule.quietDays) })}
+								</span>
+							</li>
+						))}
+					</ul>
+				</section>
+			)}
 			{data.rows.length === 0 ? (
 				<p className="font-sans text-lg font-medium text-fg">
 					{t("warningsEmpty")}
 				</p>
 			) : (
-				<table className="w-full border-collapse text-left">
-					<thead>
-						<tr className="font-meta text-xs uppercase text-fg-muted">
-							<th className="border-b border-line py-2 font-semibold">
-								{t("warningsWho")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold">
-								{t("warningsKind")}
-							</th>
-							<th className="border-b border-line py-2 font-semibold">
-								{t("warningsAge")}
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{data.rows.map((row) => (
-							<tr key={`${row.kind}-${row.who}`}>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{row.who}
-								</td>
-								<td className="border-b border-line py-3">
-									<Badge variant={row.kind === "dropout" ? "warn" : "action"}>
-										{row.kind === "dropout"
-											? t("warningsDropout")
-											: t("warningsBacklog")}
-									</Badge>
-								</td>
-								<td className="border-b border-line py-3 font-sans text-lg text-fg">
-									{t("warningsAgeValue", { days: String(row.ageDays) })}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+				<RecordTable
+					caption={t("warningsTitle")}
+					columns={[t("warningsWho"), t("warningsKind"), t("warningsAge")]}
+					rows={data.rows.map((row) => ({
+						key: `${row.kind}-${row.who}`,
+						cells: [
+							row.who,
+							<Badge
+								key="kind"
+								variant={row.kind === "dropout" ? "warn" : "action"}
+							>
+								{row.kind === "dropout"
+									? t("warningsDropout")
+									: t("warningsBacklog")}
+							</Badge>,
+							t("warningsAgeValue", { days: String(row.ageDays) }),
+						],
+					}))}
+				/>
 			)}
 			<form
-				className="flex max-w-sm flex-col gap-4"
+				className="flex max-w-sm flex-col gap-4 rounded-[20px] bg-surface p-5 sm:p-6"
 				onSubmit={(event) => {
 					event.preventDefault();
 					void onSave();
@@ -141,7 +149,7 @@ export default function WarningsPage() {
 						</span>
 						<select
 							id="warning-district"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className="h-11 rounded-xl border border-line-strong bg-canvas px-3 font-sans text-lg text-fg"
 							value={districtId}
 							onChange={(event) => setDistrictId(event.target.value)}
 						>

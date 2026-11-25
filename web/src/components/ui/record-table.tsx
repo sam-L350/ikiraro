@@ -17,34 +17,36 @@ export function RecordTable({
 		label,
 	}));
 	return (
-		<table className="w-full border-collapse text-left">
-			<caption className="sr-only">{caption}</caption>
-			<thead>
-				<tr className="font-meta text-xs uppercase text-fg-muted">
-					{headers.map((header) => (
-						<th
-							key={header.id}
-							className="border-b border-line py-2 pr-4 font-semibold"
-						>
-							{header.label}
-						</th>
-					))}
-				</tr>
-			</thead>
-			<tbody>
-				{rows.map((row) => (
-					<tr key={row.key}>
+		<div className="overflow-x-auto rounded-[20px] bg-surface">
+			<table className="w-full border-collapse text-left">
+				<caption className="sr-only">{caption}</caption>
+				<thead>
+					<tr className="font-meta text-xs uppercase text-fg-muted">
 						{headers.map((header) => (
-							<td
-								key={`${row.key}-${header.id}`}
-								className="border-b border-line py-3 pr-4 align-top font-sans text-lg text-fg"
+							<th
+								key={header.id}
+								className="border-b border-line px-4 py-3 font-semibold"
 							>
-								{row.cells[headers.indexOf(header)]}
-							</td>
+								{header.label}
+							</th>
 						))}
 					</tr>
-				))}
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					{rows.map((row) => (
+						<tr key={row.key}>
+							{headers.map((header) => (
+								<td
+									key={`${row.key}-${header.id}`}
+									className="border-b border-line px-4 py-3 align-top font-sans text-base font-medium text-fg"
+								>
+									{row.cells[headers.indexOf(header)]}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
 	);
 }

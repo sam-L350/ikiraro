@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { BadgeMark } from "@/components/public/marks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,13 +34,16 @@ export default function VerifyCredentialPage() {
 
 	return (
 		<section className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-16">
-			<div className="flex flex-col gap-4">
-				<h1 className="font-sans text-4xl font-semibold leading-tight text-fg sm:text-5xl">
-					{t("credentialsTitle")}
-				</h1>
-				<p className="font-sans text-lg font-semibold leading-relaxed text-fg">
-					{t("credentialsSentence")}
-				</p>
+			<div className="grid items-center gap-8 sm:grid-cols-[9rem_1fr]">
+				<BadgeMark className="size-28" />
+				<div className="flex flex-col gap-4">
+					<h1 className="font-sans text-4xl font-semibold leading-tight text-fg sm:text-5xl">
+						{t("credentialsTitle")}
+					</h1>
+					<p className="font-sans text-lg font-semibold leading-relaxed text-fg">
+						{t("credentialsSentence")}
+					</p>
+				</div>
 			</div>
 			<form className="flex flex-col gap-4" onSubmit={submit}>
 				<label className="flex flex-col gap-2" htmlFor="credential-token">
@@ -54,7 +58,7 @@ export default function VerifyCredentialPage() {
 					/>
 				</label>
 				{ready ? (
-					<Button type="submit" variant="quiet" className="w-fit">
+					<Button type="submit" variant="ink" className="w-fit">
 						{t("credentialsSend")}
 					</Button>
 				) : null}
@@ -63,7 +67,7 @@ export default function VerifyCredentialPage() {
 				<p className="text-lg text-fg">{t("credentialsLimited")}</p>
 			) : null}
 			{data ? (
-				<div className="flex flex-col gap-3">
+				<div className="flex flex-col gap-3 rounded-[20px] bg-surface p-6">
 					{data.subject === "unknown" ? (
 						<p className="text-lg text-fg">{t("credentialsUnknown")}</p>
 					) : null}

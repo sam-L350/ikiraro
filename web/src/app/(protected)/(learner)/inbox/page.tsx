@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { RecordTable } from "@/components/ui/record-table";
+import { Switch } from "@/components/ui/switch";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
+import { eventTitle } from "@/lib/event-title";
 import { useI18n } from "@/lib/i18n";
-import type { MessageKey } from "@/lib/i18n/messages";
 
 type Delivery = "queued" | "submitted" | "sent" | "failed" | "capped" | "none";
 
@@ -26,30 +26,27 @@ type Preference = {
 	email: boolean;
 };
 
-function eventLabel(name: string): MessageKey {
-	switch (name) {
-		case "submission.created":
-			return "eventSubmissionReceived";
-		case "submission.approved":
-			return "eventReviewApproved";
-		case "submission.needs_revision":
-			return "eventRevision";
-		case "submission.rejected":
-			return "eventReviewRejected";
-		case "badge.awarded":
-			return "eventBadge";
-		case "points.adjusted":
-			return "eventPoints";
-		case "grant.decided":
-			return "eventGrant";
-		case "follow_up.due":
-			return "eventFollowUp";
-		case "learner.stalled":
-			return "eventStalled";
-		case "announcement.posted":
-			return "eventAnnouncement";
-		default:
-			return "inboxTitle";
+const CHANNELS = [
+	{ id: "in_app", label: "prefInApp" },
+	{ id: "sms", label: "prefSms" },
+	{ id: "email", label: "prefEmail" },
+] as const;
+
+function channelOn(
+	choice: Preference,
+	channel: (typeof CHANNELS)[number]["id"],
+) {
+	switch (channel) {
+		case "in_app":
+			return choice.inApp;
+		case "sms":
+			return choice.sms;
+		case "email":
+			return choice.email;
+		default: {
+			const unreachable: never = channel;
+			return unreachable;
+		}
 	}
 }
 
@@ -128,35 +125,42 @@ export default function InboxPage() {
 			{items.length === 0 ? (
 				<EmptyState sentence={t("inboxEmpty")} />
 			) : (
-				<RecordTable
-					caption={t("inboxTitle")}
-					columns={[t("nameLabel"), t("inboxUnread"), t("inboxMarkRead")]}
-					rows={items.map((item) => {
+				<ul className="flex flex-col gap-3">
+					{items.map((item) => {
 						const notes = deliveryNotes(item);
 						const failed = item.sms === "failed" || item.email === "failed";
-						return {
-							key: item.id,
-							cells: [
-								<div key="subject" className="flex flex-col gap-1">
-									<p>{item.title}</p>
-									<p>{item.body}</p>
-									{notes.map((note) => (
-										<p
-											key={note}
-											className={failed ? "text-destructive" : "text-fg-muted"}
-										>
-											{note}
+						return (
+							<li
+								key={item.id}
+								className="flex flex-col gap-3 rounded-[20px] bg-surface p-5"
+							>
+								<div className="flex items-start justify-between gap-4">
+									<div className="flex flex-col gap-1">
+										<p className="font-sans text-lg font-semibold text-fg">
+											{item.title}
 										</p>
-									))}
-								</div>,
-								item.readAt ? null : (
-									<Badge key="unread" variant="pending">
-										{t("inboxUnread")}
-									</Badge>
-								),
-								item.readAt ? null : (
+										<p className="font-sans text-base font-medium text-fg">
+											{item.body}
+										</p>
+										{notes.map((note) => (
+											<p
+												key={note}
+												className={
+													failed
+														? "font-sans text-sm font-medium text-destructive"
+														: "font-sans text-sm font-medium text-fg-muted"
+												}
+											>
+												{note}
+											</p>
+										))}
+									</div>
+									{item.readAt ? null : (
+										<Badge variant="pending">{t("inboxUnread")}</Badge>
+									)}
+								</div>
+								{item.readAt ? null : (
 									<Button
-										key="read"
 										type="button"
 										variant="quiet"
 										className="w-fit"
@@ -165,65 +169,70 @@ export default function InboxPage() {
 									>
 										{t("inboxMarkRead")}
 									</Button>
-								),
-							],
-						};
+								)}
+							</li>
+						);
 					})}
-				/>
+				</ul>
 			)}
 			{choices.length === 0 ? null : (
-				<section className="flex flex-col gap-4">
+				<section className="rounded-[20px] bg-surface p-5 sm:p-6">
 					<h2 className="font-sans text-2xl font-semibold text-fg">
 						{t("inboxPrefTitle")}
 					</h2>
-					<ul className="flex flex-col gap-4">
-						{choices.map((choice) => (
-							<li key={choice.eventName} className="flex flex-col gap-2">
-								<p className="text-lg text-fg">
-									{t(eventLabel(choice.eventName))}
-								</p>
-								<div className="flex flex-wrap gap-2">
-									<Button
-										type="button"
-										variant="quiet"
-										disabled={busy}
-										onClick={() =>
-											void onPreference(
-												choice.eventName,
-												"in_app",
-												!choice.inApp,
-											)
-										}
-									>
-										{t("prefInApp")} {choice.inApp ? t("prefOn") : t("prefOff")}
-									</Button>
-									<Button
-										type="button"
-										variant="quiet"
-										disabled={busy}
-										onClick={() =>
-											void onPreference(choice.eventName, "sms", !choice.sms)
-										}
-									>
-										{t("prefSms")} {choice.sms ? t("prefOn") : t("prefOff")}
-									</Button>
-									<Button
-										type="button"
-										variant="quiet"
-										disabled={busy}
-										onClick={() =>
-											void onPreference(
-												choice.eventName,
-												"email",
-												!choice.email,
-											)
-										}
-									>
-										{t("prefEmail")} {choice.email ? t("prefOn") : t("prefOff")}
-									</Button>
-								</div>
-							</li>
+					<p className="mt-2 max-w-xl font-sans text-base font-medium text-fg">
+						{t("inboxPrefLead")}
+					</p>
+					<div className="mt-6 hidden sm:grid sm:grid-cols-[minmax(0,1fr)_repeat(3,6.5rem)] sm:px-1">
+						<span />
+						{CHANNELS.map((channel) => (
+							<span
+								key={channel.id}
+								className="text-center font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted"
+							>
+								{t(channel.label)}
+							</span>
 						))}
+					</div>
+					<ul className="mt-2 flex flex-col">
+						{choices.map((choice) => {
+							const title = eventTitle(choice.eventName);
+							const name = title ? t(title) : choice.eventName;
+							return (
+								<li
+									key={choice.eventName}
+									className="grid gap-3 border-t border-line py-4 sm:grid-cols-[minmax(0,1fr)_repeat(3,6.5rem)] sm:items-center"
+								>
+									<p className="font-sans text-lg font-semibold text-fg">
+										{name}
+									</p>
+									{CHANNELS.map((channel) => {
+										const on = channelOn(choice, channel.id);
+										return (
+											<div
+												key={channel.id}
+												className="flex items-center justify-between gap-3 sm:flex-col sm:justify-center"
+											>
+												<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted sm:sr-only">
+													{t(channel.label)}
+												</span>
+												<Switch
+													checked={on}
+													disabled={busy}
+													label={`${name}, ${t(channel.label)}, ${on ? t("prefOn") : t("prefOff")}`}
+													onToggle={() =>
+														void onPreference(choice.eventName, channel.id, !on)
+													}
+												/>
+												<span className="w-8 font-meta text-xs font-semibold uppercase text-fg">
+													{on ? t("prefOn") : t("prefOff")}
+												</span>
+											</div>
+										);
+									})}
+								</li>
+							);
+						})}
 					</ul>
 				</section>
 			)}

@@ -1,4 +1,10 @@
 import { Link } from "react-router";
+import {
+	BadgeMark,
+	BoardMark,
+	LedgerMark,
+	MapMark,
+} from "@/components/public/marks";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useI18n } from "@/lib/i18n";
@@ -21,6 +27,33 @@ const principles = [
 	},
 ] as const;
 
+const actions = [
+	{
+		to: "/directory",
+		title: "directoryNav",
+		body: "homeActionDirectoryBody",
+		mark: MapMark,
+	},
+	{
+		to: "/audit-summary",
+		title: "auditSummaryNav",
+		body: "homeActionAuditBody",
+		mark: LedgerMark,
+	},
+	{
+		to: "/leaderboard",
+		title: "leaderboardNav",
+		body: "homeActionBoardBody",
+		mark: BoardMark,
+	},
+	{
+		to: "/verify",
+		title: "credentialsNav",
+		body: "homeActionBadgeBody",
+		mark: BadgeMark,
+	},
+] as const;
+
 export default function HomePage() {
 	const { t } = useI18n();
 
@@ -40,30 +73,29 @@ export default function HomePage() {
 					<Button asChild variant="sticker" className="mt-10">
 						<Link to="/login">{t("signIn")}</Link>
 					</Button>
-					<Link
-						to="/directory"
-						className="mt-4 font-sans text-sm font-semibold text-fg"
-					>
-						{t("directoryNav")}
-					</Link>
-					<Link
-						to="/audit-summary"
-						className="mt-3 font-sans text-sm font-semibold text-fg"
-					>
-						{t("auditSummaryNav")}
-					</Link>
-					<Link
-						to="/leaderboard"
-						className="mt-3 font-sans text-sm font-semibold text-fg"
-					>
-						{t("leaderboardNav")}
-					</Link>
-					<Link
-						to="/verify"
-						className="mt-3 font-sans text-sm font-semibold text-fg"
-					>
-						{t("credentialsNav")}
-					</Link>
+					<ul className="mt-10 grid w-full max-w-3xl gap-4 text-left sm:grid-cols-2">
+						{actions.map((action) => {
+							const Mark = action.mark;
+							return (
+								<li key={action.to}>
+									<Link
+										to={action.to}
+										className="flex h-full items-center gap-4 rounded-[20px] bg-surface p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+									>
+										<Mark />
+										<span>
+											<span className="block font-sans text-lg font-semibold text-fg">
+												{t(action.title)}
+											</span>
+											<span className="mt-1 block font-sans text-sm font-medium leading-relaxed text-fg">
+												{t(action.body)}
+											</span>
+										</span>
+									</Link>
+								</li>
+							);
+						})}
+					</ul>
 				</div>
 			</section>
 
@@ -98,9 +130,12 @@ export default function HomePage() {
 					<p className="font-sans text-2xl font-semibold text-fg">
 						{t("homeClose")}
 					</p>
-					<Button asChild variant="sticker" className="mt-8">
-						<Link to="/login">{t("signIn")}</Link>
-					</Button>
+					<Link
+						to="/login"
+						className="mt-8 font-sans text-lg font-semibold text-fg underline"
+					>
+						{t("signIn")}
+					</Link>
 				</div>
 			</section>
 		</>

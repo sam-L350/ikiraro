@@ -1,6 +1,6 @@
 import { Link } from "react-router";
+import { BoardMark } from "@/components/public/marks";
 import { EmptyState } from "@/components/ui/empty-state";
-import { RecordTable } from "@/components/ui/record-table";
 import { useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 
@@ -31,35 +31,69 @@ export default function LeaderboardPage() {
 	}
 
 	return (
-		<section className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-16">
-			<div>
-				<Link to="/" className="font-sans text-sm font-semibold text-fg">
-					{t("wordmark")}
-				</Link>
-				<h1 className="mt-3 font-sans text-4xl font-semibold text-balance text-fg">
-					{t("leaderboardTitle")}
-				</h1>
-				<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
-					{t("leaderboardSentence")}
-				</p>
+		<section className="mx-auto flex max-w-3xl flex-col gap-10 px-6 py-16">
+			<div className="flex items-end gap-5">
+				<BoardMark className="size-24 shrink-0" />
+				<div>
+					<Link to="/" className="font-sans text-sm font-semibold text-fg">
+						{t("wordmark")}
+					</Link>
+					<h1 className="mt-3 font-sans text-4xl font-semibold text-balance text-fg">
+						{t("leaderboardTitle")}
+					</h1>
+					<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
+						{t("leaderboardSentence")}
+					</p>
+				</div>
 			</div>
 			{rows.length === 0 ? (
 				<EmptyState sentence={t("leaderboardEmpty")} />
 			) : (
-				<RecordTable
-					caption={t("leaderboardTitle")}
-					columns={[t("nameLabel"), t("districtLabel"), t("status")]}
-					rows={rows.map((row) => ({
-						key: rowKey(row),
-						cells: [
-							row.initials,
-							row.district,
+				<ol className="flex flex-col">
+					{rows.map((row) => {
+						const width =
 							row.progress === null
-								? t("leaderboardNoThreshold")
-								: t("leaderboardProgress", { percent: String(row.progress) }),
-						],
-					}))}
-				/>
+								? 0
+								: Math.max(0, Math.min(100, row.progress));
+						return (
+							<li
+								key={rowKey(row)}
+								className="flex flex-col gap-2 border-b border-line py-4"
+							>
+								<div className="flex items-baseline justify-between gap-4">
+									<p className="font-sans text-2xl font-semibold text-fg">
+										{row.initials}
+									</p>
+									<p className="font-sans text-lg font-medium text-fg">
+										{row.district}
+									</p>
+								</div>
+								{row.progress === null ? (
+									<p className="font-sans text-sm font-medium text-fg">
+										{t("leaderboardNoThreshold")}
+									</p>
+								) : (
+									<>
+										<div
+											className="h-2 overflow-hidden rounded-full bg-surface"
+											aria-hidden="true"
+										>
+											<div
+												className="h-full bg-ink"
+												style={{ width: `${width}%` }}
+											/>
+										</div>
+										<p className="font-sans text-sm font-medium text-fg">
+											{t("leaderboardProgress", {
+												percent: String(row.progress),
+											})}
+										</p>
+									</>
+								)}
+							</li>
+						);
+					})}
+				</ol>
 			)}
 		</section>
 	);

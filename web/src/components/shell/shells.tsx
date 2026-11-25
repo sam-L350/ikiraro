@@ -26,9 +26,9 @@ export function PublicShell({ children }: { children: ReactNode }) {
 	return (
 		<div className="flex min-h-screen flex-col bg-canvas">
 			<header className="sticky top-0 z-40 bg-canvas/90 backdrop-blur-sm">
-				<div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between gap-4 px-6 lg:px-12">
-					<Wordmark />
-					<div className="flex items-center gap-4">
+				<div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6 lg:px-12">
+					<Wordmark className="shrink-0" />
+					<div className="flex items-center gap-2 sm:gap-4">
 						<LanguageSwitch />
 						{user ? (
 							<Button asChild variant="sticker">

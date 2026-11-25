@@ -8,7 +8,7 @@ export function EmptyState({
 	action?: ReactNode;
 }) {
 	return (
-		<div className="flex max-w-md flex-col items-start gap-6">
+		<div className="flex max-w-md flex-col items-start gap-4 rounded-[20px] bg-surface p-6">
 			<EmptyMark />
 			<p className="font-sans text-lg font-medium text-fg">{sentence}</p>
 			{action}
