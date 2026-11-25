@@ -89,7 +89,7 @@ export default function LearnerHomePage() {
 		operations: isManager || isCoordinator || isAdmin,
 		courses: codes.includes("content_author"),
 		reviews: codes.includes("content_reviewer"),
-		inventory: isHardware,
+		inventory: isHardware || isAdmin,
 		hardware: isHardware,
 		decisions: codes.includes("committee_member"),
 		equity:

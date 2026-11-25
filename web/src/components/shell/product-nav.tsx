@@ -418,10 +418,17 @@ function useProductNavItems(): NavItem[] {
 	if (canReviewConcerns) {
 		add("reports", { to: "/concerns", label: "concernsNav" });
 	}
+	const canViewInventory =
+		user?.roles.some(
+			(role) =>
+				role.code === "hardware_officer" || role.code === "platform_admin",
+		) ?? false;
 	const canManageHardware =
 		user?.roles.some((role) => role.code === "hardware_officer") ?? false;
-	if (canManageHardware) {
+	if (canViewInventory) {
 		add("hardware", { to: "/inventory", label: "inventoryNav" });
+	}
+	if (canManageHardware) {
 		add("hardware", { to: "/licences", label: "licencesNav" });
 		add("hardware", { to: "/handovers", label: "handoverNav" });
 		add("hardware", { to: "/recovery", label: "recoveryNav" });

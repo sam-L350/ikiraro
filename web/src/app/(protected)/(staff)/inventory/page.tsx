@@ -1,10 +1,11 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
+import { InventoryMark } from "@/components/learning/inventory-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageTabs } from "@/components/ui/page-tabs";
-import { RecordTable } from "@/components/ui/record-table";
+import { useAuth } from "@/lib/auth";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -68,23 +69,30 @@ function statusKey(status: InventoryStatus): MessageKey {
 	}
 }
 
-function statusTone(status: InventoryStatus): "neutral" | "pending" | "danger" {
+function statusTone(
+	status: InventoryStatus,
+): "verified" | "pending" | "info" | "danger" | "outline" {
 	switch (status) {
 		case "in_stock":
-		case "awarded":
-		case "retired":
-			return "neutral";
+			return "verified";
 		case "reserved":
 		case "in_repair":
 			return "pending";
+		case "awarded":
+			return "info";
 		case "lost":
 			return "danger";
+		case "retired":
+			return "outline";
 		default: {
 			const unreachable: never = status;
 			return unreachable;
 		}
 	}
 }
+
+const fieldClass =
+	"h-11 rounded-xl border border-line-strong bg-canvas px-3 font-sans text-lg text-fg";
 
 function isCondition(value: string): value is InventoryCondition {
 	switch (value) {
@@ -132,6 +140,9 @@ function saveError(caught: unknown): MessageKey {
 
 export default function InventoryPage() {
 	const { t } = useI18n();
+	const { user } = useAuth();
+	const canManage =
+		user?.roles.some((role) => role.code === "hardware_officer") ?? false;
 	const online = useOnline();
 	const list = useEngine("/inventory", { query: {} });
 	const create = useEngineMutation("/inventory/create");
@@ -225,7 +236,7 @@ export default function InventoryPage() {
 	}
 
 	if (list.isPending) {
-		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
+		return <div className="h-40 animate-pulse rounded-[20px] bg-surface" />;
 	}
 	if (isApiClientError(list.error) && list.error.status === 403) {
 		return (
@@ -242,28 +253,44 @@ export default function InventoryPage() {
 		isStatus(item.status),
 	);
 
+	const inStock = items.filter((item) => item.status === "in_stock").length;
+	const reserved = items.filter((item) => item.status === "reserved").length;
+	const awarded = items.filter((item) => item.status === "awarded").length;
+
 	return (
-		<section className="flex max-w-3xl flex-col gap-8">
-			<div>
-				<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
-					{t("inventoryTitle")}
-				</h1>
-				<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
-					{t("inventorySentence")}
-				</p>
-			</div>
-			<PageTabs
-				label={t("inventoryTitle")}
-				value={panel}
-				onChange={setPanel}
-				tabs={[
-					{ value: "list", label: t("listTab") },
-					{ value: "add", label: t("addTab") },
-				]}
-			/>
-			{panel === "add" ? (
+		<section className="mx-auto flex max-w-3xl flex-col gap-8">
+			<article className="rounded-[20px] bg-surface p-6 sm:p-8">
+				<div className="flex items-start gap-4">
+					<InventoryMark />
+					<div>
+						<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
+							{t("inventoryTitle")}
+						</h1>
+						<p className="mt-2 max-w-xl font-sans text-lg font-medium text-fg">
+							{t("inventorySentence")}
+						</p>
+					</div>
+				</div>
+				<ul className="mt-6 grid gap-3 sm:grid-cols-3">
+					<Stat label={t("inventoryInStock")} value={String(inStock)} />
+					<Stat label={t("inventoryReserved")} value={String(reserved)} />
+					<Stat label={t("inventoryAwarded")} value={String(awarded)} />
+				</ul>
+			</article>
+			{canManage ? (
+				<PageTabs
+					label={t("inventoryTitle")}
+					value={panel}
+					onChange={setPanel}
+					tabs={[
+						{ value: "list", label: t("listTab") },
+						{ value: "add", label: t("addTab") },
+					]}
+				/>
+			) : null}
+			{canManage && panel === "add" ? (
 				<form
-					className="flex flex-col gap-4"
+					className="flex flex-col gap-4 rounded-[20px] bg-surface p-6"
 					onSubmit={(event) => void onSave(event)}
 				>
 					<label className="flex flex-col gap-2" htmlFor="inventory-center">
@@ -272,7 +299,7 @@ export default function InventoryPage() {
 						</span>
 						<select
 							id="inventory-center"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={centerId}
 							onChange={(event) => setCenterId(event.target.value)}
 						>
@@ -289,7 +316,7 @@ export default function InventoryPage() {
 						</span>
 						<input
 							id="inventory-name"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={name}
 							maxLength={120}
 							onChange={(event) => setName(event.target.value)}
@@ -302,7 +329,7 @@ export default function InventoryPage() {
 							</span>
 							<input
 								id="inventory-category"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={category}
 								maxLength={60}
 								onChange={(event) => setCategory(event.target.value)}
@@ -314,7 +341,7 @@ export default function InventoryPage() {
 							</span>
 							<input
 								id="inventory-serial"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={serial}
 								maxLength={80}
 								onChange={(event) => setSerial(event.target.value)}
@@ -327,7 +354,7 @@ export default function InventoryPage() {
 						</span>
 						<select
 							id="inventory-condition"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={condition}
 							onChange={(event) => {
 								if (isCondition(event.target.value))
@@ -348,7 +375,7 @@ export default function InventoryPage() {
 							</span>
 							<input
 								id="inventory-donor"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={donor}
 								maxLength={120}
 								onChange={(event) => setDonor(event.target.value)}
@@ -361,7 +388,7 @@ export default function InventoryPage() {
 							<input
 								id="inventory-acquired"
 								type="date"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={acquiredOn}
 								onChange={(event) => setAcquiredOn(event.target.value)}
 							/>
@@ -375,7 +402,7 @@ export default function InventoryPage() {
 							<input
 								id="inventory-points"
 								inputMode="numeric"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={points}
 								onChange={(event) => setPoints(event.target.value)}
 							/>
@@ -387,7 +414,7 @@ export default function InventoryPage() {
 							<input
 								id="inventory-badges"
 								inputMode="numeric"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={badges}
 								onChange={(event) => setBadges(event.target.value)}
 							/>
@@ -399,7 +426,7 @@ export default function InventoryPage() {
 							<input
 								id="inventory-months"
 								inputMode="numeric"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={months}
 								onChange={(event) => setMonths(event.target.value)}
 							/>
@@ -431,35 +458,45 @@ export default function InventoryPage() {
 			) : items.length === 0 ? (
 				<EmptyState sentence={t("inventoryEmpty")} />
 			) : (
-				<RecordTable
-					caption={t("inventoryTitle")}
-					columns={[
-						t("nameLabel"),
-						t("inventorySerial"),
-						t("status"),
-						t("centerLabel"),
-						t("openRow"),
-					]}
-					rows={items.map((item) => ({
-						key: item.id,
-						cells: [
-							item.name,
-							item.serial,
-							<Badge key="status" variant={statusTone(item.status)}>
-								{t(statusKey(item.status))}
-							</Badge>,
-							item.centerName,
+				<ul className="flex flex-col gap-3">
+					{items.map((item) => (
+						<li key={item.id}>
 							<Link
-								key="open"
 								to={`/inventory/${item.id}`}
-								className="underline"
+								className="flex flex-col gap-2 rounded-[20px] bg-surface px-5 py-4"
 							>
-								{t("openRow")}
-							</Link>,
-						],
-					}))}
-				/>
+								<div className="flex flex-wrap items-center justify-between gap-3">
+									<span className="font-sans text-xl font-semibold text-fg">
+										{item.name}
+									</span>
+									<Badge variant={statusTone(item.status)}>
+										{t(statusKey(item.status))}
+									</Badge>
+								</div>
+								<p className="font-sans text-base font-medium text-fg">
+									{item.category}
+									{" · "}
+									{item.serial}
+								</p>
+								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+									{item.centerName}
+								</p>
+							</Link>
+						</li>
+					))}
+				</ul>
 			)}
 		</section>
+	);
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+	return (
+		<li className="rounded-2xl bg-canvas px-4 py-4">
+			<p className="font-sans text-3xl font-semibold text-fg">{value}</p>
+			<p className="mt-1 font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+				{label}
+			</p>
+		</li>
 	);
 }
