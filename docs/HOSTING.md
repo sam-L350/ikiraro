@@ -1,5 +1,24 @@
 # Hosting
 
+## Hubfly space: `make deploy`
+
+The production deployment is one container on Hubfly space, built from the root `Dockerfile`. The Bun engine serves the API and the built web app on the same origin (`WEB_DIST_DIR`), so the session cookie is first-party and needs no CORS or `SameSite=None` setup. On every start the container applies pending migrations and the foundation seed (`engine/src/db/release-cli.ts`), then starts the server.
+
+```sh
+make deploy          # build the image, upload it, roll it out and wait for the result
+make deploy-plan     # show what a deploy would change
+make deploy-secrets  # store engine/.env.production as secrets of the container
+make deploy-logs     # follow the container's logs
+```
+
+- `hubfly.build.json` binds the repository to the Hubfly space project and container and holds the non-secret settings (`API_URL`, `WEB_URL`, `CORS_ORIGINS`, logging). Commit it; the CLI updates its `metadata` after each deploy.
+- Secrets live only on the container. `hubfly.build.json` lists their names with `"from": "cloud"` and no value, which makes a deploy keep them. To set or change one, edit `engine/.env.production` (git-ignored; copy `engine/.env.production.example`) and run `make deploy-secrets`. That needs an access token in `HUBFLY_TOKEN` or `~/.hubfly/api-token`; `make deploy` needs only `hubfly login`.
+- The public address is `https://ikiraro.g.hubfly.app`. When it changes (a custom domain), update `API_URL`, `WEB_URL` and `CORS_ORIGINS` in `hubfly.build.json`, and the redirect URI `<API_URL>/api/auth/google/callback` in the Google OAuth client.
+
+The sections below describe the other option, hosting the two halves apart.
+
+## Engine and web app on separate hosts
+
 The engine and the web app deploy separately. The engine runs on **Bun** (any VM/container) or **Cloudflare Workers**; the web app is a static bundle (Cloudflare Pages, Netlify, S3, …).
 
 ## 1. Decide on cookie strategy (read this first)

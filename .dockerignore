@@ -1,0 +1,29 @@
+# Keep the build context small and free of secrets.
+.git
+.github
+.zed
+.hubfly
+node_modules
+**/node_modules
+**/dist
+**/.generated
+**/.wrangler
+**/.data
+**/.cache
+**/.tmp
+*.tsbuildinfo
+*.log
+
+# Environment files never enter the image; Hubfly space injects them at runtime.
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+.dev.vars
+**/.dev.vars
+
+docs
+README.md
+hubfly.build.json
+docker-compose.yml
