@@ -28,6 +28,7 @@ import { approveCourse, publishCourse, retireCourse } from "../content/review";
 import { createUserWithPassport } from "../identity/create-user";
 import {
 	type CatalogLanguage,
+	catalogOutline,
 	enrollInCourse,
 	listCatalog,
 	matchesCatalog,
@@ -89,6 +90,83 @@ describe("catalog filters", () => {
 		expect(parsed?.category).toBe("");
 		expect(parsed?.economicSector).toBe("");
 		expect(parsed?.languages).toEqual(["en"]);
+		expect(catalogOutline({ titleEn: "Hello" })).toEqual([]);
+	});
+
+	test("the outline keeps module and task titles in position order", () => {
+		expect(
+			catalogOutline({
+				modules: [
+					{
+						id: "later",
+						position: 2,
+						titleEn: "The stall",
+						titleRw: "",
+						summaryEn: "",
+						summaryRw: "",
+						tasks: [],
+					},
+					{
+						id: "first",
+						position: 1,
+						titleEn: "The store",
+						titleRw: "Ububiko",
+						summaryEn: "Where the bags sit.",
+						summaryRw: "",
+						tasks: [
+							{
+								id: "count",
+								position: 2,
+								titleEn: "Count the bags",
+								titleRw: "",
+								evidenceType: "note",
+								required: true,
+							},
+							{
+								id: "open",
+								position: 1,
+								titleEn: "Open the book",
+								titleRw: "",
+								evidenceType: "photo",
+								required: false,
+							},
+						],
+					},
+				],
+			}),
+		).toEqual([
+			{
+				moduleId: "first",
+				titleEn: "The store",
+				titleRw: "Ububiko",
+				summaryEn: "Where the bags sit.",
+				summaryRw: "",
+				tasks: [
+					{
+						taskId: "open",
+						titleEn: "Open the book",
+						titleRw: "",
+						evidenceType: "photo",
+						required: false,
+					},
+					{
+						taskId: "count",
+						titleEn: "Count the bags",
+						titleRw: "",
+						evidenceType: "note",
+						required: true,
+					},
+				],
+			},
+			{
+				moduleId: "later",
+				titleEn: "The stall",
+				titleRw: "",
+				summaryEn: "",
+				summaryRw: "",
+				tasks: [],
+			},
+		]);
 	});
 
 	test("category and sector ignore case, and level is exact", () => {

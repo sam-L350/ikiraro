@@ -1617,6 +1617,16 @@ export const en = {
 	warningsRules: "Quiet days already stored",
 	eventEscalated: "A review is overdue",
 	eventDormant: "A recipient has gone quiet",
+	catalogEmptyTasks: "This course has no tasks yet.",
+	taskComplete: "Done",
+	taskAlso: "Also on this task",
+	taskClarityAsk: "Was this clear?",
+	passportStatMinutes: "Minutes",
+	passportStatHours: "Hours",
+	passportStatPoints: "Points",
+	passportStatLevel: "Level",
+	passportStatNone: "None yet",
+	allocationNotReady: "Meet every rule before you can apply.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -3248,4 +3258,14 @@ export const rw: Record<MessageKey, string> = {
 	warningsRules: "Iminsi y'ubutitiri yabitswe",
 	eventEscalated: "Isuzuma ryarengeje igihe",
 	eventDormant: "Uwahawe ikintu yacecekeye",
+	catalogEmptyTasks: "Iri somo ntiragira imirimo.",
+	taskComplete: "Byarangiye",
+	taskAlso: "Ibindi kuri iki gikorwa",
+	taskClarityAsk: "Ibyo byari bisobanutse?",
+	passportStatMinutes: "Iminota",
+	passportStatHours: "Amasaha",
+	passportStatPoints: "Amanota",
+	passportStatLevel: "Urwego",
+	passportStatNone: "Nta na kimwe",
+	allocationNotReady: "Uzuza amategeko yose mbere yo gusaba.",
 };

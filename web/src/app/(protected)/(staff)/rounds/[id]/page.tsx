@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router";
+import { RoundMark } from "@/components/learning/round-mark";
 import { Badge } from "@/components/ui/badge";
 import { isApiClientError, useEngine } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
@@ -68,6 +69,23 @@ function ruleSentence(
 	}
 }
 
+function resultVariant(
+	status: ResultStatus,
+): "verified" | "rejected" | "outline" {
+	switch (status) {
+		case "pass":
+			return "verified";
+		case "fail":
+			return "rejected";
+		case "unknown":
+			return "outline";
+		default: {
+			const unreachable: never = status;
+			return unreachable;
+		}
+	}
+}
+
 function statusKey(status: ResultStatus): MessageKey {
 	switch (status) {
 		case "pass":
@@ -94,7 +112,7 @@ export default function RoundPage() {
 	const detail = round.data as RoundDetail | undefined;
 
 	if (!id || round.isPending) {
-		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
+		return <div className="h-40 animate-pulse rounded-[20px] bg-surface" />;
 	}
 	if (isApiClientError(round.error) && round.error.status === 403) {
 		return (
@@ -112,68 +130,83 @@ export default function RoundPage() {
 	}
 
 	return (
-		<section className="flex max-w-3xl flex-col gap-8">
-			<div>
-				<Link to="/rounds" className="font-sans text-sm font-semibold text-fg">
+		<section className="mx-auto flex max-w-3xl flex-col gap-8">
+			<article className="rounded-[20px] bg-surface p-6 sm:p-8">
+				<Link
+					to="/rounds"
+					className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted underline-offset-4 hover:underline"
+				>
 					{t("roundsTitle")}
 				</Link>
-				<h1 className="mt-3 font-sans text-4xl font-semibold text-balance text-fg">
-					{detail.title}
-				</h1>
-				<p className="mt-4 font-sans text-lg font-medium text-fg">
-					{detail.districtName} ·{" "}
-					{t("allocationItems", { count: String(detail.quantity) })}
-				</p>
-				<Badge variant={detail.open ? "pending" : "neutral"}>
-					{whenLabel(detail.open, t)}
-				</Badge>
-			</div>
-			<div className="flex flex-col gap-2">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+				<div className="mt-4 flex items-start gap-4">
+					<RoundMark />
+					<div className="min-w-0">
+						<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
+							{detail.title}
+						</h1>
+						<p className="mt-2 font-sans text-lg font-medium text-fg">
+							{detail.districtName}
+							{" · "}
+							{t("allocationItems", { count: String(detail.quantity) })}
+						</p>
+						<div className="mt-3">
+							<Badge variant={detail.open ? "pending" : "neutral"}>
+								{whenLabel(detail.open, t)}
+							</Badge>
+						</div>
+					</div>
+				</div>
+			</article>
+			<section className="rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("inventoryRules")}
 				</h2>
 				{detail.criteria.length === 0 ? (
-					<p className="font-sans text-lg font-medium text-fg">
+					<p className="mt-3 font-sans text-lg font-medium text-fg">
 						{t("inventoryNoRules")}
 					</p>
 				) : (
-					<ul className="flex flex-col gap-1">
+					<ul className="mt-4 flex flex-col gap-3">
 						{detail.criteria.map((rule) => (
 							<li
 								key={ruleSentence(rule, t)}
-								className="font-sans text-lg font-medium text-fg"
+								className="rounded-2xl bg-canvas px-4 py-3 font-sans text-lg font-medium text-fg"
 							>
 								{ruleSentence(rule, t)}
 							</li>
 						))}
 					</ul>
 				)}
-			</div>
-			<div className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+			</section>
+			<section className="rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("roundsApplications")}
 				</h2>
 				{detail.applications.length === 0 ? (
-					<p className="font-sans text-lg font-medium text-fg">
+					<p className="mt-3 font-sans text-lg font-medium text-fg">
 						{t("roundsNoApplications")}
 					</p>
 				) : (
-					<ul>
+					<ul className="mt-4 flex flex-col gap-3">
 						{detail.applications.map((application) => (
-							<li key={application.id} className="border-t border-ink/15 py-4">
-								<p className="font-sans text-lg font-medium text-fg">
+							<li
+								key={application.id}
+								className="rounded-2xl bg-canvas px-4 py-4"
+							>
+								<p className="font-sans text-lg font-semibold text-fg">
 									{application.learnerName}
 								</p>
-								<p className="mt-1 font-sans text-lg font-medium text-fg">
-									{application.statement}
-								</p>
-								<ul className="mt-2 flex flex-col gap-1">
+								{application.statement ? (
+									<p className="mt-2 font-sans text-base font-medium text-fg">
+										{application.statement}
+									</p>
+								) : null}
+								<ul className="mt-3 flex flex-wrap gap-2">
 									{application.results.map((result) => (
-										<li
-											key={`${result.kind}-${result.status}`}
-											className="font-meta text-xs font-semibold uppercase tracking-wide text-fg"
-										>
-											{t(statusKey(result.status))}
+										<li key={`${result.kind}-${result.status}`}>
+											<Badge variant={resultVariant(result.status)}>
+												{t(statusKey(result.status))}
+											</Badge>
 										</li>
 									))}
 								</ul>
@@ -181,7 +214,7 @@ export default function RoundPage() {
 						))}
 					</ul>
 				)}
-			</div>
+			</section>
 		</section>
 	);
 }

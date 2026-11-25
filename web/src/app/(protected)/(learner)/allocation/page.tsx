@@ -1,6 +1,8 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { RoundMark } from "@/components/learning/round-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -50,6 +52,23 @@ function ruleSentence(
 			return t("inventoryDistrictRule");
 		default: {
 			const unreachable: never = rule;
+			return unreachable;
+		}
+	}
+}
+
+function resultVariant(
+	status: ResultStatus,
+): "verified" | "rejected" | "outline" {
+	switch (status) {
+		case "pass":
+			return "verified";
+		case "fail":
+			return "rejected";
+		case "unknown":
+			return "outline";
+		default: {
+			const unreachable: never = status;
 			return unreachable;
 		}
 	}
@@ -119,7 +138,7 @@ export default function AllocationPage() {
 	}
 
 	if (list.isPending) {
-		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
+		return <div className="h-40 animate-pulse rounded-[20px] bg-surface" />;
 	}
 	if (isApiClientError(list.error) && list.error.status === 403) {
 		return (
@@ -133,130 +152,155 @@ export default function AllocationPage() {
 	}
 
 	return (
-		<section className="flex max-w-3xl flex-col gap-8">
-			<div>
-				<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
-					{t("allocationTitle")}
-				</h1>
-				<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
-					{t("allocationSentence")}
-				</p>
-			</div>
+		<section className="mx-auto flex max-w-3xl flex-col gap-8">
 			{rounds.length === 0 || !selected ? (
-				<p className="font-sans text-lg font-medium text-fg">
-					{t("allocationEmpty")}
-				</p>
+				<EmptyState sentence={t("allocationEmpty")} />
 			) : (
-				<div className="flex flex-col gap-6">
+				<>
 					{rounds.length > 1 ? (
-						<label className="flex flex-col gap-2" htmlFor="allocation-round">
-							<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{t("roundsName")}
-							</span>
-							<select
-								id="allocation-round"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-								value={selected.id}
-								onChange={(event) => setRoundId(event.target.value)}
-							>
-								{rounds.map((round) => (
-									<option key={round.id} value={round.id}>
-										{round.title}
-									</option>
-								))}
-							</select>
-						</label>
-					) : null}
-					<div className="flex flex-col gap-2">
-						<div className="flex flex-wrap items-center gap-3">
-							<Badge variant={selected.open ? "pending" : "neutral"}>
-								{selected.open ? t("roundsOpen") : t("roundsClosed")}
-							</Badge>
-							<p className="font-sans text-lg font-medium text-fg">
-								{selected.title}
-							</p>
-						</div>
-						<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-							{selected.districtName} ·{" "}
-							{t("allocationItems", { count: String(selected.quantity) })}
-						</p>
-					</div>
-					{selected.criteria.length === 0 ? (
-						<p className="font-sans text-lg font-medium text-fg">
-							{t("inventoryNoRules")}
-						</p>
-					) : (
-						<ul className="flex flex-col gap-2">
-							{selected.criteria.map((rule, index) => {
-								const result = selected.results[index];
-								const status =
-									result && isStatus(result.status) ? result.status : "unknown";
+						<ul className="grid gap-3 sm:grid-cols-2">
+							{rounds.map((round) => {
+								const current = round.id === selected.id;
 								return (
-									<li
-										key={ruleSentence(rule, t)}
-										className="flex flex-col gap-1"
-									>
-										<p className="font-sans text-lg font-medium text-fg">
-											{ruleSentence(rule, t)}
-										</p>
-										<Badge variant={status === "fail" ? "danger" : "neutral"}>
-											{t(statusKey(status))}
-										</Badge>
+									<li key={round.id}>
+										<button
+											type="button"
+											aria-pressed={current}
+											className={
+												current
+													? "flex w-full flex-col items-start gap-1 rounded-[20px] bg-ink px-4 py-4 text-left text-ink-fg"
+													: "flex w-full flex-col items-start gap-1 rounded-[20px] bg-surface px-4 py-4 text-left"
+											}
+											onClick={() => setRoundId(round.id)}
+										>
+											<span className="font-sans text-lg font-semibold">
+												{round.title}
+											</span>
+											<span className="font-meta text-xs font-semibold uppercase tracking-wide opacity-80">
+												{round.districtName}
+											</span>
+										</button>
 									</li>
 								);
 							})}
 						</ul>
-					)}
-					{selected.applied ? (
-						<div className="flex flex-col gap-2">
-							<p className="font-sans text-lg font-medium text-fg">
-								{t("allocationSent")}
-							</p>
-							{selected.statement ? (
-								<p className="font-sans text-lg font-medium text-fg">
-									{selected.statement}
-								</p>
-							) : null}
-						</div>
-					) : ready && selected.open ? (
-						<form
-							className="flex flex-col gap-4"
-							onSubmit={(event) => void onSend(event)}
-						>
-							<label
-								className="flex flex-col gap-2"
-								htmlFor="allocation-statement"
-							>
-								<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-									{t("allocationStatement")}
-								</span>
-								<textarea
-									id="allocation-statement"
-									className="min-h-28 rounded-md border border-line bg-card px-3 py-2 font-sans text-lg text-fg"
-									value={statement}
-									maxLength={400}
-									onChange={(event) => setStatement(event.target.value)}
-								/>
-							</label>
-							{error ? (
-								<p
-									className="font-sans text-sm font-medium text-danger"
-									role="alert"
-								>
-									{t(error)}
-								</p>
-							) : null}
-							<Button
-								type="submit"
-								variant="sticker"
-								className="w-fit"
-								disabled={apply.isPending}
-							>
-								{t("allocationSend")}
-							</Button>
-						</form>
 					) : null}
-				</div>
+					<article className="rounded-[20px] bg-surface p-6 sm:p-8">
+						<div className="flex items-start gap-4">
+							<RoundMark />
+							<div className="min-w-0">
+								<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+									{selected.districtName}
+								</p>
+								<h1 className="mt-1 font-sans text-4xl font-semibold text-balance text-fg">
+									{selected.title}
+								</h1>
+								<div className="mt-3 flex flex-wrap items-center gap-2">
+									<Badge variant={selected.open ? "pending" : "neutral"}>
+										{selected.open ? t("roundsOpen") : t("roundsClosed")}
+									</Badge>
+									<span className="font-sans text-base font-medium text-fg">
+										{t("allocationItems", {
+											count: String(selected.quantity),
+										})}
+									</span>
+								</div>
+							</div>
+						</div>
+						<p className="mt-5 max-w-xl font-sans text-lg font-medium text-fg">
+							{t("allocationSentence")}
+						</p>
+					</article>
+					<section className="rounded-[20px] bg-surface p-6">
+						<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+							{t("inventoryRules")}
+						</h2>
+						{selected.criteria.length === 0 ? (
+							<p className="mt-3 font-sans text-lg font-medium text-fg">
+								{t("inventoryNoRules")}
+							</p>
+						) : (
+							<ul className="mt-4 flex flex-col gap-3">
+								{selected.criteria.map((rule, index) => {
+									const result = selected.results[index];
+									const status =
+										result && isStatus(result.status)
+											? result.status
+											: "unknown";
+									return (
+										<li
+											key={ruleSentence(rule, t)}
+											className="flex items-center justify-between gap-4 rounded-2xl bg-canvas px-4 py-3"
+										>
+											<p className="font-sans text-lg font-medium text-fg">
+												{ruleSentence(rule, t)}
+											</p>
+											<Badge variant={resultVariant(status)}>
+												{t(statusKey(status))}
+											</Badge>
+										</li>
+									);
+								})}
+							</ul>
+						)}
+					</section>
+					<section className="rounded-[20px] bg-surface p-6">
+						{selected.applied ? (
+							<>
+								<h2 className="font-sans text-2xl font-semibold text-fg">
+									{t("allocationSent")}
+								</h2>
+								{selected.statement ? (
+									<p className="mt-3 max-w-xl font-sans text-lg font-medium text-fg">
+										{selected.statement}
+									</p>
+								) : null}
+							</>
+						) : ready && selected.open ? (
+							<form
+								className="flex flex-col gap-4"
+								onSubmit={(event) => void onSend(event)}
+							>
+								<label
+									className="flex flex-col gap-2"
+									htmlFor="allocation-statement"
+								>
+									<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+										{t("allocationStatement")}
+									</span>
+									<textarea
+										id="allocation-statement"
+										className="min-h-28 rounded-2xl border border-line-strong bg-canvas px-4 py-3 font-sans text-lg text-fg"
+										value={statement}
+										maxLength={400}
+										onChange={(event) => setStatement(event.target.value)}
+									/>
+								</label>
+								{error ? (
+									<p
+										className="font-sans text-sm font-medium text-danger"
+										role="alert"
+									>
+										{t(error)}
+									</p>
+								) : null}
+								<div>
+									<Button
+										type="submit"
+										variant="sticker"
+										disabled={apply.isPending}
+									>
+										{t("allocationSend")}
+									</Button>
+								</div>
+							</form>
+						) : selected.open ? (
+							<p className="font-sans text-lg font-medium text-fg">
+								{t("allocationNotReady")}
+							</p>
+						) : null}
+					</section>
+				</>
 			)}
 		</section>
 	);

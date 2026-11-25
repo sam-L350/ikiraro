@@ -1,4 +1,14 @@
-import { Camera, File, FileText, Image, PenLine, Volume2 } from "lucide-react";
+import {
+	BookOpen,
+	Camera,
+	File,
+	FileText,
+	Image,
+	MessagesSquare,
+	PenLine,
+	Users,
+	Volume2,
+} from "lucide-react";
 import {
 	type ChangeEvent,
 	type FormEvent,
@@ -9,6 +19,7 @@ import {
 } from "react";
 import { Link, useParams } from "react-router";
 import { MaskPhotoDialog } from "@/components/evidence/mask-photo";
+import { TaskMark } from "@/components/learning/task-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -464,313 +475,383 @@ export default function TaskPage() {
 	const waiting = attempts.find(
 		(item) => item.status === "draft" || item.status === "pending",
 	);
+	const hasMedia =
+		task.imageKey !== null || task.audioKey !== null || task.jobAidKey !== null;
 
 	return (
-		<div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
-			<p className="text-lg text-fg-muted">
-				{textFor(locale, view.courseTitleRw, view.courseTitleEn)}
-			</p>
-			<h1 className="font-sans text-2xl font-semibold text-fg">
-				{textFor(locale, task.titleRw, task.titleEn)}
-			</h1>
-			{instructions.map((paragraph) => (
-				<p key={paragraph} className="text-lg leading-relaxed text-fg">
-					{paragraph}
-				</p>
-			))}
-			{instructions.length > 0 ? (
-				<div className="flex flex-col gap-2">
-					<Button
-						type="button"
-						variant="quiet"
-						className="w-fit"
-						aria-pressed={reading}
-						onClick={readAloud}
-					>
-						<Volume2 aria-hidden="true" />
-						{reading ? t("stopReading") : t("readAloud")}
-					</Button>
-					{speakError ? (
-						<p className="text-lg text-fg">{t("cannotReadAloud")}</p>
-					) : null}
+		<div className="mx-auto flex max-w-3xl flex-col gap-8">
+			<article className="rounded-[20px] bg-surface p-6 sm:p-8">
+				<div className="flex items-start gap-4">
+					<TaskMark kind={kind} />
+					<div className="min-w-0">
+						<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+							{textFor(locale, view.courseTitleRw, view.courseTitleEn)}
+						</p>
+						<h1 className="mt-1 font-sans text-3xl font-semibold text-balance text-fg">
+							{textFor(locale, task.titleRw, task.titleEn)}
+						</h1>
+					</div>
 				</div>
-			) : null}
-			<div className="flex flex-col gap-2">
-				<label
-					className="flex min-h-11 items-center gap-3"
-					htmlFor="data-saver"
-				>
-					<input
-						id="data-saver"
-						type="checkbox"
-						className="size-5 accent-ink"
-						checked={dataSaver}
-						onChange={(event) => {
-							setDataSaver(event.target.checked);
-							writeDataSaver(event.target.checked);
-						}}
-					/>
-					<span className="text-lg text-fg">{t("dataSaver")}</span>
-				</label>
-				<p className="text-lg text-fg">{t("dataSaverHint")}</p>
-				<MediaRow
-					label={t("loadPicture")}
-					present={task.imageKey !== null}
-					show={mediaShouldLoad(dataSaver, asked.picture)}
-					held={t("mediaHeld")}
-					onAsk={() => ask("picture")}
-					icon={<Image aria-hidden="true" />}
-				/>
-				<MediaRow
-					label={t("loadNarration")}
-					present={task.audioKey !== null}
-					show={mediaShouldLoad(dataSaver, asked.narration)}
-					held={t("mediaHeld")}
-					onAsk={() => ask("narration")}
-					icon={<Volume2 aria-hidden="true" />}
-				/>
-				<MediaRow
-					label={t("loadJobAid")}
-					present={task.jobAidKey !== null}
-					show={mediaShouldLoad(dataSaver, asked.jobAid)}
-					held={t("mediaHeld")}
-					onAsk={() => ask("jobAid")}
-					icon={<FileText aria-hidden="true" />}
-				/>
-				{practice ? (
-					<a
-						href={practice}
-						target="_blank"
-						rel="noreferrer"
-						className="inline-flex min-h-11 items-center text-lg text-fg"
-					>
-						{t("practiceLink")}
-					</a>
+				{instructions.length > 0 ? (
+					<div className="mt-6 max-w-xl">
+						{instructions.map((paragraph) => (
+							<p
+								key={paragraph}
+								className="font-sans text-lg font-medium leading-relaxed text-fg"
+							>
+								{paragraph}
+							</p>
+						))}
+						<Button
+							type="button"
+							variant="quiet"
+							className="mt-3 w-fit px-0"
+							aria-pressed={reading}
+							onClick={readAloud}
+						>
+							<Volume2 aria-hidden="true" />
+							{reading ? t("stopReading") : t("readAloud")}
+						</Button>
+						{speakError ? (
+							<p className="mt-2 font-sans text-base font-medium text-fg">
+								{t("cannotReadAloud")}
+							</p>
+						) : null}
+					</div>
 				) : null}
-				<Link
-					to={`/tasks/${enrollmentId}/${taskId}/practice`}
-					className="inline-flex min-h-11 items-center text-lg text-fg"
-				>
-					{t("taskPracticeLink")}
-				</Link>
-				<Link
-					to={`/tasks/${enrollmentId}/${taskId}/questions`}
-					className="inline-flex min-h-11 items-center text-lg text-fg"
-				>
-					{t("taskQuestionsLink")}
-				</Link>
-				<Link
-					to={`/tasks/${enrollmentId}/${taskId}/group`}
-					className="inline-flex min-h-11 items-center text-lg text-fg"
-				>
-					{t("taskGroupLink")}
-				</Link>
-			</div>
+				{locked ? (
+					<div className="mt-6">
+						<p className="font-sans text-lg font-medium text-fg">
+							{t("finishEarlier")}
+						</p>
+						<Link
+							to="/home"
+							className="mt-3 inline-flex min-h-11 items-center font-sans text-lg font-medium text-fg underline-offset-4 hover:underline"
+						>
+							{t("navHome")}
+						</Link>
+					</div>
+				) : (
+					<div className="mt-6 flex max-w-xl flex-col gap-4">
+						<p className="font-sans text-base font-medium text-fg">
+							{evidenceCopy(kind, t)}
+						</p>
+						{kind === "note" && opened ? (
+							<textarea
+								ref={note}
+								className="min-h-32 rounded-md border border-line bg-card px-3 py-3 text-lg text-fg"
+								aria-label={t("writeNote")}
+							/>
+						) : null}
+						{kind !== "note" ? (
+							<input
+								ref={file}
+								type="file"
+								accept={
+									kind === "photo"
+										? "image/*"
+										: kind === "voice"
+											? "audio/*"
+											: "application/pdf"
+								}
+								capture={kind === "photo" ? "environment" : undefined}
+								className="sr-only"
+								aria-hidden="true"
+								tabIndex={-1}
+								onChange={(event) => void onFile(event)}
+							/>
+						) : null}
+						{limited ? (
+							<p className="font-sans text-lg font-medium text-fg">
+								{t("meetTrainer")}
+							</p>
+						) : (
+							<Button
+								type="button"
+								variant={blocked || maskFile ? "quiet" : "sticker"}
+								className="w-fit"
+								disabled={start.isPending || sending || blocked}
+								onClick={() => void openEvidence()}
+							>
+								<EvidenceIcon kind={kind} />
+								{evidenceLabel(kind, t)}
+							</Button>
+						)}
+						{canResend ? (
+							<p className="rounded-2xl bg-canvas px-4 py-3 font-sans text-base font-medium text-fg">
+								{t("sendAgain")}
+							</p>
+						) : null}
+						{held ? (
+							<p className="font-sans text-base font-medium text-fg">
+								{warningCopy(held.warning, t)}
+							</p>
+						) : null}
+						{held ? (
+							<Button
+								type="button"
+								variant="quiet"
+								className="w-fit"
+								disabled={sending}
+								onClick={() => void sendHeld()}
+							>
+								{t("sendThisPhoto")}
+							</Button>
+						) : null}
+						{stored ? (
+							<p className="font-sans text-base font-medium text-fg">
+								{storedCopy(stored, t)}
+							</p>
+						) : null}
+					</div>
+				)}
+			</article>
 			{criteria.length > 0 ? (
-				<section className="flex flex-col gap-2 border-t border-line pt-4">
-					<h2 className="font-meta text-xs uppercase text-fg-muted">
+				<section className="rounded-[20px] bg-surface p-6">
+					<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 						{t("rubricChecks")}
 					</h2>
-					<ul className="flex flex-col">
+					<ul className="mt-4 flex flex-col gap-3">
 						{criteria.map((prompt) => (
-							<li
-								key={prompt}
-								className="border-b border-line py-3 text-lg text-fg"
-							>
-								{prompt}
+							<li key={prompt} className="flex items-start gap-3">
+								<span
+									aria-hidden="true"
+									className="mt-2 size-2 shrink-0 rounded-full bg-ink"
+								/>
+								<span className="font-sans text-lg font-medium text-fg">
+									{prompt}
+								</span>
 							</li>
 						))}
 					</ul>
 				</section>
 			) : null}
-			<div className="flex flex-wrap gap-3">
-				<Button
-					type="button"
-					variant="quiet"
-					aria-pressed={rating === "clear"}
-					disabled={saveClarity.isPending}
-					onClick={() => void rate("clear")}
-				>
-					{t("clearEnough")}
-				</Button>
-				<Button
-					type="button"
-					variant="quiet"
-					aria-pressed={rating === "hard"}
-					disabled={saveClarity.isPending}
-					onClick={() => void rate("hard")}
-				>
-					{t("tooHard")}
-				</Button>
-			</div>
-			{locked ? (
-				<>
-					<p className="text-lg text-fg">{t("finishEarlier")}</p>
-					<Link to="/home" className="min-h-11 text-lg text-fg">
-						{t("navHome")}
-					</Link>
-				</>
-			) : (
-				<div className="flex flex-col gap-3">
-					<p className="text-lg text-fg">{evidenceCopy(kind, t)}</p>
-					{kind === "note" && opened ? (
-						<textarea
-							ref={note}
-							className="min-h-32 rounded-md border border-line bg-card px-3 py-3 text-lg text-fg"
-							aria-label={t("writeNote")}
-						/>
-					) : null}
-					{kind !== "note" ? (
+			<section className="rounded-[20px] bg-surface p-6">
+				<h2 className="font-sans text-lg font-semibold text-fg">
+					{t("taskClarityAsk")}
+				</h2>
+				<div className="mt-4 flex flex-wrap gap-2">
+					<Button
+						type="button"
+						variant="soft"
+						className={rating === "clear" ? "bg-ink text-ink-fg" : "bg-canvas"}
+						aria-pressed={rating === "clear"}
+						disabled={saveClarity.isPending}
+						onClick={() => void rate("clear")}
+					>
+						{t("clearEnough")}
+					</Button>
+					<Button
+						type="button"
+						variant="soft"
+						className={rating === "hard" ? "bg-ink text-ink-fg" : "bg-canvas"}
+						aria-pressed={rating === "hard"}
+						disabled={saveClarity.isPending}
+						onClick={() => void rate("hard")}
+					>
+						{t("tooHard")}
+					</Button>
+				</div>
+			</section>
+			{hasMedia ? (
+				<section className="rounded-[20px] bg-surface p-6">
+					<label
+						className="flex min-h-11 items-center gap-3"
+						htmlFor="data-saver"
+					>
 						<input
-							ref={file}
-							type="file"
-							accept={
-								kind === "photo"
-									? "image/*"
-									: kind === "voice"
-										? "audio/*"
-										: "application/pdf"
-							}
-							capture={kind === "photo" ? "environment" : undefined}
-							className="sr-only"
-							aria-hidden="true"
-							tabIndex={-1}
-							onChange={(event) => void onFile(event)}
+							id="data-saver"
+							type="checkbox"
+							className="size-5 accent-ink"
+							checked={dataSaver}
+							onChange={(event) => {
+								setDataSaver(event.target.checked);
+								writeDataSaver(event.target.checked);
+							}}
 						/>
+						<span className="font-sans text-lg font-medium text-fg">
+							{t("dataSaver")}
+						</span>
+					</label>
+					<p className="mt-2 font-sans text-base font-medium text-fg-muted">
+						{t("dataSaverHint")}
+					</p>
+					<div className="mt-4 flex flex-col gap-2">
+						<MediaRow
+							label={t("loadPicture")}
+							present={task.imageKey !== null}
+							show={mediaShouldLoad(dataSaver, asked.picture)}
+							held={t("mediaHeld")}
+							onAsk={() => ask("picture")}
+							icon={<Image aria-hidden="true" />}
+						/>
+						<MediaRow
+							label={t("loadNarration")}
+							present={task.audioKey !== null}
+							show={mediaShouldLoad(dataSaver, asked.narration)}
+							held={t("mediaHeld")}
+							onAsk={() => ask("narration")}
+							icon={<Volume2 aria-hidden="true" />}
+						/>
+						<MediaRow
+							label={t("loadJobAid")}
+							present={task.jobAidKey !== null}
+							show={mediaShouldLoad(dataSaver, asked.jobAid)}
+							held={t("mediaHeld")}
+							onAsk={() => ask("jobAid")}
+							icon={<FileText aria-hidden="true" />}
+						/>
+					</div>
+				</section>
+			) : null}
+			<section>
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+					{t("taskAlso")}
+				</h2>
+				<ul className="mt-3 grid gap-3 sm:grid-cols-2">
+					{practice ? (
+						<li>
+							<a
+								href={practice}
+								target="_blank"
+								rel="noreferrer"
+								className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-4 font-sans text-base font-medium text-fg"
+							>
+								<span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-canvas text-ink">
+									<BookOpen aria-hidden="true" className="size-5" />
+								</span>
+								{t("practiceLink")}
+							</a>
+						</li>
 					) : null}
-					{limited ? (
-						<p className="text-lg text-fg">{t("meetTrainer")}</p>
-					) : (
-						<Button
-							type="button"
-							variant={blocked || maskFile ? "quiet" : "sticker"}
-							className="w-fit"
-							disabled={start.isPending || sending || blocked}
-							onClick={() => void openEvidence()}
+					<li>
+						<Link
+							to={`/tasks/${enrollmentId}/${taskId}/practice`}
+							className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-4 font-sans text-base font-medium text-fg"
 						>
-							<EvidenceIcon kind={kind} />
-							{evidenceLabel(kind, t)}
-						</Button>
-					)}
-					{canResend ? (
-						<p className="text-lg text-fg">{t("sendAgain")}</p>
-					) : null}
-					{held ? (
-						<p className="text-lg text-fg">{warningCopy(held.warning, t)}</p>
-					) : null}
-					{held ? (
+							<span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-canvas text-ink">
+								<BookOpen aria-hidden="true" className="size-5" />
+							</span>
+							{t("taskPracticeLink")}
+						</Link>
+					</li>
+					<li>
+						<Link
+							to={`/tasks/${enrollmentId}/${taskId}/questions`}
+							className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-4 font-sans text-base font-medium text-fg"
+						>
+							<span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-canvas text-ink">
+								<MessagesSquare aria-hidden="true" className="size-5" />
+							</span>
+							{t("taskQuestionsLink")}
+						</Link>
+					</li>
+					<li>
+						<Link
+							to={`/tasks/${enrollmentId}/${taskId}/group`}
+							className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-4 font-sans text-base font-medium text-fg"
+						>
+							<span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-canvas text-ink">
+								<Users aria-hidden="true" className="size-5" />
+							</span>
+							{t("taskGroupLink")}
+						</Link>
+					</li>
+				</ul>
+			</section>
+			{attempts.length > 0 ? (
+				<section className="rounded-[20px] bg-surface p-6">
+					<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+						{t("submissionHistory")}
+					</h2>
+					<ul className="mt-4 flex flex-col gap-3">
+						{attempts.map((item) => (
+							<li
+								key={item.id}
+								className="flex flex-col gap-2 rounded-2xl bg-canvas px-4 py-4"
+							>
+								<div className="flex min-h-11 items-center justify-between gap-3">
+									<span className="text-lg text-fg">
+										{t("attemptLabel", { count: String(item.attempt) })}
+									</span>
+									<Badge variant={pillFor(item.status)}>
+										{statusLabel(item.status, t)}
+									</Badge>
+								</div>
+								{item.feedback ? (
+									<p className="text-lg text-fg">{item.feedback}</p>
+								) : null}
+								{item.duplicate === "same" ? (
+									<p className="text-lg text-fg">{t("duplicateSame")}</p>
+								) : null}
+								{item.duplicate === "other" ? (
+									<p className="text-lg text-fg">{t("duplicateOther")}</p>
+								) : null}
+								{item.appeal?.status === "open" ? (
+									<p className="text-lg text-fg">{t("appealWaiting")}</p>
+								) : null}
+								{item.appeal?.status === "upheld" ? (
+									<p className="text-lg text-fg">
+										{t("appealStands")}
+										{item.appeal.decisionNote
+											? ` ${item.appeal.decisionNote}`
+											: ""}
+									</p>
+								) : null}
+								{item.appeal?.status === "overturned" ? (
+									<p className="text-lg text-fg">{t("appealAgain")}</p>
+								) : null}
+								{blocked && appealable?.id === item.id ? (
+									<form
+										className="flex flex-col gap-3"
+										onSubmit={(event) => void sendAppeal(item.id, event)}
+									>
+										<label
+											className="flex flex-col gap-2"
+											htmlFor="appeal-reason"
+										>
+											<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+												{t("appealReason")}
+											</span>
+											<textarea
+												id="appeal-reason"
+												className="min-h-24 rounded-md border border-line bg-card px-3 py-3 font-sans text-lg text-fg"
+												value={appealNote}
+												disabled={appeal.isPending}
+												onChange={(event) => setAppealNote(event.target.value)}
+											/>
+										</label>
+										{appealError ? (
+											<p className="text-lg text-danger">{t(appealError)}</p>
+										) : null}
+										<Button
+											type="submit"
+											variant="sticker"
+											className="w-fit"
+											disabled={
+												appeal.isPending || appealNote.trim().length === 0
+											}
+										>
+											{t("appealSend")}
+										</Button>
+									</form>
+								) : null}
+							</li>
+						))}
+					</ul>
+					{waiting ? (
 						<Button
 							type="button"
 							variant="quiet"
 							className="w-fit"
 							disabled={sending}
-							onClick={() => void sendHeld()}
+							onClick={() => void takeBack(waiting.id)}
 						>
-							{t("sendThisPhoto")}
+							{t("withdrawSubmission")}
 						</Button>
 					) : null}
-					{stored ? (
-						<p className="text-lg text-fg">{storedCopy(stored, t)}</p>
-					) : null}
-					{attempts.length > 0 ? (
-						<section className="flex flex-col gap-2 border-t border-line pt-4">
-							<h2 className="font-meta text-xs uppercase text-fg-muted">
-								{t("submissionHistory")}
-							</h2>
-							<ul className="flex flex-col">
-								{attempts.map((item) => (
-									<li
-										key={item.id}
-										className="flex flex-col gap-2 border-b border-line py-3"
-									>
-										<div className="flex min-h-11 items-center justify-between gap-3">
-											<span className="text-lg text-fg">
-												{t("attemptLabel", { count: String(item.attempt) })}
-											</span>
-											<Badge variant={pillFor(item.status)}>
-												{statusLabel(item.status, t)}
-											</Badge>
-										</div>
-										{item.feedback ? (
-											<p className="text-lg text-fg">{item.feedback}</p>
-										) : null}
-										{item.duplicate === "same" ? (
-											<p className="text-lg text-fg">{t("duplicateSame")}</p>
-										) : null}
-										{item.duplicate === "other" ? (
-											<p className="text-lg text-fg">{t("duplicateOther")}</p>
-										) : null}
-										{item.appeal?.status === "open" ? (
-											<p className="text-lg text-fg">{t("appealWaiting")}</p>
-										) : null}
-										{item.appeal?.status === "upheld" ? (
-											<p className="text-lg text-fg">
-												{t("appealStands")}
-												{item.appeal.decisionNote
-													? ` ${item.appeal.decisionNote}`
-													: ""}
-											</p>
-										) : null}
-										{item.appeal?.status === "overturned" ? (
-											<p className="text-lg text-fg">{t("appealAgain")}</p>
-										) : null}
-										{blocked && appealable?.id === item.id ? (
-											<form
-												className="flex flex-col gap-3"
-												onSubmit={(event) => void sendAppeal(item.id, event)}
-											>
-												<label
-													className="flex flex-col gap-2"
-													htmlFor="appeal-reason"
-												>
-													<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
-														{t("appealReason")}
-													</span>
-													<textarea
-														id="appeal-reason"
-														className="min-h-24 rounded-md border border-line bg-card px-3 py-3 font-sans text-lg text-fg"
-														value={appealNote}
-														disabled={appeal.isPending}
-														onChange={(event) =>
-															setAppealNote(event.target.value)
-														}
-													/>
-												</label>
-												{appealError ? (
-													<p className="text-lg text-danger">
-														{t(appealError)}
-													</p>
-												) : null}
-												<Button
-													type="submit"
-													variant="sticker"
-													className="w-fit"
-													disabled={
-														appeal.isPending || appealNote.trim().length === 0
-													}
-												>
-													{t("appealSend")}
-												</Button>
-											</form>
-										) : null}
-									</li>
-								))}
-							</ul>
-							{waiting ? (
-								<Button
-									type="button"
-									variant="quiet"
-									className="w-fit"
-									disabled={sending}
-									onClick={() => void takeBack(waiting.id)}
-								>
-									{t("withdrawSubmission")}
-								</Button>
-							) : null}
-						</section>
-					) : null}
-				</div>
-			)}
+				</section>
+			) : null}
 			{maskFile ? (
 				<MaskPhotoDialog
 					file={maskFile}

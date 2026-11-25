@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
 	callEngine,
 	isApiClientError,
@@ -44,10 +45,12 @@ export function PassportShare() {
 	const [downloading, setDownloading] = useState(false);
 
 	if (share.isPending) {
-		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
+		return <div className="h-28 animate-pulse rounded-[20px] bg-surface" />;
 	}
 	if (share.error || !share.data) {
-		return <p className="text-lg text-destructive">{t("tryAgain")}</p>;
+		return (
+			<p className="font-sans text-lg font-medium text-fg">{t("tryAgain")}</p>
+		);
 	}
 
 	const data = share.data;
@@ -133,31 +136,35 @@ export function PassportShare() {
 					: null;
 
 	return (
-		<section className="flex flex-col gap-4 border-t border-line pt-8">
-			<h2 className="font-meta text-xs uppercase text-fg-muted">
+		<section className="rounded-[20px] bg-surface p-6">
+			<h2 className="font-sans text-2xl font-semibold text-fg">
 				{t("shareTitle")}
 			</h2>
 			{blockCopy ? (
-				<p className="text-lg text-fg">
+				<p className="mt-3 max-w-xl font-sans text-lg font-medium text-fg">
 					{blockCopy}{" "}
 					{data.block === "consent" || data.block === "birth" ? (
-						<Link className="underline" to="/profile">
+						<Link className="underline underline-offset-4" to="/profile">
 							{t("yourProfile")}
 						</Link>
 					) : null}
 				</p>
 			) : null}
 			{data.block === "ok" && data.token ? (
-				<>
-					<p className="text-lg text-fg">{t("shareLinkLabel")}</p>
-					<p className="break-all text-lg text-fg">
+				<div className="mt-4 rounded-2xl bg-canvas px-4 py-4">
+					<p className="font-sans text-base font-medium text-fg">
+						{t("shareLinkLabel")}
+					</p>
+					<p className="mt-2 break-all font-sans text-lg font-semibold text-fg">
 						{`${window.location.origin}/p/${data.token}`}
 					</p>
-					<p className="text-lg text-fg-muted">{t("shareOldDies")}</p>
-				</>
+					<p className="mt-2 font-sans text-base font-medium text-fg-muted">
+						{t("shareOldDies")}
+					</p>
+				</div>
 			) : null}
 			{data.block === "ok" ? (
-				<div className="flex flex-wrap items-center gap-3">
+				<div className="mt-4 flex flex-wrap items-center gap-3">
 					<Button
 						type="button"
 						variant="sticker"
@@ -199,7 +206,7 @@ export function PassportShare() {
 				</div>
 			) : null}
 			{data.block === "ok" ? (
-				<div className="flex flex-col gap-2">
+				<div className="mt-4 flex flex-col divide-y divide-line">
 					<Check
 						label={t("sharePhoto")}
 						checked={data.photo}
@@ -293,7 +300,11 @@ export function PassportShare() {
 					))}
 				</div>
 			) : null}
-			{error ? <p className="text-lg text-destructive">{t(error)}</p> : null}
+			{error ? (
+				<p className="mt-3 font-sans text-base font-medium text-danger">
+					{t(error)}
+				</p>
+			) : null}
 		</section>
 	);
 }
@@ -310,16 +321,15 @@ function Check({
 	onChange: (checked: boolean) => void;
 }) {
 	return (
-		<label className="flex min-h-11 items-center gap-3">
-			<input
-				type="checkbox"
-				className="size-5 accent-ink"
+		<div className="flex min-h-11 items-center justify-between gap-4 py-2">
+			<span className="font-sans text-base font-medium text-fg">{label}</span>
+			<Switch
 				checked={checked}
 				disabled={disabled}
-				onChange={(event) => onChange(event.target.checked)}
+				label={label}
+				onToggle={() => onChange(!checked)}
 			/>
-			<span className="text-lg text-fg">{label}</span>
-		</label>
+		</div>
 	);
 }
 

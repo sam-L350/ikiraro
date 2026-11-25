@@ -32,6 +32,27 @@ export type CatalogCourse = {
 	enrolled: boolean;
 };
 
+export type CatalogOutlineTask = {
+	taskId: string;
+	titleEn: string;
+	titleRw: string;
+	evidenceType: string;
+	required: boolean;
+};
+
+export type CatalogOutlineModule = {
+	moduleId: string;
+	titleEn: string;
+	titleRw: string;
+	summaryEn: string;
+	summaryRw: string;
+	tasks: CatalogOutlineTask[];
+};
+
+export type CatalogCourseDetail = CatalogCourse & {
+	modules: CatalogOutlineModule[];
+};
+
 export type CatalogFilter = {
 	language?: string;
 	category?: string;
@@ -81,6 +102,11 @@ function levelOf(record: Record<string, JsonValue>): number {
 	return 1;
 }
 
+function positionOf(record: Record<string, JsonValue>): number {
+	const value = record.position;
+	return typeof value === "number" && Number.isInteger(value) ? value : 0;
+}
+
 function asRecord(value: JsonValue): Record<string, JsonValue> | null {
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
 		return null;
@@ -114,6 +140,49 @@ export function parsePublishedCourse(
 		level: levelOf(record),
 		languages,
 	};
+}
+
+/** Modules and tasks pinned in a published snapshot. Missing modules stay empty. */
+export function catalogOutline(snapshot: JsonValue): CatalogOutlineModule[] {
+	const record = asRecord(snapshot);
+	if (!record || !Array.isArray(record.modules)) return [];
+	const positioned: { position: number; module: CatalogOutlineModule }[] = [];
+	for (const value of record.modules) {
+		const moduleRecord = asRecord(value);
+		if (!moduleRecord || typeof moduleRecord.id !== "string") continue;
+		const taskRows: { position: number; task: CatalogOutlineTask }[] = [];
+		if (Array.isArray(moduleRecord.tasks)) {
+			for (const taskValue of moduleRecord.tasks) {
+				const task = asRecord(taskValue);
+				if (!task || typeof task.id !== "string") continue;
+				const evidence = task.evidenceType;
+				taskRows.push({
+					position: positionOf(task),
+					task: {
+						taskId: task.id,
+						titleEn: textOf(task, "titleEn"),
+						titleRw: textOf(task, "titleRw"),
+						evidenceType: typeof evidence === "string" ? evidence : "",
+						required: task.required !== false,
+					},
+				});
+			}
+			taskRows.sort((left, right) => left.position - right.position);
+		}
+		positioned.push({
+			position: positionOf(moduleRecord),
+			module: {
+				moduleId: moduleRecord.id,
+				titleEn: textOf(moduleRecord, "titleEn"),
+				titleRw: textOf(moduleRecord, "titleRw"),
+				summaryEn: textOf(moduleRecord, "summaryEn"),
+				summaryRw: textOf(moduleRecord, "summaryRw"),
+				tasks: taskRows.map((row) => row.task),
+			},
+		});
+	}
+	positioned.sort((left, right) => left.position - right.position);
+	return positioned.map((row) => row.module);
 }
 
 export function matchesCatalog(
@@ -184,16 +253,48 @@ export async function listCatalog(
 export async function readCatalogCourse(
 	database: CatalogDb,
 	input: { userId: number; courseId: string },
-): Promise<CatalogCourse> {
-	const coursesInCatalog = await listCatalog(database, {
-		userId: input.userId,
-		filter: {},
-	});
-	const course = coursesInCatalog.find(
-		(row) => row.courseId === input.courseId,
+): Promise<CatalogCourseDetail> {
+	const [course] = await database
+		.select({ status: courses.status })
+		.from(courses)
+		.where(eq(courses.id, input.courseId))
+		.limit(1);
+	if (!course || course.status === "retired") {
+		throw errors.notFound("That course is not in the catalog.");
+	}
+	const [version] = await database
+		.select({
+			id: contentVersions.id,
+			versionNumber: contentVersions.versionNumber,
+			snapshot: contentVersions.snapshot,
+		})
+		.from(contentVersions)
+		.where(eq(contentVersions.courseId, input.courseId))
+		.orderBy(desc(contentVersions.versionNumber))
+		.limit(1);
+	if (!version) throw errors.notFound("That course is not in the catalog.");
+	const parsed = parsePublishedCourse(
+		input.courseId,
+		version.id,
+		version.versionNumber,
+		version.snapshot,
 	);
-	if (!course) throw errors.notFound("That course is not in the catalog.");
-	return course;
+	if (!parsed) throw errors.notFound("That course is not in the catalog.");
+	const [enrolled] = await database
+		.select({ id: enrollments.id })
+		.from(enrollments)
+		.where(
+			and(
+				eq(enrollments.userId, input.userId),
+				eq(enrollments.courseId, input.courseId),
+			),
+		)
+		.limit(1);
+	return {
+		...parsed,
+		enrolled: Boolean(enrolled),
+		modules: catalogOutline(version.snapshot),
+	};
 }
 
 async function homeCenter(

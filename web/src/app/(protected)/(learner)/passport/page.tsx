@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BadgeMark } from "@/components/public/marks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,15 +59,15 @@ export default function PassportPage() {
 
 	if (passport.isPending) {
 		return (
-			<div className="mx-auto max-w-3xl px-4 py-8">
-				<div className="h-16 animate-pulse rounded-md bg-surface" />
+			<div className="mx-auto max-w-3xl">
+				<div className="h-40 animate-pulse rounded-[20px] bg-surface" />
 			</div>
 		);
 	}
 
 	if (isApiClientError(passport.error) && passport.error.status === 403) {
 		return (
-			<div className="mx-auto max-w-3xl px-4 py-8">
+			<div className="mx-auto max-w-3xl">
 				<p className="font-sans text-2xl text-fg">{t("homeUnavailable")}</p>
 			</div>
 		);
@@ -74,8 +75,8 @@ export default function PassportPage() {
 
 	if (passport.error || !passport.data) {
 		return (
-			<div className="mx-auto max-w-3xl px-4 py-8">
-				<p className="text-lg text-destructive">{t("tryAgain")}</p>
+			<div className="mx-auto max-w-3xl">
+				<p className="font-sans text-lg font-medium text-fg">{t("tryAgain")}</p>
 			</div>
 		);
 	}
@@ -107,127 +108,125 @@ export default function PassportPage() {
 		note: string;
 	}[];
 
+	const time = timeStat(data.verifiedMinutes);
+
 	return (
-		<div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8">
-			<h1 className="font-sans text-4xl font-semibold leading-tight text-fg sm:text-5xl">
-				{t("passportTitle")}
-			</h1>
-			<div className="flex flex-col gap-2">
-				<p className="text-lg text-fg">{hoursCopy(data.verifiedMinutes, t)}</p>
-				<p className="text-lg text-fg">
-					{t("passportPoints", { count: String(data.points) })}
-				</p>
-				<p className="text-lg text-fg">
-					{data.level === null
-						? t("passportLevelEmpty")
-						: t("passportLevel", { count: String(data.level) })}
-				</p>
-			</div>
-			<section className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs uppercase text-fg-muted">
+		<div className="mx-auto flex max-w-3xl flex-col gap-8">
+			<article className="rounded-[20px] bg-surface p-6 sm:p-8">
+				<div className="flex items-start gap-4">
+					<BadgeMark className="size-20" />
+					<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
+						{t("passportTitle")}
+					</h1>
+				</div>
+				<ul className="mt-6 grid gap-3 sm:grid-cols-3">
+					<Stat label={t(time.label)} value={time.value} />
+					<Stat label={t("passportStatPoints")} value={String(data.points)} />
+					<Stat
+						label={t("passportStatLevel")}
+						value={
+							data.level === null ? t("passportStatNone") : String(data.level)
+						}
+					/>
+				</ul>
+			</article>
+			<section className="rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("passportBadges")}
 				</h2>
 				{badges.length === 0 ? (
-					<p className="text-lg text-fg">{t("passportBadgesEmpty")}</p>
+					<p className="mt-3 font-sans text-lg font-medium text-fg">
+						{t("passportBadgesEmpty")}
+					</p>
 				) : (
-					<table className="w-full border-collapse text-left">
-						<thead>
-							<tr className="font-meta text-xs uppercase text-fg-muted">
-								<th className="border-b border-line py-2 font-semibold">
-									{t("passportBadges")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("badgeLevel")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold">
-									{t("licencesExpiry")}
-								</th>
-								<th className="border-b border-line py-2 font-semibold" />
-							</tr>
-						</thead>
-						<tbody>
-							{badges.map((badge) => {
-								const title = textFor(locale, badge.titleRw, badge.titleEn);
-								const expired =
-									badge.expiresAt !== null &&
-									new Date(badge.expiresAt).getTime() < Date.now();
-								return (
-									<tr key={badge.id}>
-										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+					<ul className="mt-4 flex flex-col gap-3">
+						{badges.map((badge) => {
+							const title = textFor(locale, badge.titleRw, badge.titleEn);
+							const expired =
+								badge.expiresAt !== null &&
+								new Date(badge.expiresAt).getTime() < Date.now();
+							return (
+								<li
+									key={badge.id}
+									className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-canvas px-4 py-4"
+								>
+									<div className="min-w-0">
+										<p className="font-sans text-lg font-semibold text-fg">
 											{title}
-										</td>
-										<td className="border-b border-line py-3 font-sans text-lg text-fg">
+										</p>
+										<p className="mt-1 font-sans text-base font-medium text-fg-muted">
 											{levelLabel(badge.level, t)}
-										</td>
-										<td className="border-b border-line py-3">
-											{badge.expiresAt ? (
-												<span className="flex items-center gap-2">
-													{expired ? (
-														<Badge variant="danger">{t("badgeExpired")}</Badge>
-													) : null}
-													<span className="font-sans text-lg text-fg">
-														{when(badge.expiresAt, locale)}
-													</span>
-												</span>
-											) : (
-												<span className="font-sans text-lg text-fg">
-													{t("badgeNoExpiry")}
-												</span>
-											)}
-										</td>
-										<td className="border-b border-line py-3">
-											{badge.credentialToken ? (
-												<Button
-													type="button"
-													variant="quiet"
-													onClick={() => void onDownload(badge.id)}
-												>
-													{t("openBadgeDownload")}
-												</Button>
-											) : null}
-										</td>
-									</tr>
-								);
-							})}
-						</tbody>
-					</table>
+											{" · "}
+											{badge.expiresAt
+												? when(badge.expiresAt, locale)
+												: t("badgeNoExpiry")}
+										</p>
+									</div>
+									<span className="flex items-center gap-2">
+										{expired ? (
+											<Badge variant="danger">{t("badgeExpired")}</Badge>
+										) : null}
+										{badge.credentialToken ? (
+											<Button
+												type="button"
+												variant="quiet"
+												onClick={() => void onDownload(badge.id)}
+											>
+												{t("openBadgeDownload")}
+											</Button>
+										) : null}
+									</span>
+								</li>
+							);
+						})}
+					</ul>
 				)}
-				{error ? <p className="text-lg text-destructive">{error}</p> : null}
+				{error ? (
+					<p className="mt-3 font-sans text-base font-medium text-danger">
+						{error}
+					</p>
+				) : null}
 			</section>
 			<Showcase />
 			{referrals.length > 0 ? (
-				<section className="flex flex-col gap-3">
-					<h2 className="font-meta text-xs uppercase text-fg-muted">
+				<section className="rounded-[20px] bg-surface p-6">
+					<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 						{t("referralsTitle")}
 					</h2>
-					<ul className="flex flex-col gap-4">
+					<ul className="mt-4 flex flex-col gap-3">
 						{referrals.map((row) => (
-							<li key={row.id}>
-								<p className="text-lg text-fg">{row.note}</p>
-								<p className="text-lg text-fg-muted">{row.authorName}</p>
+							<li key={row.id} className="rounded-2xl bg-canvas px-4 py-4">
+								<p className="font-sans text-lg font-medium text-fg">
+									{row.note}
+								</p>
+								<p className="mt-1 font-sans text-base font-medium text-fg-muted">
+									{row.authorName}
+								</p>
 							</li>
 						))}
 					</ul>
 				</section>
 			) : null}
-			<section className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs uppercase text-fg-muted">
+			<section className="rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("passportTasks")}
 				</h2>
 				{tasks.length === 0 ? (
-					<p className="text-lg text-fg">{t("passportTasksEmpty")}</p>
+					<p className="mt-3 font-sans text-lg font-medium text-fg">
+						{t("passportTasksEmpty")}
+					</p>
 				) : (
-					<ul className="flex flex-col">
+					<ul className="mt-2">
 						{tasks.map((task) => (
 							<li
 								key={task.id}
-								className="flex min-h-11 items-center justify-between gap-3 border-b border-line py-3"
+								className="flex items-center justify-between gap-4 border-b border-line py-3 last:border-b-0"
 							>
-								<span className="text-lg text-fg">
+								<span className="font-sans text-lg font-medium text-fg">
 									{textFor(locale, task.titleRw, task.titleEn)}
 								</span>
 								{task.completedAt ? (
-									<span className="text-lg text-fg-muted">
+									<span className="shrink-0 font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 										{when(task.completedAt, locale)}
 									</span>
 								) : null}
@@ -241,26 +240,27 @@ export default function PassportPage() {
 	);
 }
 
-function hoursCopy(
-	minutes: number,
-	t: (
-		key:
-			| "passportHoursEmpty"
-			| "passportHours"
-			| "passportMinutes"
-			| "passportHoursMinutes",
-		vars?: Record<string, string>,
-	) => string,
-): string {
-	if (minutes <= 0) return t("passportHoursEmpty");
-	const hours = Math.floor(minutes / 60);
-	const rest = minutes % 60;
-	if (rest === 0) return t("passportHours", { count: String(hours) });
-	if (hours === 0) return t("passportMinutes", { count: String(rest) });
-	return t("passportHoursMinutes", {
-		hours: String(hours),
-		minutes: String(rest),
-	});
+function Stat({ label, value }: { label: string; value: string }) {
+	return (
+		<li className="rounded-2xl bg-canvas px-4 py-4">
+			<p className="font-sans text-3xl font-semibold text-fg">{value}</p>
+			<p className="mt-1 font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+				{label}
+			</p>
+		</li>
+	);
+}
+
+function timeStat(minutes: number): {
+	value: string;
+	label: "passportStatMinutes" | "passportStatHours";
+} {
+	const safe = Math.max(0, minutes);
+	const hours = Math.floor(safe / 60);
+	if (hours > 0 && safe % 60 === 0) {
+		return { value: String(hours), label: "passportStatHours" };
+	}
+	return { value: String(safe), label: "passportStatMinutes" };
 }
 
 function textFor(locale: "en" | "rw", rw: string, en: string): string {
@@ -314,26 +314,28 @@ function Showcase() {
 	}
 
 	return (
-		<section className="flex flex-col gap-4">
-			<h2 className="font-meta text-xs uppercase text-fg-muted">
+		<section className="rounded-[20px] bg-surface p-6">
+			<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 				{t("showcaseTitle")}
 			</h2>
 			{pins.length === 0 ? (
-				<p className="text-lg text-fg">{t("showcaseEmpty")}</p>
+				<p className="mt-3 font-sans text-lg font-medium text-fg">
+					{t("showcaseEmpty")}
+				</p>
 			) : (
-				<ul className="grid gap-4 sm:grid-cols-3">
+				<ul className="mt-4 grid gap-3 sm:grid-cols-2">
 					{pins.map((item) => {
 						const title = textFor(locale, item.titleRw, item.titleEn);
 						return (
 							<li
 								key={item.submissionId}
-								className="flex flex-col gap-3 border border-line bg-card p-4"
+								className="flex flex-col gap-3 rounded-2xl bg-canvas p-4"
 							>
 								{item.evidenceType === "photo" && item.evidenceUrl ? (
 									<img
 										src={item.evidenceUrl}
 										alt={title}
-										className="h-40 w-full object-contain"
+										className="h-40 w-full rounded-xl object-contain"
 									/>
 								) : null}
 								{item.evidenceType === "voice" && item.evidenceUrl ? (
@@ -341,7 +343,9 @@ function Showcase() {
 										<track kind="captions" />
 									</audio>
 								) : null}
-								<p className="font-sans text-lg text-fg">{title}</p>
+								<p className="font-sans text-lg font-semibold text-fg">
+									{title}
+								</p>
 								<Badge variant="neutral">
 									{evidenceName(item.evidenceType, t)}
 								</Badge>
@@ -350,24 +354,28 @@ function Showcase() {
 					})}
 				</ul>
 			)}
-			{open.map((item) => (
-				<div
-					key={item.submissionId}
-					className="flex items-center justify-between gap-3"
-				>
-					<p className="font-sans text-lg text-fg">
-						{textFor(locale, item.titleRw, item.titleEn)}
-					</p>
-					<Button
-						type="button"
-						variant="quiet"
-						disabled={pin.isPending}
-						onClick={() => void onPin(item.submissionId)}
-					>
-						{t("showcasePin")}
-					</Button>
-				</div>
-			))}
+			{open.length > 0 ? (
+				<ul className="mt-4 border-t border-line">
+					{open.map((item) => (
+						<li
+							key={item.submissionId}
+							className="flex items-center justify-between gap-3 py-3"
+						>
+							<p className="font-sans text-lg font-medium text-fg">
+								{textFor(locale, item.titleRw, item.titleEn)}
+							</p>
+							<Button
+								type="button"
+								variant="quiet"
+								disabled={pin.isPending}
+								onClick={() => void onPin(item.submissionId)}
+							>
+								{t("showcasePin")}
+							</Button>
+						</li>
+					))}
+				</ul>
+			) : null}
 		</section>
 	);
 }

@@ -1,10 +1,10 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
+import { RoundMark } from "@/components/learning/round-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageTabs } from "@/components/ui/page-tabs";
-import { RecordTable } from "@/components/ui/record-table";
 import { isApiClientError, useEngine, useEngineMutation } from "@/lib/engine";
 import { useI18n } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -37,8 +37,22 @@ function toIso(value: string): string | null {
 	return parsed.toISOString();
 }
 
+const fieldClass =
+	"h-11 rounded-xl border border-line-strong bg-canvas px-3 font-sans text-lg text-fg";
+
+function when(value: string, locale: "en" | "rw"): string {
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return value;
+	return date.toLocaleDateString(locale === "rw" ? "rw-RW" : "en-GB", {
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+		timeZone: "Africa/Kigali",
+	});
+}
+
 export default function RoundsPage() {
-	const { t } = useI18n();
+	const { locale, t } = useI18n();
 	const online = useOnline();
 	const list = useEngine("/rounds");
 	const create = useEngineMutation("/rounds/create");
@@ -129,7 +143,7 @@ export default function RoundsPage() {
 	}
 
 	if (list.isPending) {
-		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
+		return <div className="h-40 animate-pulse rounded-[20px] bg-surface" />;
 	}
 	if (isApiClientError(list.error) && list.error.status === 403) {
 		return (
@@ -151,15 +165,20 @@ export default function RoundsPage() {
 		: rounds;
 
 	return (
-		<section className="flex max-w-3xl flex-col gap-8">
-			<div>
-				<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
-					{t("roundsTitle")}
-				</h1>
-				<p className="mt-4 max-w-xl font-sans text-lg font-medium text-fg">
-					{t("roundsSentence")}
-				</p>
-			</div>
+		<section className="mx-auto flex max-w-3xl flex-col gap-8">
+			<article className="rounded-[20px] bg-surface p-6 sm:p-8">
+				<div className="flex items-start gap-4">
+					<RoundMark />
+					<div>
+						<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
+							{t("roundsTitle")}
+						</h1>
+						<p className="mt-2 max-w-xl font-sans text-lg font-medium text-fg">
+							{t("roundsSentence")}
+						</p>
+					</div>
+				</div>
+			</article>
 			<PageTabs
 				label={t("roundsTitle")}
 				value={panel}
@@ -171,7 +190,7 @@ export default function RoundsPage() {
 			/>
 			{panel === "add" ? (
 				<form
-					className="flex flex-col gap-4"
+					className="flex flex-col gap-4 rounded-[20px] bg-surface p-6"
 					onSubmit={(event) => void onSave(event)}
 				>
 					<label className="flex flex-col gap-2" htmlFor="round-district">
@@ -180,7 +199,7 @@ export default function RoundsPage() {
 						</span>
 						<select
 							id="round-district"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={districtId}
 							onChange={(event) => setDistrictId(event.target.value)}
 						>
@@ -197,7 +216,7 @@ export default function RoundsPage() {
 						</span>
 						<input
 							id="round-title"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={title}
 							maxLength={120}
 							onChange={(event) => setTitle(event.target.value)}
@@ -210,7 +229,7 @@ export default function RoundsPage() {
 						<input
 							id="round-quantity"
 							inputMode="numeric"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={quantity}
 							onChange={(event) => setQuantity(event.target.value)}
 						/>
@@ -223,7 +242,7 @@ export default function RoundsPage() {
 							<input
 								id="round-opens"
 								type="datetime-local"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={opensAt}
 								onChange={(event) => setOpensAt(event.target.value)}
 							/>
@@ -235,7 +254,7 @@ export default function RoundsPage() {
 							<input
 								id="round-closes"
 								type="datetime-local"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={closesAt}
 								onChange={(event) => setClosesAt(event.target.value)}
 							/>
@@ -249,7 +268,7 @@ export default function RoundsPage() {
 							<input
 								id="round-points"
 								inputMode="numeric"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={points}
 								onChange={(event) => setPoints(event.target.value)}
 							/>
@@ -261,7 +280,7 @@ export default function RoundsPage() {
 							<input
 								id="round-badges"
 								inputMode="numeric"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={badges}
 								onChange={(event) => setBadges(event.target.value)}
 							/>
@@ -273,7 +292,7 @@ export default function RoundsPage() {
 							<input
 								id="round-months"
 								inputMode="numeric"
-								className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+								className={fieldClass}
 								value={months}
 								onChange={(event) => setMonths(event.target.value)}
 							/>
@@ -313,7 +332,7 @@ export default function RoundsPage() {
 						</span>
 						<select
 							id="round-filter"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={filterDistrict}
 							onChange={(event) => setFilterDistrict(event.target.value)}
 						>
@@ -328,38 +347,35 @@ export default function RoundsPage() {
 					{shown.length === 0 ? (
 						<EmptyState sentence={t("roundsEmpty")} />
 					) : (
-						<RecordTable
-							caption={t("roundsTitle")}
-							columns={[
-								t("nameLabel"),
-								t("districtLabel"),
-								t("status"),
-								t("openRow"),
-							]}
-							rows={shown.map((round) => ({
-								key: round.id,
-								cells: [
-									<span
-										key="title"
-										className="flex flex-wrap items-center gap-2"
-									>
-										{round.title}
-										<Badge variant={round.open ? "pending" : "neutral"}>
-											{round.open ? t("roundsOpen") : t("roundsClosed")}
-										</Badge>
-									</span>,
-									round.districtName,
-									String(round.quantity),
+						<ul className="flex flex-col gap-3">
+							{shown.map((round) => (
+								<li key={round.id}>
 									<Link
-										key="open"
 										to={`/rounds/${round.id}`}
-										className="underline"
+										className="flex flex-col gap-2 rounded-[20px] bg-surface px-5 py-4"
 									>
-										{t("openRow")}
-									</Link>,
-								],
-							}))}
-						/>
+										<div className="flex flex-wrap items-center justify-between gap-3">
+											<span className="font-sans text-xl font-semibold text-fg">
+												{round.title}
+											</span>
+											<Badge variant={round.open ? "pending" : "neutral"}>
+												{round.open ? t("roundsOpen") : t("roundsClosed")}
+											</Badge>
+										</div>
+										<p className="font-sans text-base font-medium text-fg">
+											{round.districtName}
+											{" · "}
+											{t("allocationItems", { count: String(round.quantity) })}
+										</p>
+										<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
+											{when(round.opensAt, locale)}
+											{" – "}
+											{when(round.closesAt, locale)}
+										</p>
+									</Link>
+								</li>
+							))}
+						</ul>
 					)}
 				</>
 			)}

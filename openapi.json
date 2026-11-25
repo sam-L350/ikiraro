@@ -3939,6 +3939,69 @@
 												},
 												"enrolled": {
 													"type": "boolean"
+												},
+												"modules": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"moduleId": {
+																"type": "string"
+															},
+															"titleEn": {
+																"type": "string"
+															},
+															"titleRw": {
+																"type": "string"
+															},
+															"summaryEn": {
+																"type": "string"
+															},
+															"summaryRw": {
+																"type": "string"
+															},
+															"tasks": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"taskId": {
+																			"type": "string"
+																		},
+																		"titleEn": {
+																			"type": "string"
+																		},
+																		"titleRw": {
+																			"type": "string"
+																		},
+																		"evidenceType": {
+																			"type": "string"
+																		},
+																		"required": {
+																			"type": "boolean"
+																		}
+																	},
+																	"required": [
+																		"taskId",
+																		"titleEn",
+																		"titleRw",
+																		"evidenceType",
+																		"required"
+																	],
+																	"additionalProperties": false
+																}
+															}
+														},
+														"required": [
+															"moduleId",
+															"titleEn",
+															"titleRw",
+															"summaryEn",
+															"summaryRw",
+															"tasks"
+														],
+														"additionalProperties": false
+													}
 												}
 											},
 											"required": [
@@ -3953,7 +4016,8 @@
 												"economicSector",
 												"level",
 												"languages",
-												"enrolled"
+												"enrolled",
+												"modules"
 											],
 											"additionalProperties": false
 										},
