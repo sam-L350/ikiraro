@@ -1,173 +1,161 @@
-# Ikiraro — 8 minute presentation script
+# Ikiraro — talk track, about 8 minutes
 
-Read the words under **Say**. Do the thing under **Show** while you talk, or in the short pause after the sentence. Aim for a calm pace. The spoken lines are about seven minutes. The clicks fill the rest, inside the 5–10 minute limit.
+The lines under **Say** are meant to be spoken. If a sentence feels long in your mouth, drop the second half. The clicks are under **Show**.
 
-Record in English, with the app language set to English. Use a window about 1280 pixels wide so the map and the review screen are readable. Sign out between roles. That is part of the story: centers share one computer.
+English on screen. Window wide enough that the map and the review page are readable. Sign out each time you change person. That is a real part of how a center works.
 
-Before you press record, have the app running and these three accounts ready. The shared demo password is in `docs/demo-accounts.md`.
+Accounts are in `docs/demo-accounts.md`. Learner, trainer, then platform admin.
 
-| When | Who | Address |
-| --- | --- | --- |
-| Learner | Demo learner | learner@demo.ikiraro.test |
-| Trainer | Demo trainer | trainer@demo.ikiraro.test |
-| Admin | Platform admin | admin@demo.ikiraro.test |
-
-One piece of prep makes the trainer section real. Sign in as the learner, open a task in **Run a small shop** or **Keep a household record**, and submit one piece of evidence. Leave it pending. Do not approve it until the camera is rolling.
+Before you record: sign in as the learner, open **Run a small shop** or **Keep a household record**, and send one piece of evidence. Leave it waiting. You want the trainer to have something to decide while the camera is on.
 
 ---
 
-## 0:00 — What this is
+## 0:00
 
-**Show:** The public home page. Leave the headline on screen: “Verified work. A fair share of the tools.”
+**Show:** Home page. Leave the headline up.
 
 **Say:**
 
-Ikiraro means bridge. It is a web app for learning centers in rural Rwanda.
+So, Ikiraro. The word just means bridge. And that's really the whole project.
 
-It is not another course website, and it does not replace Irembo or the tools farmers and shopkeepers already use. It is the missing step between a person’s first time with a computer and a skill they can prove.
+Rwanda already has Irembo. People already farm, people already keep a shop. What I kept running into is the gap in the middle. You've never really used a computer, and somehow you're supposed to be running your work on one. This is that middle.
 
-The people in this demo are the three actors in the design: the learner, the trainer, and the administrator.
+I'll show it the way the three people use it. The learner, the trainer at the center, and the admin who handles the equipment.
 
 ---
 
-## 0:35 — The problem
+## 0:35 — why this is a problem
 
-**Show:** Stay on the home page. You do not need to click yet.
+**Show:** Stay here. No need to click.
 
 **Say:**
 
-Rural Rwanda is moving into a digital economy. Public services, farm records, and small shops are going online. Many people in the villages still cannot use a phone or a laptop for the work they already do.
+Here's what I mean by the gap.
 
-The people this is for are small business owners, farmers, and young learners. They may have a signal. What they do not have is a place to practice, a trainer who will look at the real work, and a record that says the skill is actually being used.
+More of ordinary life is going online. You register something, you follow a season, you write down what the shop sold. And in a lot of villages the person doing that work still can't really do it on a phone or a laptop. They might have network. Network was never the hard part. The hard part is somewhere to practice, a trainer who will look at the actual work, and a record that says this person is using the skill. Not that they sat in a room for a morning.
 
-That matters now. Devices and digital public services are spreading through 2029, while a lot of rural users are still at the first step.
+And it's now. Devices are arriving, the services are arriving, out toward 2029. A lot of people in rural areas are still on the first day.
 
-It happens in villages, sectors, and community rooms, where a connection can exist and guided practice still does not.
-
-Without that path, a training day does not become a habit. Irembo stays out of reach. A donated laptop goes to whoever is nearby, and then it sits unused, because nobody had to show that the skill lasted.
-
-Today the usual path is a one-off session, or a device with no follow-up. Nobody asks for a photo of the sales book, nobody checks it, and nobody can explain later why one person got the equipment and another did not.
+Skip that middle and you can guess what happens. The training stays a one-day event. Irembo stays something other people use. A donated laptop goes to whoever was standing closest. A few months later it's in a cupboard, and if you ask why that person got it, nobody has an answer. There was no photo of the sales book. Nobody checked it. There was nothing to point at.
 
 ---
 
-## 2:05 — The proposed solution
+## 2:05 — what I built instead
 
-**Show:** Still on the home page. Point, with the cursor, at the four cards under Sign in: Find a center, Audit summary, Board, Check a badge.
+**Show:** On the home page, move the cursor over the four cards under Sign in. Find a center, Audit summary, Board, Check a badge.
 
 **Say:**
 
-Ikiraro is the bridge. A learner practices a real task at a center, submits proof, and a trainer at that center accepts it, sends it back, or refuses it with a reason.
+So the path is short. You practice a real task at a center. You bring proof. A photo, a file, a note. The trainer at that center says yes, or send it back, or no. And if it's no, they have to write why.
 
-What was accepted becomes a digital opportunity passport: hours, badges, and merit points. Equipment is given from that record, against rules everyone can see, not from a private opinion.
+When they say yes, it goes on a passport. Hours, a badge, points. The laptop or the phone comes off that passport. There's a number you have to reach, and the number is on the screen. It isn't a conversation in an office.
 
-The courses match the work in the requirements: a shop ledger, a farming season, and using a phone for a public service. The interface is English and Kinyarwanda, and it is meant for a shared computer and a slow connection.
+The courses are the jobs people already have. A shop. A season on the farm. Using a phone to get to a government service. You can do it in English or Kinyarwanda, on the one computer at the center, on a slow line. That's who I was designing for.
 
-What is different from a normal course site is the proof. Nothing is credited until a trainer has checked the work. What is different from giving out laptops by hand is that the reason can be audited.
+Nothing gets credited because someone says they're good at it. A trainer has to have seen the work. And if a device goes out, there's a reason you can look up later.
 
 ---
 
-## 3:05 — Demo: the learner
+## 3:05 — the learner
 
-**Show:** Click **Sign in**. Choose **Email and password**. Sign in as the learner. Land on Home.
-
-**Say:**
-
-I am signing in as a learner whose home center is Gitega. On a shared computer the sign-out control stays visible, because the next person must not inherit this session.
-
-**Show:** Open **Catalog**. Pause on the course list long enough to read the titles.
+**Show:** Sign in, email and password, as the learner. You land on Home.
 
 **Say:**
 
-These are practical tracks, not theory modules. Run a small shop is the e-ledger. Plan a growing season is the farm record. Use a phone for work is the path toward a service such as Irembo. Keep a household record is the same idea at home.
+This learner's home center is Gitega. And sign out is right there, on purpose. These computers are shared. The next person should not still be me.
 
-**Show:** Open one enrolled course, then open one task. Leave the evidence choices on screen: photo, file, note, or voice, whichever that task asks for.
-
-**Say:**
-
-Each step says what proof is required. The learner does the task in real life, then brings back a photograph, a file, or a short note. The submission stores who sent it, when, and that it is waiting. This is the submission I prepared, still pending, so the trainer can decide it in a moment.
-
-**Show:** Open **Your passport**. Scroll enough to show badges or points, and the empty state if a section has none. Do not rush past the numbers.
+**Show:** Open Catalog. Let the titles sit for a second.
 
 **Say:**
 
-The passport is the record. It shows verified hours, finished tasks, badges, and points. A public link can be shared later so an employer or a mentor can check it without an account. The check only says whether a badge is authentic and whether it was revoked. It does not publish the person’s full story.
+This isn't a list of lessons about computers. Run a small shop, that's the ledger. Plan a growing season, that's the farm. Use a phone for work, that's how you get as far as something like Irembo. Keep a household record is the same habit, just at home.
 
-**Show:** Open **Rounds**, if it is in the learner menu.
+**Show:** Open one course you're enrolled in, then one task. Leave the proof on screen, whatever that task asks for.
 
 **Say:**
 
-When a hardware round is open, this page tests the learner against the rules for that round: points, badges, hours. If the learner does not pass, the page says so. The system does not let a request skip the threshold. If no round is open today, the rule is the same: no device moves until the passport meets the bar.
+Every step tells you what to bring back. You do it in the shop or in the field, then you upload the proof. Who sent it, when, and that it's waiting. This one I sent before we started. I left it sitting here. The trainer hasn't touched it. I'll come back to it in their seat in a minute.
+
+**Show:** Open Your passport. Scroll far enough that the numbers, or the empty places, are visible. Don't rush.
+
+**Say:**
+
+This is the thing that follows the person. Hours that were actually checked. Tasks that got finished. Badges. Points. Later they can hand someone a link. An employer opens it with no account, and the page answers two questions. Is this badge real, and did anyone take it back. It doesn't hand over the rest of their life.
+
+**Show:** Open Rounds.
+
+**Say:**
+
+If a round for equipment is open, this page checks the learner against it. Points, badges, hours. You pass or you don't. You can't talk your way past the line. If nothing is open today, the rule is still the rule. No device until the passport gets there.
 
 ---
 
-## 5:15 — Demo: the trainer
+## 5:15 — the trainer
 
-**Show:** Sign out. Sign in as the trainer. Open **Evidence**.
-
-**Say:**
-
-The trainer works at Gitega and Huye. The queue is only the centers they are assigned to. They cannot mark their own work, and they cannot review family. That rule is there so a badge cannot be granted inside one household.
-
-**Show:** Open the pending submission. Show the evidence on one side and the decision on the other. Point at the three actions. If you approve it, do it once, slowly. If you would rather not change the data on camera, point at the three actions and say what each one does.
+**Show:** Sign out. Sign in as the trainer. Open Evidence.
 
 **Say:**
 
-Three decisions, and only these three.
+This trainer works at Gitega and at Huye, so the queue is those centers and nowhere else. And they can't mark their own work, or their family's. Otherwise one household could just badge itself.
 
-Approve writes the trainer’s name and the time, completes the task, and adds the points and the badge when the course rules say so.
+**Show:** Open the waiting submission. Proof on one side, the decision on the other. If you're happy to approve it on camera, do it once, slowly. If you'd rather not change the data, just rest on the three actions and talk.
 
-Needs revision sends it back with a reason. The learner may try again. After repeated tries, a person has to step in. The work is not silently dropped.
+**Say:**
 
-Reject also requires a reason. A refusal with no sentence is not allowed.
+Three choices. The screen doesn't give you a fourth.
 
-That log is what an auditor reads later. The decision is not a private chat.
+Approve. My name and the time go on it, the task is done, and if the course says so, the points and the badge come with that.
+
+Needs revision. It goes back, with a sentence. They can try again. If they keep missing it, a person has to sit with them. It doesn't just disappear.
+
+Reject. Also needs a sentence. You don't get to refuse someone in silence.
+
+If somebody asks in a year why this went the way it did, this is the page. Not a chat message.
 
 ---
 
-## 6:25 — Demo: the administrator, then the public
+## 6:25 — the admin, then anyone
 
-**Show:** Sign out. Sign in as the platform admin. Open **Inventory**, then **Rounds** if you have time for one extra screen.
-
-**Say:**
-
-The administrator does not hand someone a laptop because they seem promising. Inventory holds the devices: what they are, and the serial number when one is recorded. A round states how many items, which district, and the points and badges required. A grant records who received which device, and when. An exception, if one is ever allowed, has to be written down with a reason. The public audit summary is where that reason can be read.
-
-**Show:** Sign out, so you are on the public site again. Open **Board**. Then **Check a badge**. Then **Find a center**. On the map, click Musanze or Huye.
+**Show:** Sign out. Sign in as the admin. Open Inventory. If you have a few seconds, open Rounds too.
 
 **Say:**
 
-Anyone can open the board. It shows initials and a district, and only for people who chose to appear. An empty board is the privacy rule working, not a missing feature.
+This is the part people worry about, so I'll just show the screen. I'm not picking a name because I like them. Inventory is the actual devices, and the serial number when we have one. A round says how many, which district, and what the passport has to already show. When a device leaves, we write who took it, which one, and the day. If we ever break that rule, the reason has to be written down. There's a public page for those reasons. Anyone can read them.
 
-Anyone can paste a badge token and see whether it is still valid.
+**Show:** Sign out. You're on the public site. Board, then Check a badge, then Find a center. Click Musanze or Huye.
 
-Anyone can find a center. These pins are the districts of Rwanda, plus Gitega in Nyarugenge. Search narrows the list. The map and the row stay in step.
+**Say:**
+
+Board. Initials, and a district. And only if that person said they want to be on it. If you see nobody here, that's the choice working. We don't put people's names on a ranking.
+
+Check a badge. You paste the token. Real or not, and whether it was taken back.
+
+Find a center. This is Rwanda. A pin for each district, and Gitega in Nyarugenge as well. I'll take Musanze. The row and the dot are the same place.
 
 ---
 
-## 7:35 — Close
+## 7:35 — stop
 
-**Show:** Return to the home page. Stop on the headline.
+**Show:** Back to the home page. Leave the headline up.
 
 **Say:**
 
-The hypothesis is simple. If people learn a real task, prove it, and only then receive equipment, the device stays in use, and the choice of who received it can be explained.
+That's the bet. Learn the task, show the work, and only then the device. Then the device has a reason to stay in use. And if you ask me later why they got it, I can show you.
 
-Ikiraro is that path: learner, trainer, administrator, and a record a stranger can check.
+Learner, trainer, admin. And a record a stranger can check.
 
 Thank you.
 
 ---
 
-## If you are short on time
+## If you're running long
 
-Cut in this order, and keep the three decisions and the passport:
+Drop things in this order. Keep the problem, the passport, and the trainer's three choices.
 
-1. Drop the map click. One sentence on Find a center is enough.
-2. Drop Inventory if Rounds already showed the threshold.
-3. On the learner course, do not open every module. One task is enough.
+1. Skip clicking the map. One sentence on Find a center is enough.
+2. Skip Inventory if Rounds already showed the line they have to cross.
+3. Don't open every module. One task.
 
-Do not cut the problem, the passport, or the trainer’s three actions. Those are the assignment: why it is a problem, what the system does, and the process in the sequence diagram.
+## If you finish early
 
-## If you have a minute left
-
-Sign in as the learner again after the trainer has approved the task. Open the passport and show the new badge or the new points. That single cut is the sequence diagram with a result: evidence in, decision, passport updated.
+Sign back in as the learner, after the trainer has approved that task. Open the passport and show the new badge or the new points. That's the whole loop with an ending: proof in, a decision, the passport changed.

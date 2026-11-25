@@ -10,6 +10,7 @@ On the sign-in page, choose **Use email and password**, then the address below. 
 | --- | --- |
 | Learner | learner@demo.ikiraro.test |
 | Trainer | trainer@demo.ikiraro.test |
+Platform admin | admin@demo.ikiraro.test |
 | Center manager | manager@demo.ikiraro.test |
 | District coordinator | coordinator@demo.ikiraro.test |
 | Content author | author@demo.ikiraro.test |
