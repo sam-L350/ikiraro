@@ -17,6 +17,7 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.production.example
 .dev.vars
 
 # Local object bytes written by the development store and the content seed

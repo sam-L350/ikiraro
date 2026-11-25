@@ -1,0 +1,175 @@
+{
+  "version": 2,
+  "project": {
+    "id": "prj_9446abda-c66f-46f6-8e65-0b96088165d1",
+    "name": "ikiraro",
+    "region": "17baae1d-99e0-4fe5-8701-9b7292f45ca2"
+  },
+  "container": {
+    "id": "cont_1390f654-1152-499b-b29d-855286d150d2",
+    "name": "ikiraro"
+  },
+  "build": {
+    "mode": "dockerfile",
+    "dockerfilePath": "Dockerfile",
+    "workingDir": ".",
+    "contextDir": ".",
+    "exposePort": "3000"
+  },
+  "deploy": {
+    "tier": "dedicated",
+    "resources": {
+      "cpu": 0.5,
+      "ram": 512,
+      "storage": 1
+    },
+    "runtime": {
+      "autoSleep": false,
+      "autoScale": false,
+      "is24x7": true
+    },
+    "ports": [
+      {
+        "id": "port_3eceb291-9f44-4d25-9ec2-1fcf0fa81471",
+        "container": 3000,
+        "protocol": "HTTP"
+      }
+    ],
+    "process": {},
+    "healthcheck": {
+      "test": [
+        "CMD",
+        "bun",
+        "-e",
+        "const r = await fetch('http://127.0.0.1:3000/api/v1/system/health'); process.exit(r.ok ? 0 : 1)"
+      ],
+      "interval": "30s",
+      "timeout": "5s",
+      "startPeriod": "120s",
+      "retries": 3
+    },
+    "restartPolicy": {
+      "name": "always"
+    }
+  },
+  "env": [
+    {
+      "name": "APP_NAME",
+      "value": "ikiraro",
+      "scope": "runtime"
+    },
+    {
+      "name": "NODE_ENV",
+      "value": "production",
+      "scope": "runtime"
+    },
+    {
+      "name": "HOST",
+      "value": "0.0.0.0",
+      "scope": "runtime"
+    },
+    {
+      "name": "PORT",
+      "value": "3000",
+      "scope": "runtime"
+    },
+    {
+      "name": "API_URL",
+      "value": "https://ikiraro.g.hubfly.app",
+      "scope": "runtime"
+    },
+    {
+      "name": "WEB_URL",
+      "value": "https://ikiraro.g.hubfly.app",
+      "scope": "runtime"
+    },
+    {
+      "name": "CORS_ORIGINS",
+      "value": "https://ikiraro.g.hubfly.app",
+      "scope": "runtime"
+    },
+    {
+      "name": "SESSION_TTL_DAYS",
+      "value": "7",
+      "scope": "runtime"
+    },
+    {
+      "name": "COOKIE_SAME_SITE",
+      "value": "lax",
+      "scope": "runtime"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "value": "info",
+      "scope": "runtime"
+    },
+    {
+      "name": "LOG_FORMAT",
+      "value": "json",
+      "scope": "runtime"
+    },
+    {
+      "name": "DEBUG_API",
+      "value": "false",
+      "scope": "runtime"
+    },
+    {
+      "name": "VALIDATE_RESPONSES",
+      "value": "true",
+      "scope": "runtime"
+    },
+    {
+      "name": "MAX_BODY_BYTES",
+      "value": "1048576",
+      "scope": "runtime"
+    },
+    {
+      "name": "DATABASE_URL",
+      "value": "",
+      "secret": true,
+      "scope": "runtime",
+      "from": "cloud"
+    },
+    {
+      "name": "GOOGLE_CLIENT_ID",
+      "value": "",
+      "secret": true,
+      "scope": "runtime",
+      "from": "cloud"
+    },
+    {
+      "name": "GOOGLE_CLIENT_SECRET",
+      "value": "",
+      "secret": true,
+      "scope": "runtime",
+      "from": "cloud"
+    },
+    {
+      "name": "CLOUDINARY_URL",
+      "value": "",
+      "secret": true,
+      "scope": "runtime",
+      "from": "cloud"
+    },
+    {
+      "name": "OTP_PEPPER",
+      "value": "",
+      "secret": true,
+      "scope": "runtime",
+      "from": "cloud"
+    },
+    {
+      "name": "CREDENTIAL_SIGNING_KEY",
+      "value": "",
+      "secret": true,
+      "scope": "runtime",
+      "from": "cloud"
+    }
+  ],
+  "remove": {},
+  "metadata": {
+    "lastBuildId": "build_58187cef-b866-47ad-90f5-2fe16b0d6a2c",
+    "lastImageDisplay": "hubcell.local/prj_9446abda-c66f-46f6-8e65-0b96088165d1/ikiraro:build_58187cef-b866-47ad-90f5-2fe16b0d6a2c-20261125T173913Z",
+    "lastDeployedAt": "2026-11-25T17:41:20Z"
+  }
+}

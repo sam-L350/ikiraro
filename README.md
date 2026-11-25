@@ -217,7 +217,7 @@ See `engine/.env.example` and `web/.env.example`; every variable is validated at
 
 ## Deployment
 
-See [docs/HOSTING.md](docs/HOSTING.md). In short: `make worker-build` proves the Workers bundle compiles, `.github/workflows/ci.yml` runs `make verify` on every PR, and the deploy workflows ship the engine (Workers) and web (Pages) from `main`.
+See [docs/HOSTING.md](docs/HOSTING.md). `make deploy` builds the root `Dockerfile` and rolls it out to Hubfly space as one container that serves the API and the web app. Also: `make worker-build` proves the Workers bundle compiles, `.github/workflows/ci.yml` runs `make verify` on every PR, and the deploy workflows ship the engine (Workers) and web (Pages) from `main`.
 
 ## Troubleshooting
 
