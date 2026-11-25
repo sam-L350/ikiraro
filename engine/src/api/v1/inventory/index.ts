@@ -15,7 +15,7 @@ export async function getInventory(input: {
 	centers: { id: string; name: string }[];
 }> {
 	await requireAuth();
-	await authorize({ permission: "hardware.manage" });
+	await authorize({ permission: "hardware.read" });
 	return listInventory(db, {
 		centerId: input.centerId,
 		status: input.status,

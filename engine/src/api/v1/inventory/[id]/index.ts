@@ -11,6 +11,6 @@ export async function getInventoryItem(input: {
 	id: string;
 }): Promise<InventoryDetail> {
 	await requireAuth();
-	await authorize({ permission: "hardware.manage" });
+	await authorize({ permission: "hardware.read" });
 	return readInventory(db, input.id);
 }

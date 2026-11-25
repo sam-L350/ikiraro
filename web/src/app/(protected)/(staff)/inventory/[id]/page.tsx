@@ -1,7 +1,9 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
+import { InventoryMark } from "@/components/learning/inventory-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 import {
 	invalidateEngine,
 	isApiClientError,
@@ -100,23 +102,30 @@ function statusKey(status: InventoryStatus): MessageKey {
 	}
 }
 
-function statusTone(status: InventoryStatus): "neutral" | "pending" | "danger" {
+function statusTone(
+	status: InventoryStatus,
+): "verified" | "pending" | "info" | "danger" | "outline" {
 	switch (status) {
 		case "in_stock":
-		case "awarded":
-		case "retired":
-			return "neutral";
+			return "verified";
 		case "reserved":
 		case "in_repair":
 			return "pending";
+		case "awarded":
+			return "info";
 		case "lost":
 			return "danger";
+		case "retired":
+			return "outline";
 		default: {
 			const unreachable: never = status;
 			return unreachable;
 		}
 	}
 }
+
+const fieldClass =
+	"h-11 w-full rounded-xl border border-line-strong bg-canvas px-3 font-sans text-lg text-fg";
 
 function isCondition(value: string): value is InventoryCondition {
 	switch (value) {
@@ -172,6 +181,9 @@ function ruleSentence(
 
 export default function InventoryItemPage() {
 	const { t } = useI18n();
+	const { user } = useAuth();
+	const canManage =
+		user?.roles.some((role) => role.code === "hardware_officer") ?? false;
 	const online = useOnline();
 	const { id = "" } = useParams();
 	const item = useEngine(
@@ -223,7 +235,7 @@ export default function InventoryItemPage() {
 	}
 
 	if (!id || item.isPending) {
-		return <div className="h-16 animate-pulse rounded-md bg-surface" />;
+		return <div className="h-40 animate-pulse rounded-[20px] bg-surface" />;
 	}
 	if (isApiClientError(item.error) && item.error.status === 403) {
 		return (
@@ -243,153 +255,183 @@ export default function InventoryItemPage() {
 	const rules = detail.criteria.map((rule) => ruleSentence(rule, t));
 
 	return (
-		<section className="flex max-w-3xl flex-col gap-8">
-			<div>
+		<section className="mx-auto flex max-w-3xl flex-col gap-8">
+			<article className="rounded-[20px] bg-surface p-6 sm:p-8">
 				<Link
 					to="/inventory"
-					className="font-sans text-sm font-semibold text-fg"
+					className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted underline-offset-4 hover:underline"
 				>
 					{t("inventoryTitle")}
 				</Link>
-				<h1 className="mt-3 font-sans text-4xl font-semibold text-balance text-fg">
-					{detail.name}
-				</h1>
-				<p className="mt-4 font-sans text-lg font-medium text-fg">
-					{detail.category} · {detail.serial} · {detail.centerName}
-				</p>
-			</div>
-			<div className="flex flex-col gap-2">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+				<div className="mt-4 flex items-start gap-4">
+					<InventoryMark />
+					<div className="min-w-0">
+						<h1 className="font-sans text-4xl font-semibold text-balance text-fg">
+							{detail.name}
+						</h1>
+						<p className="mt-2 font-sans text-lg font-medium text-fg">
+							{detail.category}
+							{" · "}
+							{detail.serial}
+						</p>
+						<p className="mt-1 font-sans text-base font-medium text-fg-muted">
+							{detail.centerName}
+						</p>
+						<div className="mt-3 flex flex-wrap gap-2">
+							{isStatus(detail.status) ? (
+								<Badge variant={statusTone(detail.status)}>
+									{t(statusKey(detail.status))}
+								</Badge>
+							) : null}
+							{isCondition(detail.condition) ? (
+								<Badge variant="neutral">
+									{t(conditionKey(detail.condition))}
+								</Badge>
+							) : null}
+						</div>
+					</div>
+				</div>
+			</article>
+			<section className="rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("inventoryRules")}
 				</h2>
 				{rules.length === 0 ? (
-					<p className="font-sans text-lg font-medium text-fg">
+					<p className="mt-3 font-sans text-lg font-medium text-fg">
 						{t("inventoryNoRules")}
 					</p>
 				) : (
-					<ul className="flex flex-col gap-1">
+					<ul className="mt-4 flex flex-col gap-3">
 						{rules.map((rule) => (
-							<li key={rule} className="font-sans text-lg font-medium text-fg">
+							<li
+								key={rule}
+								className="rounded-2xl bg-canvas px-4 py-3 font-sans text-lg font-medium text-fg"
+							>
 								{rule}
 							</li>
 						))}
 					</ul>
 				)}
-			</div>
-			<form
-				className="flex flex-col gap-4"
-				onSubmit={(event) => void onSave(event)}
-			>
-				<label className="flex flex-col gap-2" htmlFor="inventory-status">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("inventoryStatus")}
-					</span>
-					<select
-						id="inventory-status"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={status}
-						onChange={(event) => {
-							if (isStatus(event.target.value)) setStatus(event.target.value);
-						}}
-					>
-						{STATUSES.map((item) => (
-							<option key={item} value={item}>
-								{t(statusKey(item))}
-							</option>
-						))}
-					</select>
-				</label>
-				<label
-					className="flex flex-col gap-2"
-					htmlFor="inventory-item-condition"
+			</section>
+			{canManage ? (
+				<form
+					className="flex flex-col gap-4 rounded-[20px] bg-surface p-6"
+					onSubmit={(event) => void onSave(event)}
 				>
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("inventoryCondition")}
-					</span>
-					<select
-						id="inventory-item-condition"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={condition}
-						onChange={(event) => {
-							if (isCondition(event.target.value))
-								setCondition(event.target.value);
-						}}
+					<label className="flex flex-col gap-2" htmlFor="inventory-status">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("inventoryStatus")}
+						</span>
+						<select
+							id="inventory-status"
+							className={fieldClass}
+							value={status}
+							onChange={(event) => {
+								if (isStatus(event.target.value)) setStatus(event.target.value);
+							}}
+						>
+							{STATUSES.map((item) => (
+								<option key={item} value={item}>
+									{t(statusKey(item))}
+								</option>
+							))}
+						</select>
+					</label>
+					<label
+						className="flex flex-col gap-2"
+						htmlFor="inventory-item-condition"
 					>
-						{CONDITIONS.map((item) => (
-							<option key={item} value={item}>
-								{t(conditionKey(item))}
-							</option>
-						))}
-					</select>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="inventory-holding">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("inventoryCenter")}
-					</span>
-					<select
-						id="inventory-holding"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={centerId}
-						onChange={(event) => setCenterId(event.target.value)}
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("inventoryCondition")}
+						</span>
+						<select
+							id="inventory-item-condition"
+							className={fieldClass}
+							value={condition}
+							onChange={(event) => {
+								if (isCondition(event.target.value))
+									setCondition(event.target.value);
+							}}
+						>
+							{CONDITIONS.map((item) => (
+								<option key={item} value={item}>
+									{t(conditionKey(item))}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="flex flex-col gap-2" htmlFor="inventory-holding">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("inventoryCenter")}
+						</span>
+						<select
+							id="inventory-holding"
+							className={fieldClass}
+							value={centerId}
+							onChange={(event) => setCenterId(event.target.value)}
+						>
+							{detail.centers.map((center) => (
+								<option key={center.id} value={center.id}>
+									{center.name}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="flex flex-col gap-2" htmlFor="inventory-note">
+						<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+							{t("inventoryNote")}
+						</span>
+						<input
+							id="inventory-note"
+							className={fieldClass}
+							value={note}
+							maxLength={200}
+							onChange={(event) => setNote(event.target.value)}
+						/>
+					</label>
+					{error ? (
+						<p
+							className="font-sans text-sm font-medium text-danger"
+							role="alert"
+						>
+							{t(error)}
+						</p>
+					) : null}
+					<Button
+						type="submit"
+						variant="sticker"
+						className="w-fit"
+						disabled={update.isPending}
 					>
-						{detail.centers.map((center) => (
-							<option key={center.id} value={center.id}>
-								{center.name}
-							</option>
-						))}
-					</select>
-				</label>
-				<label className="flex flex-col gap-2" htmlFor="inventory-note">
-					<span className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-						{t("inventoryNote")}
-					</span>
-					<input
-						id="inventory-note"
-						className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
-						value={note}
-						maxLength={200}
-						onChange={(event) => setNote(event.target.value)}
-					/>
-				</label>
-				{error ? (
-					<p className="font-sans text-sm font-medium text-danger" role="alert">
-						{t(error)}
-					</p>
-				) : null}
-				<Button
-					type="submit"
-					variant="sticker"
-					className="w-fit"
-					disabled={update.isPending}
-				>
-					{t("inventoryUpdate")}
-				</Button>
-			</form>
-			<div className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+						{t("inventoryUpdate")}
+					</Button>
+				</form>
+			) : null}
+			<section className="rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("inventoryHistory")}
 				</h2>
-				<ul>
+				<ul className="mt-4 flex flex-col gap-3">
 					{detail.history.map((entry) => (
 						<li
 							key={entry.id}
-							className="flex flex-wrap items-center gap-3 border-t border-ink/15 py-4"
+							className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-canvas px-4 py-3"
 						>
+							<p className="font-sans text-base font-medium text-fg">
+								{entry.centerName}
+								{entry.holderName ? ` · ${entry.holderName}` : ""}
+								{entry.note ? ` · ${entry.note}` : ""}
+							</p>
 							{isStatus(entry.status) ? (
 								<Badge variant={statusTone(entry.status)}>
 									{t(statusKey(entry.status))}
 								</Badge>
 							) : null}
-							<p className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
-								{entry.centerName}
-								{entry.holderName ? ` · ${entry.holderName}` : ""}
-								{entry.note ? ` · ${entry.note}` : ""}
-							</p>
 						</li>
 					))}
 				</ul>
-			</div>
-			<ItemCare inventoryId={detail.id} />
+			</section>
+			{canManage ? <ItemCare inventoryId={detail.id} /> : null}
 		</section>
 	);
 }
@@ -443,8 +485,8 @@ function ItemCare({ inventoryId }: { inventoryId: string }) {
 	const repairs = care.data?.repairs ?? [];
 	return (
 		<div className="flex flex-col gap-8">
-			<section className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+			<section className="flex flex-col gap-3 rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("repairTitle")}
 				</h2>
 				{repairs.length === 0 ? (
@@ -471,7 +513,7 @@ function ItemCare({ inventoryId }: { inventoryId: string }) {
 						</span>
 						<input
 							id="repair-note"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={note}
 							maxLength={500}
 							onChange={(event) => setNote(event.target.value)}
@@ -484,8 +526,8 @@ function ItemCare({ inventoryId }: { inventoryId: string }) {
 					) : null}
 				</form>
 			</section>
-			<section className="flex flex-col gap-3">
-				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg">
+			<section className="flex flex-col gap-3 rounded-[20px] bg-surface p-6">
+				<h2 className="font-meta text-xs font-semibold uppercase tracking-wide text-fg-muted">
 					{t("warrantyTitle")}
 				</h2>
 				<p className="font-sans text-lg text-fg">
@@ -502,7 +544,7 @@ function ItemCare({ inventoryId }: { inventoryId: string }) {
 						<input
 							id="warranty-ends"
 							type="date"
-							className="h-11 rounded-md border border-line bg-card px-3 font-sans text-lg text-fg"
+							className={fieldClass}
 							value={endsOn}
 							onChange={(event) => setEndsOn(event.target.value)}
 						/>
